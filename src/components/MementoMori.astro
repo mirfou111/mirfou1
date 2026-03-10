@@ -1,0 +1,505 @@
+<div class="memento-wrap">
+
+    <!-- Accroche -->
+    <div class="memento-intro">
+        <p class="memento-phrase">
+            Un humain vit en moyenne <strong>72 ans</strong> — soit <strong>37 843 jours</strong>.<br />
+            Si je suis né le <span id="mm-date-display">01/01/2000</span>,
+            il me resterait environ <strong id="mm-reste">—</strong>.<br />
+            Et vous ?
+        </p>
+        <p class="memento-conclusion">
+            En attendant, je cultive mon jardin.
+        </p>
+    </div>
+
+    <!-- Contrôles -->
+    <div class="memento-controls">
+        <div class="control-group">
+            <label for="mm-birthdate">Date de naissance</label>
+            <input type="date" id="mm-birthdate" value="2000-01-01" />
+        </div>
+        <div class="control-group">
+            <label for="mm-lifespan">Espérance de vie</label>
+            <input type="number" id="mm-lifespan" value="72" min="1" max="130" />
+            <span class="control-unit">ans</span>
+        </div>
+        <div class="control-group">
+            <label for="mm-unit">Unité</label>
+            <select id="mm-unit">
+                <option value="years">Années</option>
+                <option value="months">Mois</option>
+                <option value="weeks">Semaines</option>
+                <option value="days" selected>Jours</option>
+                <option value="hours">Heures</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="memento-stats">
+        <div class="mm-stat">
+            <span class="mm-stat-value" id="mm-total">—</span>
+            <span class="mm-stat-label">total</span>
+        </div>
+        <div class="mm-stat">
+            <span class="mm-stat-value mm-stat-past" id="mm-past">—</span>
+            <span class="mm-stat-label">écoulés</span>
+        </div>
+        <div class="mm-stat">
+            <span class="mm-stat-value mm-stat-future" id="mm-future">—</span>
+            <span class="mm-stat-label">restants</span>
+        </div>
+        <div class="mm-stat">
+            <span class="mm-stat-value" id="mm-percent">—</span>
+            <span class="mm-stat-label">vécu</span>
+        </div>
+    </div>
+
+    <!-- Grille -->
+    <div class="memento-grid-wrap">
+        <canvas id="mm-canvas"></canvas>
+    </div>
+
+    <!-- Légende + lien -->
+    <div class="memento-legend">
+        <div class="legend-items">
+            <span class="legend-item">
+                <span class="legend-dot legend-past"></span>
+                <span>Passé</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot legend-future"></span>
+                <span>À venir</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot legend-now"></span>
+                <span>Maintenant</span>
+            </span>
+        </div>
+        <a href="/memento-mori" class="legend-link">
+            Qu'est-ce que le Memento Mori ?
+        </a>
+    </div>
+
+    <!-- Actions -->
+    <div class="memento-actions">
+        <button id="mm-download" class="mm-btn-primary">
+            Télécharger mon Memento Mori
+        </button>
+    </div>
+
+</div>
+
+<style>
+    .memento-wrap {
+        padding: 2rem 0;
+    }
+
+    /* Intro */
+    .memento-intro {
+        margin-bottom: 2rem;
+    }
+
+    .memento-phrase {
+        font-size: 1.05rem;
+        line-height: 1.85;
+        color: var(--color-text);
+        margin-bottom: 0.75rem;
+    }
+
+    .memento-phrase strong {
+        color: var(--color-accent);
+    }
+
+    .memento-conclusion {
+        font-size: 0.95rem;
+        color: var(--color-muted);
+        font-style: italic;
+        margin: 0;
+    }
+
+    /* Contrôles */
+    .memento-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+    }
+
+    .control-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .control-group label {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+    }
+
+    .control-group input,
+    .control-group select {
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        font-family: var(--font-mono);
+        transition: border-color 0.2s;
+    }
+
+    .control-group input:focus,
+    .control-group select:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+
+    .control-group input[type="number"] { width: 70px; }
+
+    .control-unit {
+        font-size: 0.78rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+    }
+
+    /* Stats */
+    .memento-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .mm-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+    }
+
+    .mm-stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        color: var(--color-text);
+    }
+
+    .mm-stat-past { color: var(--color-muted); }
+    .mm-stat-future { color: var(--color-accent); }
+
+    .mm-stat-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+        margin-top: 0.2rem;
+    }
+
+    /* Grille */
+    .memento-grid-wrap {
+        margin-bottom: 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--color-surface);
+    }
+
+    #mm-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    /* Légende */
+    .memento-legend {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .legend-items {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+
+    .legend-past { background: var(--color-muted); opacity: 0.5; }
+    .legend-future { background: var(--color-border); }
+    .legend-now { background: var(--color-accent); }
+
+    .legend-link {
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        color: var(--color-muted);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        transition: color 0.2s;
+    }
+
+    .legend-link:hover { color: var(--color-accent); }
+
+    /* Actions */
+    .memento-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .mm-btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .mm-btn-primary:hover { opacity: 0.85; }
+
+    @media (max-width: 640px) {
+        .memento-stats { grid-template-columns: repeat(2, 1fr); }
+        .memento-legend { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<script is:inline>
+(function() {
+
+    // --- Helpers ---
+    function getValues() {
+        const birthdate = document.getElementById('mm-birthdate').value;
+        const lifespan = parseInt(document.getElementById('mm-lifespan').value) || 72;
+        const unit = document.getElementById('mm-unit').value;
+        return { birthdate, lifespan, unit };
+    }
+
+    function compute(birthdate, lifespan, unit) {
+        const birth = new Date(birthdate);
+        const now = new Date();
+        const death = new Date(birth);
+        death.setFullYear(death.getFullYear() + lifespan);
+
+        const MS = {
+            years:   1000 * 60 * 60 * 24 * 365.25,
+            months:  1000 * 60 * 60 * 24 * 30.44,
+            weeks:   1000 * 60 * 60 * 24 * 7,
+            days:    1000 * 60 * 60 * 24,
+            hours:   1000 * 60 * 60,
+        };
+
+        const ms = MS[unit];
+        const total  = Math.floor((death - birth) / ms);
+        const past   = Math.min(Math.floor((now - birth) / ms), total);
+        const future = Math.max(total - past, 0);
+        const percent = ((past / total) * 100).toFixed(1);
+
+        return { total, past, future, percent };
+    }
+
+    function formatUnit(unit, value) {
+        const labels = {
+            years:  value > 1 ? 'ans' : 'an',
+            months: 'mois',
+            weeks:  value > 1 ? 'semaines' : 'semaine',
+            days:   value > 1 ? 'jours' : 'jour',
+            hours:  'heures',
+        };
+        return labels[unit];
+    }
+
+    function formatNumber(n) {
+        return n.toLocaleString('fr-FR');
+    }
+
+    // --- Canvas ---
+    function drawGrid(canvas, total, past, isDark) {
+        if (total <= 0) return;
+
+        const COLS = Math.min(Math.ceil(Math.sqrt(total * 1.6)), 80);
+        const ROWS = Math.ceil(total / COLS);
+        const DOT  = 12;
+        const GAP  = 4;
+        const PAD  = 20;
+
+        const W = COLS * (DOT + GAP) - GAP + PAD * 2;
+        const H = ROWS * (DOT + GAP) - GAP + PAD * 2;
+
+        canvas.width  = W;
+        canvas.height = H;
+
+        const ctx = canvas.getContext('2d');
+
+        // Fond
+        ctx.fillStyle = isDark ? '#161a13' : '#ede8e0';
+        ctx.fillRect(0, 0, W, H);
+
+        const colorPast   = isDark ? '#3a4030' : '#c4bdb4';
+        const colorFuture = isDark ? '#2a3022' : '#ddd8d0';
+        const colorNow    = isDark ? '#c8922a' : '#8b4513';
+
+        for (let i = 0; i < total; i++) {
+            const col = i % COLS;
+            const row = Math.floor(i / COLS);
+            const x = PAD + col * (DOT + GAP);
+            const y = PAD + row * (DOT + GAP);
+
+            ctx.beginPath();
+            ctx.roundRect(x, y, DOT, DOT, 2);
+
+            if (i === past) {
+                ctx.fillStyle = colorNow;
+            } else if (i < past) {
+                ctx.fillStyle = colorPast;
+            } else {
+                ctx.fillStyle = colorFuture;
+            }
+
+            ctx.fill();
+        }
+    }
+
+    // --- Update UI ---
+    function update() {
+        const { birthdate, lifespan, unit } = getValues();
+        if (!birthdate) return;
+
+        const { total, past, future, percent } = compute(birthdate, lifespan, unit);
+        const label = formatUnit(unit, future);
+
+        // Phrase
+        const birth = new Date(birthdate);
+        const dateStr = birth.toLocaleDateString('fr-FR');
+        document.getElementById('mm-date-display').textContent = dateStr;
+        document.getElementById('mm-reste').textContent =
+            `${formatNumber(future)} ${label}`;
+
+        // Stats
+        document.getElementById('mm-total').textContent   = formatNumber(total);
+        document.getElementById('mm-past').textContent    = formatNumber(past);
+        document.getElementById('mm-future').textContent  = formatNumber(future);
+        document.getElementById('mm-percent').textContent = `${percent}%`;
+
+        // Grille
+        const canvas = document.getElementById('mm-canvas');
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        // Limiter à 2000 points max pour la lisibilité
+        const displayTotal = Math.min(total, 2000);
+        const ratio = displayTotal / total;
+        const displayPast = Math.floor(past * ratio);
+
+        drawGrid(canvas, displayTotal, displayPast, isDark);
+    }
+
+    // --- Download ---
+    function download() {
+        const { birthdate, lifespan, unit } = getValues();
+        const { total, past, future, percent } = compute(birthdate, lifespan, unit);
+        const label = formatUnit(unit, future);
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        // Canvas haute résolution pour le téléchargement
+        const exportCanvas = document.createElement('canvas');
+        const displayTotal = Math.min(total, 2000);
+        const ratio = displayTotal / total;
+        const displayPast = Math.floor(past * ratio);
+
+        drawGrid(exportCanvas, displayTotal, displayPast, isDark);
+
+        // Ajouter le titre en bas
+        const ctx = exportCanvas.getContext('2d');
+        const W = exportCanvas.width;
+        const extraH = 60;
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width  = W;
+        finalCanvas.height = exportCanvas.height + extraH;
+
+        const fCtx = finalCanvas.getContext('2d');
+
+        // Fond
+        fCtx.fillStyle = isDark ? '#161a13' : '#ede8e0';
+        fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+        // Grille
+        fCtx.drawImage(exportCanvas, 0, 0);
+
+        // Titre
+        const birth = new Date(birthdate);
+        const dateStr = birth.toLocaleDateString('fr-FR');
+        fCtx.fillStyle = isDark ? '#6b7a5e' : '#8a7e72';
+        fCtx.font = '13px monospace';
+        fCtx.textAlign = 'center';
+        fCtx.fillText(
+            `Memento Mori · né(e) le ${dateStr} · ${formatNumber(future)} ${label} restants · mirfou.space`,
+            W / 2,
+            exportCanvas.height + 22
+        );
+
+        fCtx.fillStyle = isDark ? '#c8922a' : '#8b4513';
+        fCtx.font = '11px monospace';
+        fCtx.fillText(
+            'mirfou.space/memento-mori',
+            W / 2,
+            exportCanvas.height + 42
+        );
+
+        // Téléchargement
+        const link = document.createElement('a');
+        link.download = `memento-mori-${dateStr.replace(/\//g, '-')}.png`;
+        link.href = finalCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // --- Events ---
+    document.getElementById('mm-birthdate').addEventListener('input', update);
+    document.getElementById('mm-lifespan').addEventListener('input', update);
+    document.getElementById('mm-unit').addEventListener('change', update);
+    document.getElementById('mm-download').addEventListener('click', download);
+
+    // Réagir au changement de thème
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
+
+    // Init
+    update();
+
+})();
+</script>

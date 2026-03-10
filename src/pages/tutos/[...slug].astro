@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+    const tutos = await getCollection('tutos', ({ data }) => !data.draft);
+    return tutos.map(tuto => ({
+        params: { slug: tuto.id },
+        props: { tuto },
+    }));
+}
+
+const { tuto } = Astro.props;
+const { Content, headings } = await render(tuto);
+---
+
+<PostLayout
+    title={tuto.data.title}
+    description={tuto.data.description}
+    pubDate={tuto.data.pubDate}
+    updatedDate={tuto.data.updatedDate}
+    tags={tuto.data.tags}
+    backHref="/tutos"
+    backLabel="Tutos"
+    origin={tuto.data.origin}
+    status={tuto.data.status}
+    relatedPosts={tuto.data.relatedPosts}
+    body={tuto.body}
+    headings={headings}
+>
+    <Content />
+</PostLayout>

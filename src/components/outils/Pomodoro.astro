@@ -1,0 +1,220 @@
+<div class="outil">
+    <h2 class="outil-title">Pomodoro</h2>
+    <p class="outil-desc">25 minutes de travail, 5 minutes de pause. La méthode de la fourmi.</p>
+
+    <div class="pomodoro-wrap">
+        <div class="pomodoro-mode" id="pomo-mode">Travail</div>
+        <div class="pomodoro-timer" id="pomo-display">25:00</div>
+
+        <div class="pomodoro-progress">
+            <div class="progress-bar" id="pomo-progress"></div>
+        </div>
+
+        <div class="pomodoro-controls">
+            <button class="pomo-btn pomo-start" id="pomo-toggle">Démarrer</button>
+            <button class="pomo-btn pomo-reset" id="pomo-reset">Réinitialiser</button>
+        </div>
+
+        <div class="pomodoro-sessions">
+            <span class="sessions-label">Sessions complétées</span>
+            <span class="sessions-count" id="pomo-sessions">0</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .outil-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .outil-desc {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .pomodoro-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 2rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+    }
+
+    .pomodoro-mode {
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+    }
+
+    .pomodoro-timer {
+        font-size: 3.5rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        color: var(--color-accent);
+        line-height: 1;
+        letter-spacing: 0.05em;
+    }
+
+    .pomodoro-progress {
+        width: 100%;
+        max-width: 300px;
+        height: 3px;
+        background: var(--color-border);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--color-accent);
+        border-radius: 2px;
+        width: 100%;
+        transition: width 1s linear;
+    }
+
+    .pomodoro-controls {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .pomo-btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-family: var(--font-mono);
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid;
+    }
+
+    .pomo-start {
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border-color: var(--color-accent);
+        font-weight: 600;
+    }
+
+    .pomo-start:hover { opacity: 0.85; }
+
+    .pomo-reset {
+        background: none;
+        color: var(--color-muted);
+        border-color: var(--color-border);
+    }
+
+    .pomo-reset:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+
+    .pomodoro-sessions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+    }
+
+    .sessions-count {
+        color: var(--color-accent);
+        font-weight: 700;
+    }
+</style>
+
+<script>
+    const WORK_TIME = 25 * 60;
+    const BREAK_TIME = 5 * 60;
+
+    let timeLeft = WORK_TIME;
+    let totalTime = WORK_TIME;
+    let isRunning = false;
+    let isWork = true;
+    let sessions = 0;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const display = document.getElementById('pomo-display')!;
+    const modeEl = document.getElementById('pomo-mode')!;
+    const toggleBtn = document.getElementById('pomo-toggle')!;
+    const resetBtn = document.getElementById('pomo-reset')!;
+    const progressBar = document.getElementById('pomo-progress')!;
+    const sessionsEl = document.getElementById('pomo-sessions')!;
+
+    function format(s: number): string {
+        const m = Math.floor(s / 60).toString().padStart(2, '0');
+        const sec = (s % 60).toString().padStart(2, '0');
+        return `${m}:${sec}`;
+    }
+
+    function updateUI() {
+        display.textContent = format(timeLeft);
+        progressBar.style.width = `${(timeLeft / totalTime) * 100}%`;
+        modeEl.textContent = isWork ? 'Travail' : 'Pause';
+        sessionsEl.textContent = sessions.toString();
+    }
+
+    function tick() {
+        if (timeLeft <= 0) {
+            clearInterval(interval!);
+            isRunning = false;
+            toggleBtn.textContent = 'Démarrer';
+
+            if (isWork) sessions++;
+            isWork = !isWork;
+            timeLeft = isWork ? WORK_TIME : BREAK_TIME;
+            totalTime = timeLeft;
+
+            // Notification sonore simple
+            try {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 440;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch {}
+
+            updateUI();
+            return;
+        }
+        timeLeft--;
+        updateUI();
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        if (isRunning) {
+            clearInterval(interval!);
+            isRunning = false;
+            toggleBtn.textContent = 'Reprendre';
+        } else {
+            interval = setInterval(tick, 1000);
+            isRunning = true;
+            toggleBtn.textContent = 'Pause';
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        clearInterval(interval!);
+        isRunning = false;
+        isWork = true;
+        timeLeft = WORK_TIME;
+        totalTime = WORK_TIME;
+        toggleBtn.textContent = 'Démarrer';
+        updateUI();
+    });
+
+    updateUI();
+</script>

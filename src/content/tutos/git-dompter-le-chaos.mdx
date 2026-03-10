@@ -1,0 +1,41 @@
+---
+title: "Git : Dompter le chaos"
+description: "Un guide rapide pour ne plus jamais perdre son travail."
+pubDate: 2024-02-10
+tags: ["Git", "Développement", "Workflow"]
+draft: false
+origin: "genere"
+---
+
+Si tu travailles seul sur ton projet, tu penses peut-être que `git commit -m "update"` suffit. Erreur fatale, mon ami. Utiliser Git, c'est avoir une machine à remonter le temps.
+
+## La règle d'or : une branche par fonctionnalité
+
+Ne code jamais sur `main`. Si tu veux ajouter un système de login :
+
+```bash
+git checkout -b feat-login
+```
+
+Code tes bêtises. Si ça casse tout, tu supprimes la branche et `main` reste propre.
+
+## Le message de commit
+
+Arrête les `"fixed bug"`. Sois précis :
+
+```bash
+git commit -m "fix: correction de l'erreur 404 sur la route /api/users"
+```
+
+Ton "futur toi" te remerciera quand il devra faire un `git blame` pour comprendre pourquoi tout a explosé à 3h du matin.
+
+## La convention
+
+| Préfixe | Usage |
+|---------|-------|
+| `feat:` | nouvelle fonctionnalité |
+| `fix:` | correction de bug |
+| `chore:` | tâches techniques |
+| `docs:` | documentation |
+
+Git est l'outil ultime de la fourmi : il permet de construire brique par brique, avec la certitude qu'on peut revenir en arrière.

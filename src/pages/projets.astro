@@ -1,0 +1,383 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AntIcon from '../components/AntIcon.astro';
+import { Github, ExternalLink, FlaskConical } from 'lucide-astro';
+
+const projets = [
+    {
+        titre: "Système Expert d'Orientation",
+        description: "Système expert en Prolog pour l'orientation académique et professionnelle. Le moteur d'inférence analyse le profil de l'étudiant — résultats, intérêts, contraintes — pour suggérer des filières et métiers adaptés.",
+        technologies: ["Prolog", "Système Expert", "IA Symbolique"],
+        statut: "termine",
+        github: null,
+        demo: null,
+        highlights: [
+            "Moteur d'inférence basé sur des règles métier",
+            "Base de connaissances académiques et professionnelles",
+            "Orientation personnalisée selon le profil étudiant",
+        ],
+    },
+    {
+        titre: "GestioSang — Gestion Intelligente du Stock de Sang",
+        description: "Système intelligent de gestion de stock sanguin avec prédiction de pénurie, suggestion automatique de transfert de poches entre établissements, et chatbot explicatif intégré.",
+        technologies: ["Python", "Machine Learning", "NLP", "Chatbot"],
+        statut: "termine",
+        github: null,
+        demo: null,
+        highlights: [
+            "Prédiction de pénurie par modèle de classification",
+            "Suggestion intelligente de transfert inter-établissements",
+            "Chatbot expliquant les situations et recommandations",
+        ],
+    },
+    {
+        titre: "Prédiction du Diabète",
+        description: "Modèle de machine learning pour la prédiction du risque diabétique à partir de données cliniques. Exploration, nettoyage et analyse du dataset Pima Indians Diabetes avec comparaison de plusieurs algorithmes.",
+        technologies: ["Python", "Scikit-learn", "Pandas", "NumPy"],
+        statut: "termine",
+        github: null,
+        demo: null,
+        highlights: [
+            "Analyse exploratoire et nettoyage des données",
+            "Comparaison de plusieurs algorithmes de classification",
+            "Évaluation des performances (accuracy, F1, AUC-ROC)",
+        ],
+    },
+];
+
+const statutConfig = {
+    encours: { label: 'En cours', color: '#c8922a' },
+    termine: { label: 'Terminé', color: '#4a7c5e' },
+    abandonne: { label: 'Abandonné', color: '#8a7e72' },
+};
+---
+
+<BaseLayout title="Projets — mirfou">
+    <div class="page">
+
+        <header class="page-header">
+            <div class="page-title-group">
+                <FlaskConical size={22} color="var(--color-accent)" />
+                <h1>Projets</h1>
+            </div>
+            <p class="page-sub">
+                Ce que j'ai construit — grain par grain.
+            </p>
+        </header>
+
+        <div class="note">
+            <AntIcon size={12} />
+            <span>
+                Les projets universitaires internes n'ont pas de dépôt public.
+                Les liens GitHub seront ajoutés au fur et à mesure.
+            </span>
+        </div>
+
+        <div class="projets-list">
+            {projets.map((projet, i) => {
+                const statut = statutConfig[projet.statut as keyof typeof statutConfig];
+                return (
+                    <article class="projet-card">
+
+                        <div class="projet-header">
+                            <div class="projet-title-wrap">
+                                <h2 class="projet-title">{projet.titre}</h2>
+                                <span
+                                    class="projet-statut"
+                                    style={`color: ${statut.color}; border-color: ${statut.color}40; background: ${statut.color}12`}
+                                >
+                                    {statut.label}
+                                </span>
+                            </div>
+                            <div class="projet-links">
+                                {projet.github ? (
+                                    <a href={projet.github} target="_blank" class="projet-link" title="GitHub">
+                                        <Github size={16} />
+                                        <span>Code</span>
+                                    </a>
+                                ) : (
+                                    <span class="projet-link-disabled" title="Dépôt non disponible">
+                                        <Github size={16} />
+                                        <span>Privé</span>
+                                    </span>
+                                )}
+                                {projet.demo && (
+                                    <a href={projet.demo} target="_blank" class="projet-link" title="Démo">
+                                        <ExternalLink size={16} />
+                                        <span>Démo</span>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <p class="projet-desc">{projet.description}</p>
+
+                        <ul class="projet-highlights">
+                            {projet.highlights.map(h => (
+                                <li>
+                                    <AntIcon size={10} class="highlight-ant" />
+                                    <span>{h}</span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div class="projet-tech">
+                            {projet.technologies.map(tech => (
+                                <span class="tech-badge">{tech}</span>
+                            ))}
+                        </div>
+
+                    </article>
+                );
+            })}
+        </div>
+
+        <!-- Mirfou lui-même -->
+        <div class="divider"></div>
+
+        <article class="projet-card projet-card-special">
+            <div class="projet-header">
+                <div class="projet-title-wrap">
+                    <h2 class="projet-title">Mirfou — ce jardin</h2>
+                    <span class="projet-statut" style="color: #c8922a; border-color: #c8922a40; background: #c8922a12">
+                        En cours
+                    </span>
+                </div>
+                <div class="projet-links">
+                    <a href="https://github.com/mirfou111/mirfou" target="_blank" class="projet-link">
+                        <Github size={16} />
+                        <span>Code</span>
+                    </a>
+                    <a href="https://mirfou111.vercel.app" target="_blank" class="projet-link">
+                        <ExternalLink size={16} />
+                        <span>Live</span>
+                    </a>
+                </div>
+            </div>
+
+            <p class="projet-desc">
+                Ce site lui-même — un digital garden personnel construit avec Astro 5, MDX et Tailwind.
+                Espace de pensée, d'écriture et d'expérimentation. Construit grain par grain,
+                avec un système de badges d'honnêteté intellectuelle et un Memento Mori interactif.
+            </p>
+
+            <ul class="projet-highlights">
+                <li><AntIcon size={10} class="highlight-ant" /><span>Astro 5 + MDX + Tailwind v4</span></li>
+                <li><AntIcon size={10} class="highlight-ant" /><span>Recherche full-text avec Pagefind</span></li>
+                <li><AntIcon size={10} class="highlight-ant" /><span>Badges origine et maturité des contenus</span></li>
+                <li><AntIcon size={10} class="highlight-ant" /><span>Memento Mori interactif avec export PNG</span></li>
+            </ul>
+
+            <div class="projet-tech">
+                {['Astro 5', 'MDX', 'Tailwind v4', 'TypeScript', 'Pagefind', 'Vercel'].map(tech => (
+                    <span class="tech-badge">{tech}</span>
+                ))}
+            </div>
+        </article>
+
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Note */
+    .note {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-left: 3px solid var(--color-accent);
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 2.5rem;
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        line-height: 1.6;
+    }
+
+    .note svg { flex-shrink: 0; margin-top: 0.15rem; color: var(--color-accent); }
+
+    /* Liste */
+    .projets-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* Card */
+    .projet-card {
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .projet-card:last-child { border-bottom: none; }
+    .projet-card-special { border-bottom: none; }
+
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 0.5rem 0;
+    }
+
+    /* Header card */
+    .projet-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .projet-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .projet-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .projet-statut {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid;
+        white-space: nowrap;
+    }
+
+    .projet-links {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .projet-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        color: var(--color-muted);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        padding: 0.25rem 0.65rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .projet-link:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+
+    .projet-link-disabled {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        color: var(--color-border);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        padding: 0.25rem 0.65rem;
+        border-radius: 4px;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Description */
+    .projet-desc {
+        font-size: 0.9rem;
+        color: var(--color-muted);
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+
+    /* Highlights */
+    .projet-highlights {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+        padding: 0;
+    }
+
+    .projet-highlights li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        line-height: 1.5;
+    }
+
+    .highlight-ant {
+        color: var(--color-accent);
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+        opacity: 0.6;
+    }
+
+    /* Tech */
+    .projet-tech {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .tech-badge {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        color: var(--color-muted);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+    }
+
+    @media (max-width: 640px) {
+        .page { padding: 2rem 1.5rem 4rem; }
+        .projet-header { flex-direction: column; }
+    }
+</style>

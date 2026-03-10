@@ -1,0 +1,196 @@
+<div class="outil">
+    <h2 class="outil-title">Markdown → HTML</h2>
+    <p class="outil-desc">Tape du Markdown à gauche, vois le rendu à droite en temps réel.</p>
+
+    <div class="md-layout">
+        <div class="md-pane">
+            <div class="pane-label">Markdown</div>
+            <textarea
+                id="md-input"
+                class="md-textarea"
+                placeholder="# Titre&#10;&#10;Un paragraphe avec **gras** et *italique*.&#10;&#10;- item 1&#10;- item 2"
+                rows="12"
+            ></textarea>
+        </div>
+        <div class="md-pane">
+            <div class="pane-label">Rendu</div>
+            <div id="md-output" class="md-output"></div>
+        </div>
+    </div>
+
+    <div class="md-actions">
+        <button class="outil-btn-secondary" id="md-clear">Effacer</button>
+        <button class="outil-btn-secondary" id="md-copy-html">Copier le HTML</button>
+    </div>
+</div>
+
+<style>
+    .outil-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .outil-desc {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-bottom: 1.25rem;
+    }
+
+    .md-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .md-pane {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .pane-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-weight: 600;
+    }
+
+    .md-textarea {
+        width: 100%;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--color-text);
+        resize: vertical;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        line-height: 1.6;
+    }
+
+    .md-textarea:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+
+    .md-output {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 200px;
+        font-size: 0.88rem;
+        line-height: 1.7;
+        color: var(--color-text);
+        overflow-y: auto;
+    }
+
+    .md-output :global(h1) { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .md-output :global(h2) { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .md-output :global(h3) { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .md-output :global(p) { margin-bottom: 0.75rem; }
+    .md-output :global(strong) { font-weight: 700; }
+    .md-output :global(em) { font-style: italic; }
+    .md-output :global(code) {
+        font-family: var(--font-mono);
+        font-size: 0.82em;
+        background: var(--color-surface-2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        color: var(--color-accent);
+    }
+    .md-output :global(ul), .md-output :global(ol) {
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .md-output :global(blockquote) {
+        border-left: 2px solid var(--color-accent);
+        padding-left: 1rem;
+        color: var(--color-muted);
+        font-style: italic;
+        margin: 0.75rem 0;
+    }
+
+    .md-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .outil-btn-secondary {
+        font-size: 0.8rem;
+        color: var(--color-muted);
+        background: none;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 0.35rem 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: var(--font-mono);
+    }
+
+    .outil-btn-secondary:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+
+    @media (max-width: 640px) {
+        .md-layout { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script>
+    const input = document.getElementById('md-input') as HTMLTextAreaElement;
+    const output = document.getElementById('md-output')!;
+    const clearBtn = document.getElementById('md-clear')!;
+    const copyBtn = document.getElementById('md-copy-html')!;
+
+    function parseMarkdown(md: string): string {
+        return md
+            // Titres
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            // Gras / italique
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            // Code inline
+            .replace(/`(.+?)`/g, '<code>$1</code>')
+            // Blockquote
+            .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+            // Listes
+            .replace(/^\- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+            // Liens
+            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+            // Paragraphes
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(?!<[hul]|<block)(.+)$/gm, (m) => m ? m : '')
+            .trim();
+    }
+
+    function update() {
+        const html = parseMarkdown(input.value);
+        output.innerHTML = html ? `<p>${html}</p>` : '';
+    }
+
+    input.addEventListener('input', update);
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        output.innerHTML = '';
+    });
+
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(output.innerHTML).then(() => {
+            copyBtn.textContent = 'Copié ✓';
+            setTimeout(() => { copyBtn.textContent = 'Copier le HTML'; }, 2000);
+        });
+    });
+</script>

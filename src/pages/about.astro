@@ -1,0 +1,585 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AntIcon from '../components/AntIcon.astro';
+import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
+---
+
+<BaseLayout title="About — mirfou">
+    <div class="page">
+
+        <!-- En-tête -->
+        <header class="about-header">
+            <div class="about-ant">
+                <AntIcon size={36} />
+            </div>
+            <div>
+                <h1 class="about-name">Ousmane Ndieguene</h1>
+                <p class="about-aka">alias <em>mirfou</em> — le verlan de fourmi</p>
+                <div class="about-location">
+                    <MapPin size={13} />
+                    <span>Thiès, Sénégal</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <!-- Profil -->
+        <section class="section">
+            <h2 class="section-title">Qui suis-je</h2>
+            <div class="prose">
+                <p>
+                    Étudiant en Master 2 Intelligence Artificielle & Smart Tech
+                    à l'Université Technologique de Troyes et à l'Université Iba Der Thiam de Thiès.
+                    Titulaire d'une licence en ingénierie informatique de l'Université Assane Seck de Ziguinchor.
+                </p>
+                <p>
+                    Je transforme des données et des algorithmes en solutions numériques concrètes —
+                    au croisement de l'IA, du développement logiciel et de l'ingénierie des données.
+                    Flexible, curieux, orienté apprentissage continu.
+                </p>
+                <p>
+                    En dehors du code : passionné de contes traditionnels, de karaté,
+                    d'agriculture urbaine et de veille technologique sur l'IA pour le développement durable.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Le totem -->
+        <section class="section">
+            <h2 class="section-title">Le totem fourmi</h2>
+            <div class="prose">
+                <p>
+                    Mirfou, c'est le verlan de fourmi. Mon totem depuis longtemps.
+                    La fourmi porte cinquante fois son poids. Elle construit des galeries complexes
+                    sans architecte central. Elle communique sans parler. Elle ne s'arrête jamais.
+                </p>
+                <p>
+                    C'est ce que j'essaie d'être — quelqu'un qui construit patiemment,
+                    grain par grain, avec méthode et persévérance. Ce jardin en est le reflet.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Ce jardin -->
+        <section class="section">
+            <h2 class="section-title">Ce jardin</h2>
+            <div class="prose">
+                <p>
+                    Mirfou.space est mon espace personnel — un jardin secret ouvert à qui veut s'y promener.
+                    On y trouve des articles de fond, des réflexions courtes, des tutos techniques,
+                    des contes, et mes travaux de recherche académique.
+                </p>
+                <p>
+                    Pas un portfolio. Pas un blog corporate. Un espace pour penser à voix haute,
+                    partager ce que j'apprends, raconter des histoires, et laisser des traces.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Compétences -->
+        <section class="section">
+            <h2 class="section-title">Compétences techniques</h2>
+            <div class="skills-grid">
+                <div class="skill-group">
+                    <h3>IA & Données</h3>
+                    <p>Scikit-learn, Pandas, NumPy, apprentissage supervisé & non supervisé, web scraping, analyse exploratoire</p>
+                </div>
+                <div class="skill-group">
+                    <h3>Développement</h3>
+                    <p>Spring Boot, Node.js, React, Angular, PostgreSQL, REST APIs</p>
+                </div>
+                <div class="skill-group">
+                    <h3>IoT</h3>
+                    <p>Arduino, ESP32/ESP8266, MQTT, HTTP</p>
+                </div>
+                <div class="skill-group">
+                    <h3>Systèmes & Outils</h3>
+                    <p>Git/GitHub, Scrum, administration de bases de données, sécurité informatique</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Engagement -->
+        <section class="section">
+            <h2 class="section-title">Engagement</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="timeline-date">Depuis juin 2024</span>
+                    <div class="timeline-content">
+                        <strong>Secrétaire Général du Comité des Alumni</strong>
+                        <span class="timeline-org">Fondation Mastercard, Zone UEMOA</span>
+                        <p>Sélectionné parmi de jeunes leaders africains pour un programme intensif de leadership, d'innovation et d'entrepreneuriat.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-date">Depuis déc. 2025</span>
+                    <div class="timeline-content">
+                        <strong>Kectil Colleague</strong>
+                        <span class="timeline-org">The Kectil Program — Global</span>
+                        <p>Participation à des discussions mondiales sur l'environnement, la gouvernance et le changement social.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Colophon -->
+        <section class="section">
+            <h2 class="section-title">Colophon</h2>
+            <div class="prose">
+                <p>
+                    Ce site est construit avec <a href="https://astro.build" target="_blank">Astro 5</a>,
+                    stylisé avec <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>,
+                    typographié en <a href="https://fonts.google.com/specimen/Texturina" target="_blank">Texturina</a>
+                    et <a href="https://fonts.google.com/specimen/Fira+Code" target="_blank">Fira Code</a>.
+                    Le contenu est écrit en MDX. Déployé sur
+                    <a href="https://vercel.com" target="_blank">Vercel</a>.
+                    Le code source est disponible sur
+                    <a href="https://github.com/mirfou111/mirfou" target="_blank">GitHub</a>.
+                </p>
+                <p>
+                    Le logo est une fourmi géométrique dessinée en SVG — variante B,
+                    choisie pour son thorax en losange, distinctif et mémorable.
+                </p>
+            </div>
+        </section>
+
+            <div class="divider"></div>
+        <!-- Inspirations -->
+        <section class="section">
+            <h2 class="section-title">Inspirations & transparence</h2>
+            <div class="prose">
+                <p>
+                    Ce jardin n'est pas né de rien. Il doit beaucoup à des personnes
+                    qui ont pensé et publié avant moi sur ce que signifie écrire sur le web
+                    avec honnêteté et méthode.
+                </p>
+            </div>
+
+            <div class="inspi-grid">
+                <a href="https://tomcritchlow.com" target="_blank" class="inspi-item">
+                    <span class="inspi-name">Tom Critchlow</span>
+                    <span class="inspi-desc">L'idée du digital garden comme espace de pensée vivant, pas un blog figé.</span>
+                </a>
+                <a href="https://maggieappleton.com" target="_blank" class="inspi-item">
+                    <span class="inspi-name">Maggie Appleton</span>
+                    <span class="inspi-desc">Les statuts de maturité des notes — graines, pousses, arbres matures.</span>
+                </a>
+                <a href="https://paul.hanaoka.co" target="_blank" class="inspi-item">
+                    <span class="inspi-name">Paul Hanaoka</span>
+                    <span class="inspi-desc">La sidebar compacte avec raccourcis clavier — navigation rapide et sobre.</span>
+                </a>
+                <a href="https://astro.build" target="_blank" class="inspi-item">
+                    <span class="inspi-name">Astro</span>
+                    <span class="inspi-desc">Le framework qui rend possible un site statique rapide avec du MDX et des collections de contenu.</span>
+                </a>
+            </div>
+
+            <div class="prose" style="margin-top: 1.5rem">
+                <p>
+                    Chaque idée empruntée est adaptée, pas copiée. Comme la fourmi qui
+                    observe les autres colonies pour améliorer la sienne.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Badges -->
+        <section class="section">
+            <h2 class="section-title">Pourquoi des badges ?</h2>
+            <div class="prose">
+                <p>
+                    L'IA génère du texte de plus en plus convaincant. Dans ce contexte,
+                    je pense qu'indiquer clairement la provenance d'un contenu est un acte
+                    de respect envers le lecteur. Ce n'est pas une honte d'utiliser des outils —
+                    c'est une honte de ne pas le dire.
+                </p>
+                <p>
+                    Chaque contenu de ce jardin porte donc deux badges :
+                </p>
+            </div>
+
+            <div class="badges-explain">
+                <div class="badge-explain-group">
+                    <p class="badge-group-title">Origine</p>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-authentique">✦ Authentique</span>
+                        <span class="badge-explain-text">Écrit entièrement par moi, sans assistance IA.</span>
+                    </div>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-assiste">◈ Assisté</span>
+                        <span class="badge-explain-text">Écrit par moi avec aide IA — structure, relecture ou suggestions.</span>
+                    </div>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-genere">◇ Généré</span>
+                        <span class="badge-explain-text">Contenu généré par IA, édité et validé par moi.</span>
+                    </div>
+                </div>
+
+                <div class="badge-explain-group">
+                    <p class="badge-group-title">Maturité</p>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-graine">⬡ Graine</span>
+                        <span class="badge-explain-text">Idée brute, notes embryonnaires — pas encore développé.</span>
+                    </div>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-pousse">⬡ Pousse</span>
+                        <span class="badge-explain-text">En cours — contenu incomplet, encore en développement.</span>
+                    </div>
+                    <div class="badge-explain-item">
+                        <span class="badge-demo badge-mature">⬡ Mature</span>
+                        <span class="badge-explain-text">Finalisé — contenu stable et complet.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prose" style="margin-top: 1.5rem">
+                <p>
+                    Ce système s'inspire de la philosophie des digital gardens :
+                    un jardin n'est jamais "terminé", il pousse. Montrer l'état
+                    d'un contenu est plus honnête que de prétendre que tout est
+                    toujours parfait et complet.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Contact -->
+        <section class="section">
+            <h2 class="section-title">Contact</h2>
+            <div class="contact-links">
+                <a href="mailto:fourmitux111@gmail.com" class="contact-item">
+                    <Mail size={15} />
+                    <span>fourmitux111@gmail.com</span>
+                </a>
+                <a href="https://linkedin.com/in/mirfou111" target="_blank" class="contact-item">
+                    <Linkedin size={15} />
+                    <span>linkedin.com/in/mirfou111</span>
+                    <ExternalLink size={11} />
+                </a>
+            </div>
+        </section>
+
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    /* Header */
+    .about-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 0 2rem;
+    }
+
+    .about-ant {
+        color: var(--color-accent);
+        flex-shrink: 0;
+    }
+
+    .about-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.2rem;
+        line-height: 1.2;
+    }
+
+    .about-aka {
+        font-size: 0.9rem;
+        color: var(--color-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .about-aka em {
+        color: var(--color-accent);
+    }
+
+    .about-location {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.78rem;
+        color: var(--color-muted);
+    }
+
+    /* Divider */
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 0.5rem 0;
+    }
+
+    /* Sections */
+    .section {
+        padding: 1.75rem 0;
+    }
+
+    .section-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+    }
+
+    /* Prose */
+    .prose p {
+        font-size: 0.95rem;
+        color: var(--color-text);
+        line-height: 1.85;
+        margin-bottom: 1rem;
+    }
+
+    .prose p:last-child { margin-bottom: 0; }
+
+    .prose a {
+        color: var(--color-accent);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    /* Skills */
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    .skill-group h3 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .skill-group p {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        line-height: 1.6;
+    }
+
+    /* Timeline */
+    .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .timeline-item {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .timeline-date {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        padding-top: 0.15rem;
+        line-height: 1.4;
+    }
+
+    .timeline-content strong {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--color-text);
+        margin-bottom: 0.2rem;
+    }
+
+    .timeline-org {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--color-accent);
+        margin-bottom: 0.4rem;
+        font-style: italic;
+    }
+
+    .timeline-content p {
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        line-height: 1.6;
+    }
+
+    /* Contact */
+    .contact-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--color-text);
+        font-size: 0.9rem;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+
+    .contact-item:hover {
+        color: var(--color-accent);
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+        .page { padding: 2rem 1.5rem 4rem; }
+        .skills-grid { grid-template-columns: 1fr; }
+        .timeline-item { grid-template-columns: 1fr; gap: 0.25rem; }
+        .about-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+
+    <style>
+    /* ... styles existants ... */
+
+    /* Inspirations */
+    .inspi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+    }
+
+    .inspi-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 1rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .inspi-item:hover {
+        border-color: var(--color-accent);
+    }
+
+    .inspi-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--color-accent);
+    }
+
+    .inspi-desc {
+        font-size: 0.8rem;
+        color: var(--color-muted);
+        line-height: 1.5;
+    }
+
+    /* Badges explication */
+    .badges-explain {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 1.25rem;
+    }
+
+    .badge-explain-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .badge-group-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-muted);
+        font-weight: 600;
+        font-family: var(--font-mono);
+        margin-bottom: 0.25rem;
+    }
+
+    .badge-explain-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .badge-demo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-family: var(--font-mono);
+        border: 1px solid;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: 100px;
+        justify-content: center;
+    }
+
+    .badge-authentique {
+        color: #4a7c5e;
+        border-color: #4a7c5e40;
+        background: #4a7c5e12;
+    }
+
+    .badge-assiste {
+        color: #c8922a;
+        border-color: #c8922a40;
+        background: #c8922a12;
+    }
+
+    .badge-genere {
+        color: var(--color-muted);
+        border-color: var(--color-border);
+        background: var(--color-surface);
+    }
+
+    .badge-graine {
+        color: #c8922a;
+        border-color: #c8922a40;
+        background: #c8922a12;
+    }
+
+    .badge-pousse {
+        color: #4a7c5e;
+        border-color: #4a7c5e40;
+        background: #4a7c5e12;
+    }
+
+    .badge-mature {
+        color: var(--color-muted);
+        border-color: var(--color-border);
+        background: var(--color-surface);
+    }
+
+    .badge-explain-text {
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+        .inspi-grid { grid-template-columns: 1fr; }
+        .badge-explain-item { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    }
+</style>

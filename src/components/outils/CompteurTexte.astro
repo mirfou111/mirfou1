@@ -1,0 +1,147 @@
+<div class="outil">
+    <h2 class="outil-title">Compteur de texte</h2>
+    <p class="outil-desc">Colle ou tape ton texte pour analyser sa composition.</p>
+
+    <textarea
+        id="compteur-input"
+        class="outil-textarea"
+        placeholder="Colle ton texte ici..."
+        rows="8"
+    ></textarea>
+
+    <div class="compteur-stats" id="compteur-stats">
+        <div class="stat">
+            <span class="stat-value" id="stat-mots">0</span>
+            <span class="stat-label">mots</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-chars">0</span>
+            <span class="stat-label">caractères</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-chars-no-spaces">0</span>
+            <span class="stat-label">sans espaces</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-phrases">0</span>
+            <span class="stat-label">phrases</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-lecture">0 min</span>
+            <span class="stat-label">lecture</span>
+        </div>
+    </div>
+
+    <button class="outil-btn-secondary" id="compteur-clear">Effacer</button>
+</div>
+
+<style>
+    .outil-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .outil-desc {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-bottom: 1.25rem;
+    }
+
+    .outil-textarea {
+        width: 100%;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        color: var(--color-text);
+        resize: vertical;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .outil-textarea:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+
+    .compteur-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1.25rem 0;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        min-width: 80px;
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--color-accent);
+        font-family: var(--font-mono);
+    }
+
+    .stat-label {
+        font-size: 0.68rem;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 0.2rem;
+    }
+
+    .outil-btn-secondary {
+        font-size: 0.8rem;
+        color: var(--color-muted);
+        background: none;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 0.35rem 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: var(--font-mono);
+    }
+
+    .outil-btn-secondary:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+</style>
+
+<script>
+    const input = document.getElementById('compteur-input') as HTMLTextAreaElement;
+    const clearBtn = document.getElementById('compteur-clear');
+
+    function update() {
+        const text = input.value;
+        const mots = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        const chars = text.length;
+        const charsNoSpaces = text.replace(/\s/g, '').length;
+        const phrases = text.trim() === '' ? 0 : (text.match(/[.!?]+/g) ?? []).length;
+        const lecture = Math.max(1, Math.ceil(mots / 200));
+
+        document.getElementById('stat-mots')!.textContent = mots.toString();
+        document.getElementById('stat-chars')!.textContent = chars.toString();
+        document.getElementById('stat-chars-no-spaces')!.textContent = charsNoSpaces.toString();
+        document.getElementById('stat-phrases')!.textContent = phrases.toString();
+        document.getElementById('stat-lecture')!.textContent = `${lecture} min`;
+    }
+
+    input.addEventListener('input', update);
+    clearBtn?.addEventListener('click', () => {
+        input.value = '';
+        update();
+    });
+</script>

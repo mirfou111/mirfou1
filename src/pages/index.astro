@@ -1,0 +1,276 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AntIcon from '../components/AntIcon.astro';
+import { getCollection } from 'astro:content';
+import MementoMori from '../components/MementoMori.astro';
+import { BookOpen, Scroll, Terminal, Brain, FlaskConical, ArrowRight } from 'lucide-astro';
+
+const [articles, contes, tutos, reflexions, recherches] = await Promise.all([
+    getCollection('articles', ({ data }) => !data.draft),
+    getCollection('contes', ({ data }) => !data.draft),
+    getCollection('tutos', ({ data }) => !data.draft),
+    getCollection('reflexions', ({ data }) => !data.draft),
+    getCollection('recherches', ({ data }) => !data.draft),
+]);
+
+const sort = (arr: any[]) => arr.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 4);
+
+const sections = [
+    { label: 'Articles',    href: '/articles',   icon: BookOpen,     items: sort(articles),   color: '#8b6340' },
+    { label: 'Contes',      href: '/contes',      icon: Scroll,       items: sort(contes),     color: '#4a7c5e' },
+    { label: 'Tutos',       href: '/tutos',       icon: Terminal,     items: sort(tutos),      color: '#4a6a8b' },
+    { label: 'Réflexions',  href: '/reflexions',  icon: Brain,        items: sort(reflexions), color: '#7a5e8b' },
+    { label: 'Recherches',  href: '/recherches',  icon: FlaskConical, items: sort(recherches), color: '#6b7a5e' },
+];
+---
+
+<BaseLayout title="mirfou's garder">
+    <div class="home">
+
+        <!-- Hero -->
+         
+        <!-- Memento Mori -->
+        <section class="home-section" id="memento">
+            <MementoMori />
+        </section>
+
+        <!-- Juste un séparateur avec la signature -->
+        <div class="garden-intro">
+            <span class="garden-quote">
+                La fourmi ne compte pas les grains déjà portés.<br/>
+                Elle regarde ceux qui restent à porter.
+            </span>
+            <span class="garden-label">Le jardin</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Sections -->
+        <div class="sections">
+            {sections.map(({ label, href, icon: Icon, items, color }) => (
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title-group">
+                            <Icon size={16} style={`color: ${color}`} />
+                            <h2 class="section-title" style={`color: ${color}`}>{label}</h2>
+                        </div>
+                        <a href={href} class="section-link">
+                            <span>Tout voir</span>
+                            <ArrowRight size={13} />
+                        </a>
+                    </div>
+
+                    {items.length === 0 ? (
+                        <p class="empty">Bientôt...</p>
+                    ) : (
+                        <ul class="item-list">
+                            {items.map((item: any) => (
+                                <li>
+                                    <a href={`${href}/${item.id}`} class="item">
+                                        <AntIcon size={11} class="item-ant" />
+                                        <span class="item-title">{item.data.title}</span>
+                                        <time class="item-date">
+                                            {item.data.pubDate.toLocaleDateString('fr-FR')}
+                                        </time>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+            ))}
+        </div>
+
+    </div>
+</BaseLayout>
+
+<style>
+    .home {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    /* Hero */
+    .hero {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem 0 2.5rem;
+    }
+
+    .hero-ant {
+        color: var(--color-accent);
+        flex-shrink: 0;
+        opacity: 0.9;
+    }
+
+    .hero-title {
+        font-family: var(--font-main);
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        font-style: italic;
+        color: var(--color-text);
+        line-height: 1;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+        color: var(--color-muted);
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+
+    /* Divider */
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 0.5rem 0 2.5rem;
+    }
+
+    /* Sections */
+    .sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.9rem;
+    }
+
+    .section-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0;
+    }
+
+    .section-link {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--color-muted);
+        font-size: 0.78rem;
+        transition: color 0.2s;
+    }
+
+    .section-link:hover {
+        color: var(--color-accent);
+    }
+
+    /* Items */
+    .item-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text);
+        font-size: 0.92rem;
+        transition: color 0.2s;
+        text-decoration: none;
+    }
+
+    .item:last-child {
+        border-bottom: none;
+    }
+
+    .item:hover {
+        color: var(--color-accent);
+    }
+
+    .item-ant {
+        color: var(--color-accent);
+        flex-shrink: 0;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+    .item:hover .item-ant {
+        opacity: 1;
+    }
+
+    .item-title {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .item-date {
+        color: var(--color-muted);
+        font-size: 0.75rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-family: var(--font-mono);
+    }
+
+    .empty {
+        color: var(--color-muted);
+        font-size: 0.85rem;
+        font-style: italic;
+        padding: 0.5rem 0;
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+        .home { padding: 2rem 1.5rem 4rem; }
+        .hero { flex-direction: column; gap: 1rem; align-items: flex-start; }
+    }
+
+    .garden-intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2.5rem 0;
+    text-align: center;
+    }
+
+    .garden-quote {
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--color-muted);
+        line-height: 1.8;
+        max-width: 420px;
+    }
+
+    .garden-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        white-space: nowrap;
+    }
+
+    .garden-label::before,
+    .garden-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--color-border);
+    }
+</style>

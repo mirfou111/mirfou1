@@ -1,0 +1,116 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { FlaskConical } from 'lucide-astro';
+
+const recherches = (await getCollection('recherches', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Recherches — mirfou">
+    <div class="page">
+        <header class="page-header">
+            <div class="page-title-group">
+                <FlaskConical size={22} color="#6b7a5e" />
+                <h1>Recherches</h1>
+            </div>
+            <p class="page-sub">Travaux académiques et résultats de recherche.</p>
+        </header>
+
+        {recherches.length === 0 ? (
+            <p class="empty">Aucune recherche pour le moment. Bientôt...</p>
+        ) : (
+            <div class="list">
+                {recherches.map(recherche => (
+                    <div class="recherche-item">
+                        {(recherche.data.domaine || recherche.data.annee) && (
+                            <div class="recherche-meta">
+                                {recherche.data.domaine && (
+                                    <span class="meta-badge">{recherche.data.domaine}</span>
+                                )}
+                                {recherche.data.annee && (
+                                    <span class="meta-badge">{recherche.data.annee}</span>
+                                )}
+                            </div>
+                        )}
+                        <PostCard
+                            title={recherche.data.title}
+                            description={recherche.data.description}
+                            pubDate={recherche.data.pubDate}
+                            href={`/recherches/${recherche.id}`}
+                            tags={recherche.data.tags}
+                            origin={recherche.data.origin}
+                            body={recherche.body}
+                            accentColor="#6b7a5e"
+                        />
+                    </div>
+                ))}
+            </div>
+        )}
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .recherche-item {
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .recherche-item:last-child {
+        border-bottom: none;
+    }
+
+    .recherche-meta {
+        display: flex;
+        gap: 0.4rem;
+        padding-top: 1.25rem;
+    }
+
+    .meta-badge {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        color: #6b7a5e;
+        background: #6b7a5e12;
+        border: 1px solid #6b7a5e40;
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+    }
+
+    .empty {
+        color: var(--color-muted);
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+</style>

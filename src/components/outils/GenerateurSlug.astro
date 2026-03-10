@@ -1,0 +1,121 @@
+<div class="outil">
+    <h2 class="outil-title">Générateur de slug</h2>
+    <p class="outil-desc">Transforme un titre en slug propre pour tes URLs et noms de fichiers.</p>
+
+    <input
+        type="text"
+        id="slug-input"
+        class="outil-input"
+        placeholder="L'IA en Afrique : Éviter le copier-coller numérique"
+    />
+
+    <div class="slug-result" id="slug-result-wrap">
+        <code id="slug-output" class="slug-output">—</code>
+        <button class="copy-btn" id="slug-copy" title="Copier">
+            <span id="slug-copy-label">Copier</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    .outil-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .outil-desc {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-bottom: 1.25rem;
+    }
+
+    .outil-input {
+        width: 100%;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        color: var(--color-text);
+        font-family: inherit;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+    }
+
+    .outil-input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+
+    .slug-result {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+
+    .slug-output {
+        flex: 1;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--color-accent);
+        word-break: break-all;
+    }
+
+    .copy-btn {
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        color: var(--color-muted);
+        background: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        padding: 0.3rem 0.65rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .copy-btn:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+</style>
+
+<script>
+    const input = document.getElementById('slug-input') as HTMLInputElement;
+    const output = document.getElementById('slug-output')!;
+    const copyBtn = document.getElementById('slug-copy')!;
+    const copyLabel = document.getElementById('slug-copy-label')!;
+
+    function toSlug(text: string): string {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
+
+    input.addEventListener('input', () => {
+        const slug = toSlug(input.value);
+        output.textContent = slug || '—';
+    });
+
+    copyBtn.addEventListener('click', () => {
+        const slug = output.textContent ?? '';
+        if (slug === '—') return;
+        navigator.clipboard.writeText(slug).then(() => {
+            copyLabel.textContent = 'Copié ✓';
+            setTimeout(() => { copyLabel.textContent = 'Copier'; }, 2000);
+        });
+    });
+</script>

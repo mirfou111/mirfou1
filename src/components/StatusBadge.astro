@@ -1,0 +1,69 @@
+---
+interface Props {
+    status: 'graine' | 'pousse' | 'mature';
+}
+
+const { status } = Astro.props;
+
+const config = {
+    graine: {
+        label: 'Graine',
+        symbol: '⬡',
+        title: 'Idée brute — contenu embryonnaire, notes en vrac',
+    },
+    pousse: {
+        label: 'Pousse',
+        symbol: '⬡',
+        title: 'En cours — contenu incomplet, encore en développement',
+    },
+    mature: {
+        label: 'Mature',
+        symbol: '⬡',
+        title: 'Finalisé — contenu stable et complet',
+    },
+};
+
+const { label, symbol, title } = config[status];
+---
+
+<span class={`badge badge-${status}`} title={title}>
+    <span class="badge-symbol">{symbol}</span>
+    <span class="badge-label">{label}</span>
+</span>
+
+<style>
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-family: var(--font-mono);
+        border: 1px solid;
+        cursor: help;
+        transition: opacity 0.2s;
+    }
+
+    .badge:hover { opacity: 0.8; }
+
+    .badge-symbol { font-size: 0.6rem; }
+
+    .badge-graine {
+        color: #c8922a;
+        border-color: #c8922a40;
+        background: #c8922a12;
+    }
+
+    .badge-pousse {
+        color: #4a7c5e;
+        border-color: #4a7c5e40;
+        background: #4a7c5e12;
+    }
+
+    .badge-mature {
+        color: var(--color-muted);
+        border-color: var(--color-border);
+        background: var(--color-surface);
+    }
+</style>

@@ -1,0 +1,45 @@
+---
+title: "Python : Codez plus vite, lisez mieux"
+description: "Remplacer les boucles for illisibles par de l'élégance."
+pubDate: 2024-04-22
+tags: ["Python", "Clean Code"]
+draft: false
+origin: "genere"
+---
+
+En Python, on aime la simplicité. Pourquoi écrire quatre lignes quand une seule suffit ? Les list comprehensions sont ton meilleur allié.
+
+## Le problème
+
+Imagine que tu veuilles extraire les carrés des nombres pairs d'une liste.
+
+**Le mode "bourrin" :**
+
+```python
+result = []
+for n in numbers:
+    if n % 2 == 0:
+        result.append(n**2)
+```
+
+**Le mode "fourmi élégante" :**
+
+```python
+result = [n**2 for n in numbers if n % 2 == 0]
+```
+
+C'est plus court, plus rapide à l'exécution et, une fois qu'on a l'habitude, beaucoup plus clair.
+
+## La règle d'or
+
+Attention toutefois : n'en abuse pas. Si ta ligne fait 200 caractères, reviens à une boucle classique.
+
+```python
+# ✅ Lisible
+pairs = [x for x in range(20) if x % 2 == 0]
+
+# ❌ Illisible — trop dense
+result = [f(x) for x in range(100) if g(x) > 0 and h(x) != None and x % 3 == 0]
+```
+
+Le code est lu plus souvent qu'il n'est écrit. Écris pour le lecteur, pas pour la machine.

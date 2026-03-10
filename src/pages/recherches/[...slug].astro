@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { FlaskConical, Building, Calendar } from 'lucide-astro';
+
+export async function getStaticPaths() {
+    const recherches = await getCollection('recherches', ({ data }) => !data.draft);
+    return recherches.map(recherche => ({
+        params: { slug: recherche.id },
+        props: { recherche },
+    }));
+}
+
+const { recherche } = Astro.props;
+const { Content, headings } = await render(recherche);
+---
+
+<PostLayout
+    title={recherche.data.title}
+    description={recherche.data.description}
+    pubDate={recherche.data.pubDate}
+    updatedDate={recherche.data.updatedDate}
+    tags={recherche.data.tags}
+    backHref="/recherches"
+    backLabel="Recherches"
+    origin={recherche.data.origin}
+    status={recherche.data.status}
+    relatedPosts={recherche.data.relatedPosts}
+    body={recherche.body}
+    headings={headings}
+>
+    <!-- Métadonnées académiques -->
+    {(recherche.data.domaine || recherche.data.institution || recherche.data.annee) && (
+        <div class="academic-meta">
+            {recherche.data.domaine && (
+                <span class="academic-item">
+                    <FlaskConical size={13} />
+                    <span>{recherche.data.domaine}</span>
+                </span>
+            )}
+            {recherche.data.institution && (
+                <span class="academic-item">
+                    <Building size={13} />
+                    <span>{recherche.data.institution}</span>
+                </span>
+            )}
+            {recherche.data.annee && (
+                <span class="academic-item">
+                    <Calendar size={13} />
+                    <span>{recherche.data.annee}</span>
+                </span>
+            )}
+        </div>
+    )}
+    <Content />
+</PostLayout>
+
+<style>
+    .academic-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-left: 3px solid var(--color-accent);
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 2rem;
+    }
+
+    .academic-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+    }
+</style>

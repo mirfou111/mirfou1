@@ -1,0 +1,361 @@
+---
+import AntIcon from './AntIcon.astro';
+import {
+    Home, BookOpen, Scroll, Terminal,
+    Brain, FlaskConical, Tag, User,
+    Wrench, Search, Sun, Moon, FolderOpen 
+} from 'lucide-astro';
+import { SITE_LOCATION } from '../consts';
+
+const navItems = [
+    { href: '/',            label: 'Accueil',      icon: Home,          key: 'h' },
+    { href: '/articles',    label: 'Articles',     icon: BookOpen,      key: 'a' },
+    { href: '/projets',     label: 'Projets',      icon: FolderOpen,    key: 'j' },
+    { href: '/contes',      label: 'Contes',       icon: Scroll,        key: 'c' },
+    { href: '/tutos',       label: 'Tutos',        icon: Terminal,      key: 't' },
+    { href: '/reflexions',  label: 'Réflexions',   icon: Brain,         key: 'r' },
+    { href: '/recherches',  label: 'Recherches',   icon: FlaskConical,  key: 'q' },
+    { href: '/tags',        label: 'Tags',         icon: Tag,           key: 'g' },
+    { href: '/outils',      label: 'Outils',       icon: Wrench,        key: 'o' },
+    { href: '/about',       label: 'About',        icon: User,          key: 'p' },
+    { href: '/recherche',   label: 'Rechercher',   icon: Search,        key: 's' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<aside class="sidebar" id="sidebar">
+
+    <!-- Logo -->
+    <a href="/" class="logo">
+        <AntIcon size={22} class="logo-ant" />
+        <span class="logo-text">MIRFOU</span>
+    </a>
+
+    <div class="divider"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        {navItems.map(({ href, label, icon: Icon, key }) => {
+            const isActive = href === '/'
+                ? currentPath === '/'
+                : currentPath.startsWith(href);
+            return (
+                <a 
+                    href={href}
+                    class={`nav-item ${isActive ? 'active' : ''}`}
+                    data-key={key}
+                    title={`${label} [${key}]`}
+                >
+                    <Icon size={15} />
+                    <span class="nav-label">{label}</span>
+                    <kbd>{key}</kbd>
+                </a>
+            );
+        })}
+    </nav>
+
+    <div class="divider"></div>
+
+    <!-- Bas de sidebar -->
+    <div class="sidebar-footer">
+
+        <!-- Toggle thème -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Changer le thème">
+            <Sun size={14} class="icon-sun" />
+            <Moon size={14} class="icon-moon" />
+            <span class="theme-label" id="theme-label">Thème</span>
+        </button>
+
+        <!-- Infos vivantes -->
+        <div class="live-info">
+            <span class="live-date" id="live-date"></span>
+            <span class="live-location">{SITE_LOCATION}</span>
+        </div>
+
+        <!-- Citation du jour -->
+        <blockquote class="daily-quote" id="daily-quote"></blockquote>
+
+    </div>
+</aside>
+
+<!-- Overlay mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<script>
+    // ── Raccourcis clavier ──────────────────────────────
+    document.addEventListener('keydown', (e) => {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+        const link = document.querySelector<HTMLAnchorElement>(`[data-key="${e.key}"]`);
+        if (link) { e.preventDefault(); window.location.href = link.href; }
+    });
+
+    // ── Toggle thème ────────────────────────────────────
+    const btn = document.getElementById('theme-toggle');
+    const label = document.getElementById('theme-label');
+
+    function updateThemeUI() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (label) label.textContent = isDark ? 'Mode clair' : 'Mode nuit';
+    }
+
+    btn?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeUI();
+    });
+
+    updateThemeUI();
+
+    // ── Date vivante ────────────────────────────────────
+    function updateDate() {
+        const el = document.getElementById('live-date');
+        if (!el) return;
+        el.textContent = new Date().toLocaleDateString('fr-FR', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+        });
+    }
+    updateDate();
+
+    // ── Citations du jour ───────────────────────────────
+    const quotes = [
+        { text: "Seul on va plus vite, ensemble on va plus loin.", author: "Proverbe africain" },
+        { text: "La patience est la mère de toutes les vertus.", author: "Proverbe" },
+        { text: "Chaque expert a été un débutant.", author: "Anonyme" },
+        { text: "Un voyage de mille lieues commence par un premier pas.", author: "Lao Tseu" },
+        { text: "La fourmi n'est pas prêteuse, c'est là son moindre défaut.", author: "La Fontaine" },
+        { text: "Construire, c'est collaborer avec la nature.", author: "Marguerite Yourcenar" },
+        { text: "Le secret d'avancer, c'est de commencer.", author: "Mark Twain" },
+        { text: "L'écriture est la peinture de la voix.", author: "Voltaire" },
+        { text: "Tout ce que je sais, c'est que je ne sais rien.", author: "Socrate" },
+        { text: "La curiosité est la mère de la science.", author: "Anonyme" },
+    ];
+
+    function setDailyQuote() {
+        const el = document.getElementById('daily-quote');
+        if (!el) return;
+        const day = new Date().getDay();
+        const q = quotes[day % quotes.length];
+        el.innerHTML = `<p>"${q.text}"</p><cite>— ${q.author}</cite>`;
+    }
+    setDailyQuote();
+
+    // ── Overlay mobile ──────────────────────────────────
+    const overlay = document.getElementById('sidebar-overlay');
+    overlay?.addEventListener('click', () => {
+        document.getElementById('sidebar')?.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+</script>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        background-color: var(--color-surface);
+        border-right: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 1rem;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+
+    /* Logo */
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--color-text);
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        margin-bottom: 0.5rem;
+    }
+
+    .logo:hover { color: var(--color-accent); }
+
+    .logo-ant {
+        color: var(--color-accent);
+        flex-shrink: 0;
+    }
+
+    .logo-text {
+        font-family: var(--font-main);
+        font-size: 1.2rem;
+        font-weight: 700;
+        font-style: italic;
+        letter-spacing: -0.02em;
+    }
+
+    /* Divider */
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 0.75rem 0.5rem;
+    }
+
+    /* Nav */
+    .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        flex: 1;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.45rem 0.6rem;
+        border-radius: 8px;
+        color: var(--color-muted);
+        font-size: 0.88rem;
+        text-decoration: none;
+        transition: all 0.15s;
+        position: relative;
+    }
+
+    .nav-item:hover {
+        color: var(--color-text);
+        background: var(--color-surface-2);
+    }
+
+    .nav-item.active {
+        color: var(--color-accent);
+        background: var(--color-surface-2);
+    }
+
+    .nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20%;
+        height: 60%;
+        width: 2px;
+        background: var(--color-accent);
+        border-radius: 2px;
+    }
+
+    .nav-label { flex: 1; }
+
+    kbd {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        color: var(--color-border);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        padding: 0.1rem 0.3rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .nav-item:hover kbd { opacity: 1; }
+    .nav-item.active kbd { opacity: 0.6; }
+
+    /* Footer */
+    .sidebar-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 0.5rem;
+    }
+
+    .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.6rem;
+        border-radius: 8px;
+        background: none;
+        border: none;
+        color: var(--color-muted);
+        font-family: var(--font-main);
+        font-size: 0.88rem;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        transition: all 0.15s;
+    }
+
+    .theme-toggle:hover {
+        color: var(--color-text);
+        background: var(--color-surface-2);
+    }
+
+    /* Icônes thème */
+    .icon-sun { display: block; }
+    .icon-moon { display: none; }
+    html.dark .icon-sun { display: none; }
+    html.dark .icon-moon { display: block; }
+
+    /* Infos vivantes */
+    .live-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0 0.6rem;
+    }
+
+    .live-date {
+        font-size: 0.78rem;
+        color: var(--color-muted);
+        text-transform: capitalize;
+    }
+
+    .live-location {
+        font-size: 0.72rem;
+        color: var(--color-border);
+    }
+
+    /* Citation */
+    .daily-quote {
+        padding: 0.6rem;
+        border-left: 2px solid var(--color-border);
+        margin: 0.25rem 0;
+    }
+
+    .daily-quote p {
+        font-size: 0.72rem;
+        color: var(--color-muted);
+        font-style: italic;
+        line-height: 1.5;
+        margin-bottom: 0.25rem;
+    }
+
+    .daily-quote cite {
+        font-size: 0.65rem;
+        color: var(--color-border);
+        font-style: normal;
+    }
+
+    /* Overlay mobile */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+    .sidebar-overlay.active { display: block; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+    }
+</style>

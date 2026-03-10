@@ -1,0 +1,174 @@
+<div class="outil">
+    <h2 class="outil-title">Palette mirfou</h2>
+    <p class="outil-desc">Les couleurs du design system. Clic pour copier la valeur CSS.</p>
+
+    <div class="palette-section">
+        <p class="palette-mode-label">Mode clair — papier chaud</p>
+        <div class="swatches">
+            {[
+                { name: 'bg', value: '#f7f3ee', label: 'Fond' },
+                { name: 'surface', value: '#ede8e0', label: 'Surface' },
+                { name: 'surface-2', value: '#e4ddd3', label: 'Surface 2' },
+                { name: 'border', value: '#d4cdc4', label: 'Bordure' },
+                { name: 'text', value: '#1a1612', label: 'Texte' },
+                { name: 'muted', value: '#8a7e72', label: 'Muet' },
+                { name: 'accent', value: '#8b4513', label: 'Accent' },
+                { name: 'accent-soft', value: '#b8651a', label: 'Accent doux' },
+            ].map(c => (
+                <button
+                    class="swatch"
+                    data-value={`var(--color-${c.name})`}
+                    data-hex={c.value}
+                    title={`Copier ${c.value}`}
+                >
+                    <span class="swatch-color" style={`background: ${c.value}`}></span>
+                    <span class="swatch-name">{c.label}</span>
+                    <span class="swatch-hex">{c.value}</span>
+                </button>
+            ))}
+        </div>
+    </div>
+
+    <div class="palette-section">
+        <p class="palette-mode-label">Mode nuit — forêt profonde</p>
+        <div class="swatches">
+            {[
+                { name: 'bg-dark', value: '#0d0f0b', label: 'Fond' },
+                { name: 'surface-dark', value: '#161a13', label: 'Surface' },
+                { name: 'surface-2-dark', value: '#1e2419', label: 'Surface 2' },
+                { name: 'border-dark', value: '#2a3022', label: 'Bordure' },
+                { name: 'text-dark', value: '#e8e0d0', label: 'Texte' },
+                { name: 'muted-dark', value: '#6b7a5e', label: 'Muet' },
+                { name: 'accent-dark', value: '#c8922a', label: 'Accent' },
+                { name: 'accent-soft-dark', value: '#a07020', label: 'Accent doux' },
+            ].map(c => (
+                <button
+                    class="swatch"
+                    data-hex={c.value}
+                    title={`Copier ${c.value}`}
+                >
+                    <span class="swatch-color" style={`background: ${c.value}`}></span>
+                    <span class="swatch-name">{c.label}</span>
+                    <span class="swatch-hex">{c.value}</span>
+                </button>
+            ))}
+        </div>
+    </div>
+
+    <div class="copy-toast" id="palette-toast">Copié ✓</div>
+</div>
+
+<style>
+    .outil-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .outil-desc {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .palette-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .palette-mode-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .swatch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.75rem 0.5rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+
+    .swatch:hover {
+        border-color: var(--color-accent);
+        transform: translateY(-2px);
+    }
+
+    .swatch-color {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--color-border);
+        display: block;
+    }
+
+    .swatch-name {
+        font-size: 0.72rem;
+        color: var(--color-text);
+        font-weight: 600;
+    }
+
+    .swatch-hex {
+        font-size: 0.65rem;
+        font-family: var(--font-mono);
+        color: var(--color-muted);
+    }
+
+    .copy-toast {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(4rem);
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        font-family: var(--font-mono);
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    .copy-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
+
+<script>
+    const swatches = document.querySelectorAll('.swatch');
+    const toast = document.getElementById('palette-toast')!;
+    let toastTimeout: ReturnType<typeof setTimeout>;
+
+    swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            const hex = (swatch as HTMLElement).dataset.hex ?? '';
+            navigator.clipboard.writeText(hex).then(() => {
+                clearTimeout(toastTimeout);
+                toast.classList.add('show');
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 1800);
+            });
+        });
+    });
+</script>

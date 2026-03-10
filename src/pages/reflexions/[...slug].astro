@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+    const reflexions = await getCollection('reflexions', ({ data }) => !data.draft);
+    return reflexions.map(reflexion => ({
+        params: { slug: reflexion.id },
+        props: { reflexion },
+    }));
+}
+
+const { reflexion } = Astro.props;
+const { Content, headings } = await render(reflexion);
+---
+
+<PostLayout
+    title={reflexion.data.title}
+    description={reflexion.data.description}
+    pubDate={reflexion.data.pubDate}
+    updatedDate={reflexion.data.updatedDate}
+    tags={reflexion.data.tags}
+    backHref="/reflexions"
+    backLabel="Réflexions"
+    origin={reflexion.data.origin}
+    status={reflexion.data.status}
+    relatedPosts={reflexion.data.relatedPosts}
+    body={reflexion.body}
+    headings={headings}
+>
+    <Content />
+</PostLayout>

@@ -1,0 +1,234 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AntIcon from '../components/AntIcon.astro';
+---
+
+<BaseLayout title="Memento Mori — mirfou">
+    <div class="page">
+
+        <header class="page-header">
+            <p class="page-kicker">Concept</p>
+            <h1>Memento Mori</h1>
+            <p class="page-sub">Souviens-toi que tu mourras.</p>
+        </header>
+
+        <div class="divider"></div>
+
+        <section class="section">
+            <h2 class="section-title">Origine</h2>
+            <div class="prose">
+                <p>
+                    <em>Memento mori</em> est une locution latine qui signifie littéralement
+                    "souviens-toi que tu es mortel". Dans la Rome antique, lorsqu'un général
+                    victorieux défilait en triomphe dans les rues, un esclave se tenait derrière
+                    lui et lui murmurait ces mots à l'oreille — pour éviter que la gloire ne
+                    l'aveugle.
+                </p>
+                <p>
+                    Ce n'est pas une invitation au désespoir. C'est une invitation à la lucidité.
+                    Les stoïciens — Marc Aurèle, Sénèque, Épictète — en avaient fait une pratique
+                    quotidienne. Penser à la mort non pas pour en avoir peur, mais pour mieux
+                    vivre le temps qui reste.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="section">
+            <h2 class="section-title">Pourquoi ici</h2>
+            <div class="prose">
+                <p>
+                    Ce jardin existe parce que le temps est limité. Pas pour être productif,
+                    pas pour impressionner — mais parce que ne rien laisser derrière soi
+                    me semble être un gaspillage. Écrire, construire, raconter : c'est
+                    laisser une trace chimique, comme la fourmi qui balise son chemin
+                    pour celles qui viendront après.
+                </p>
+                <p>
+                    La grille sur la page d'accueil n'est pas là pour angoisser. Elle est là
+                    pour rappeler que chaque case cochée est irréversible — et que les cases
+                    vides devant soi sont une chance, pas une dette.
+                </p>
+                <p>
+                    Marcus Aurelius écrivait dans ses <em>Pensées pour moi-même</em> :
+                    ne remets pas à plus tard ce qui peut être fait maintenant, car tu ne
+                    sais pas combien de cases il te reste.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="section">
+            <h2 class="section-title">La fourmi et le temps</h2>
+            <div class="prose">
+                <p>
+                    La fourmi ne panique pas devant l'hiver qui vient. Elle travaille
+                    méthodiquement, grain après grain, consciente que la saison froide
+                    arrivera quoi qu'il arrive. Cette conscience ne la paralyse pas —
+                    elle l'organise.
+                </p>
+                <p>
+                    C'est ce que j'essaie de faire ici. Cultiver mon jardin, grain après grain,
+                    en sachant que le temps est compté. Pas par peur — par respect
+                    pour ce temps qui m'est donné.
+                </p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="section">
+            <h2 class="section-title">Références</h2>
+            <div class="refs">
+                <a href="https://fr.wikipedia.org/wiki/Memento_mori" target="_blank" class="ref-item">
+                    <span class="ref-title">Memento mori — Wikipédia</span>
+                    <span class="ref-desc">Histoire et symbolisme du concept à travers les âges.</span>
+                </a>
+                <a href="https://fr.wikipedia.org/wiki/Marc_Aur%C3%A8le" target="_blank" class="ref-item">
+                    <span class="ref-title">Marc Aurèle — Pensées pour moi-même</span>
+                    <span class="ref-desc">Le manuel stoïcien de la vie bien menée.</span>
+                </a>
+                <a href="https://fr.wikipedia.org/wiki/S%C3%A9n%C3%A8que" target="_blank" class="ref-item">
+                    <span class="ref-title">Sénèque — De la brièveté de la vie</span>
+                    <span class="ref-desc">Un traité sur l'usage du temps — écrit il y a 2000 ans, toujours juste.</span>
+                </a>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <footer class="page-footer">
+            <div class="footer-ant">
+                <AntIcon size={16} />
+            </div>
+            <a href="/" class="back-link">← Retour au jardin</a>
+        </footer>
+
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        padding: 1rem 0 2rem;
+    }
+
+    .page-kicker {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.4rem;
+        line-height: 1.2;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 1rem;
+        font-style: italic;
+        margin: 0;
+    }
+
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 0.5rem 0;
+    }
+
+    .section {
+        padding: 1.75rem 0;
+    }
+
+    .section-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+    }
+
+    .prose p {
+        font-size: 0.95rem;
+        color: var(--color-text);
+        line-height: 1.85;
+        margin-bottom: 1rem;
+    }
+
+    .prose p:last-child { margin-bottom: 0; }
+
+    .prose em { font-style: italic; color: var(--color-accent); }
+
+    /* Refs */
+    .refs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ref-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding: 0.9rem 1rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        transition: border-color 0.2s;
+        text-decoration: none;
+    }
+
+    .ref-item:hover { border-color: var(--color-accent); }
+
+    .ref-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--color-accent);
+    }
+
+    .ref-desc {
+        font-size: 0.78rem;
+        color: var(--color-muted);
+        line-height: 1.5;
+    }
+
+    /* Footer */
+    .page-footer {
+        padding-top: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .footer-ant {
+        color: var(--color-accent);
+        opacity: 0.4;
+    }
+
+    .back-link {
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--color-accent); }
+
+    @media (max-width: 640px) {
+        .page { padding: 2rem 1.5rem 4rem; }
+    }
+</style>

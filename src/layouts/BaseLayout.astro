@@ -1,0 +1,88 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { Menu } from 'lucide-astro';
+
+interface Props {
+    title: string;
+    description?: string;
+    image?: string;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr">
+    <head>
+        <BaseHead title={title} description={description} image={image} />
+    </head>
+    <body>
+
+        <!-- Burger mobile -->
+        <button class="burger" id="burger-btn" aria-label="Ouvrir le menu">
+            <Menu size={20} />
+        </button>
+
+        <!-- Sidebar -->
+        <aside data-pagefind-ignore>
+            <Sidebar />
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <slot />
+        </main>
+
+    </body>
+</html>
+
+<script>
+    const btn = document.getElementById('burger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    btn?.addEventListener('click', () => {
+        sidebar?.classList.toggle('open');
+        overlay?.classList.toggle('active');
+    });
+</script>
+
+<style>
+    body {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .burger {
+        display: none;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 200;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.5rem;
+        color: var(--color-text);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .burger:hover {
+        background: var(--color-surface-2);
+        color: var(--color-accent);
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        min-width: 0;
+        min-height: 100vh;
+    }
+
+    @media (max-width: 768px) {
+        .burger { display: flex; }
+        .main-content { margin-left: 0; }
+    }
+</style>

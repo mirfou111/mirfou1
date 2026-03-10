@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Search } from 'lucide-astro';
+---
+
+<BaseLayout title="Recherche — mirfou">
+    <div class="page">
+        <header class="page-header">
+            <div class="page-title-group">
+                <Search size={22} color="var(--color-accent)" />
+                <h1>Recherche</h1>
+            </div>
+            <p class="page-sub">Cherche dans tout le jardin.</p>
+        </header>
+
+        <div id="search-wrap">
+            <div id="pagefind-ui"></div>
+        </div>
+
+        <p class="search-hint" id="search-unavailable" style="display:none">
+            La recherche n'est disponible qu'après un build de production.<br />
+            Lance <code>npm run build && npm run preview</code> pour la tester localement.
+        </p>
+    </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .search-hint {
+        color: var(--color-muted);
+        font-size: 0.85rem;
+        line-height: 1.7;
+        font-style: italic;
+    }
+
+    .search-hint code {
+        font-family: var(--font-mono);
+        font-size: 0.82em;
+        background: var(--color-surface);
+        color: var(--color-accent);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        border: 1px solid var(--color-border);
+    }
+
+    /* Surcharge styles Pagefind */
+    #pagefind-ui {
+        --pagefind-ui-scale: 0.9;
+        --pagefind-ui-primary: var(--color-accent);
+        --pagefind-ui-text: var(--color-text);
+        --pagefind-ui-background: var(--color-surface);
+        --pagefind-ui-border: var(--color-border);
+        --pagefind-ui-tag: var(--color-surface-2);
+        --pagefind-ui-border-width: 1px;
+        --pagefind-ui-border-radius: 8px;
+        --pagefind-ui-font: inherit;
+    }
+
+    @media (max-width: 640px) {
+        .page { padding: 2rem 1.5rem 4rem; }
+    }
+</style>
+
+<script is:inline>
+    async function initSearch() {
+        try {
+            // 1. Import dynamique du script de recherche
+            const pagefind = await import('/pagefind/pagefind-ui.js');
+            
+            // 2. Initialisation correcte du constructeur
+            // PagefindUI est souvent attaché directement à l'objet importé ou à window
+            const Constructor = pagefind.PagefindUI || window.PagefindUI;
+            
+            if (Constructor) {
+                new Constructor({
+                    element: '#pagefind-ui',
+                    showSubResults: true,
+                    translations: {
+                        placeholder: 'Chercher dans le jardin...',
+                        zero_results: 'Aucun résultat pour [SEARCH_TERM]',
+                    },
+                });
+            } else {
+                throw new Error("Le constructeur PagefindUI n'a pas été trouvé.");
+            }
+        } catch(e) {
+            console.error('Erreur Pagefind :', e);
+            const uiElement = document.getElementById('pagefind-ui');
+            const hintElement = document.getElementById('search-unavailable');
+            
+            if (uiElement) uiElement.style.display = 'none';
+            if (hintElement) hintElement.style.display = 'block';
+        }
+    }
+
+    // Lancement au chargement initial
+    initSearch();
+
+    // Support pour les View Transitions d'Astro (si activées)
+    document.addEventListener('astro:page-load', initSearch);
+</script>

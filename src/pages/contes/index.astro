@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { Scroll } from 'lucide-astro';
+
+const contes = (await getCollection('contes', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Contes — mirfou">
+    <div class="page">
+        <header class="page-header">
+            <div class="page-title-group">
+                <Scroll size={22} color="#4a7c5e" />
+                <h1>Contes</h1>
+            </div>
+            <p class="page-sub">Histoires, fables et récits imaginaires.</p>
+        </header>
+
+        {contes.length === 0 ? (
+            <p class="empty">Aucun conte pour le moment. Bientôt...</p>
+        ) : (
+            <div class="list">
+                {contes.map(conte => (
+                    <PostCard
+                        title={conte.data.title}
+                        description={conte.data.description}
+                        pubDate={conte.data.pubDate}
+                        href={`/contes/${conte.id}`}
+                        tags={conte.data.tags}
+                        origin={conte.data.origin}
+                        body={conte.body}
+                        accentColor="#4a7c5e"
+                    />
+                ))}
+            </div>
+        )}
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .empty {
+        color: var(--color-muted);
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+</style>

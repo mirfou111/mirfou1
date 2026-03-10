@@ -1,0 +1,106 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AntIcon from '../components/AntIcon.astro';
+---
+
+<BaseLayout title="404 — Page introuvable · mirfou">
+    <div class="page">
+        <div class="content">
+            <div class="ant-wrap">
+                <AntIcon size={48} />
+            </div>
+            <p class="code">404</p>
+            <h1>La fourmi s'est perdue</h1>
+            <p class="message">
+                Cette page n'existe pas ou a été déplacée.<br />
+                La galerie que tu cherches n'est plus là.
+            </p>
+            <div class="links">
+                <a href="/" class="link-home">Retour à l'accueil</a>
+                <a href="/articles" class="link-sec">Articles</a>
+                <a href="/tags" class="link-sec">Tags</a>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 6rem 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+    }
+
+    .content {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .ant-wrap {
+        color: var(--color-accent);
+        opacity: 0.3;
+        margin-bottom: 0.5rem;
+    }
+
+    .code {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--color-muted);
+        letter-spacing: 0.15em;
+        margin: 0;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .message {
+        color: var(--color-muted);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .links {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .link-home {
+        padding: 0.5rem 1.25rem;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border-radius: 6px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .link-home:hover { opacity: 0.85; }
+
+    .link-sec {
+        font-size: 0.88rem;
+        color: var(--color-muted);
+        transition: color 0.2s;
+    }
+
+    .link-sec:hover { color: var(--color-accent); }
+
+    @media (max-width: 640px) {
+        .page { padding: 4rem 1.5rem; }
+    }
+</style>
