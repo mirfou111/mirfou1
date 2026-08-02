@@ -7,9 +7,21 @@
     --color-surface-2: #e4ddd3;
     --color-border: #d4cdc4;
     --color-text: #1a1612;
-    --color-muted: #8a7e72;
+    /* Texte secondaire — assombri pour atteindre le contraste AA (4.5:1) sur bg et surface */
+    --color-muted: #5f574d;
     --color-accent: #8b4513;
     --color-accent-soft: #b8651a;
+
+    /* Couleurs de section — calibrées pour tenir AA (4.5:1) sur bg, surface et surface-2 */
+    --section-articles: #7d593a;
+    --section-contes: #3f694f;
+    --section-tutos: #456281;
+    --section-reflexions: #715780;
+    --section-recherches: #58644d;
+
+    /* Couleurs sémantiques des badges (origine, statut, projets) */
+    --tone-positif: #3f694f;
+    --tone-encours: #7c5b1a;
 
     --font-main: 'Texturina', Georgia, serif;
     --font-mono: 'Fira Code', monospace;
@@ -34,9 +46,32 @@ html.dark {
     --color-surface-2: #1e2419;
     --color-border: #2a3022;
     --color-text: #e8e0d0;
-    --color-muted: #6b7a5e;
+    /* Texte secondaire — éclairci pour atteindre le contraste AA (4.5:1) sur bg et surface */
+    --color-muted: #8b9c7d;
     --color-accent: #c8922a;
     --color-accent-soft: #a07020;
+
+    /* Mêmes teintes, éclaircies pour tenir AA sur les fonds sombres */
+    --section-articles: #b18055;
+    --section-contes: #5a9773;
+    --section-tutos: #6c8eb1;
+    --section-reflexions: #9b81aa;
+    --section-recherches: #7e906f;
+
+    --tone-positif: #5a9773;
+    --tone-encours: #c8922a;
+}
+
+/* ── Focus clavier ──────────────────────────────────────
+   Visible à la navigation clavier, invisible à la souris. */
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
 }
 
 body {
