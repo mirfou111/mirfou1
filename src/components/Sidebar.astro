@@ -3,7 +3,7 @@ import AntIcon from './AntIcon.astro';
 import {
     Home, BookOpen, Scroll, Terminal,
     Brain, FlaskConical, Tag, User,
-    Wrench, Search, Sun, Moon, FolderOpen 
+    Wrench, Search, Sun, Moon, FolderOpen, Network
 } from 'lucide-astro';
 import { SITE_LOCATION } from '../consts';
 
@@ -16,6 +16,7 @@ const navItems = [
     { href: '/reflexions',  label: 'Réflexions',   icon: Brain,         key: 'r' },
     { href: '/recherches',  label: 'Recherches',   icon: FlaskConical,  key: 'q' },
     { href: '/tags',        label: 'Tags',         icon: Tag,           key: 'g' },
+    { href: '/jardin',      label: 'Le jardin',    icon: Network,       key: 'd' },
     { href: '/outils',      label: 'Outils',       icon: Wrench,        key: 'o' },
     { href: '/about',       label: 'About',        icon: User,          key: 'p' },
     { href: '/recherche',   label: 'Rechercher',   icon: Search,        key: 's' },
@@ -84,9 +85,25 @@ const currentPath = Astro.url.pathname;
 
 <script>
     // ── Raccourcis clavier ──────────────────────────────
+    const NAV_KEYS = new Set(['h', 'a', 'j', 'c', 't', 'r', 'q', 'g', 'd', 'o', 'p', 's']);
+
     document.addEventListener('keydown', (e) => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-        const link = document.querySelector<HTMLAnchorElement>(`[data-key="${e.key}"]`);
+        // Ne jamais détourner les combinaisons du navigateur (Ctrl+S, Cmd+A, Alt+←…)
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        // Ne pas intercepter la frappe dans un champ de saisie
+        const t = e.target as HTMLElement | null;
+        if (
+            t instanceof HTMLInputElement ||
+            t instanceof HTMLTextAreaElement ||
+            t instanceof HTMLSelectElement ||
+            t?.isContentEditable
+        ) return;
+
+        const key = e.key.toLowerCase();
+        if (!NAV_KEYS.has(key)) return;
+
+        const link = document.querySelector<HTMLAnchorElement>(`[data-key="${key}"]`);
         if (link) { e.preventDefault(); window.location.href = link.href; }
     });
 
@@ -143,12 +160,8 @@ const currentPath = Astro.url.pathname;
     }
     setDailyQuote();
 
-    // ── Overlay mobile ──────────────────────────────────
-    const overlay = document.getElementById('sidebar-overlay');
-    overlay?.addEventListener('click', () => {
-        document.getElementById('sidebar')?.classList.remove('open');
-        overlay.classList.remove('active');
-    });
+    // L'ouverture/fermeture du menu mobile est pilotée par BaseLayout,
+    // qui tient aussi à jour aria-expanded et le focus.
 </script>
 
 <style>
@@ -250,7 +263,7 @@ const currentPath = Astro.url.pathname;
     kbd {
         font-family: var(--font-mono);
         font-size: 0.65rem;
-        color: var(--color-border);
+        color: var(--color-muted);
         background: var(--color-bg);
         border: 1px solid var(--color-border);
         border-radius: 3px;
@@ -314,7 +327,8 @@ const currentPath = Astro.url.pathname;
 
     .live-location {
         font-size: 0.72rem;
-        color: var(--color-border);
+        color: var(--color-muted);
+        opacity: 0.85;
     }
 
     /* Citation */
@@ -334,7 +348,7 @@ const currentPath = Astro.url.pathname;
 
     .daily-quote cite {
         font-size: 0.65rem;
-        color: var(--color-border);
+        color: var(--color-muted);
         font-style: normal;
     }
 

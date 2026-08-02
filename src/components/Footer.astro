@@ -1,0 +1,234 @@
+---
+import AntIcon from './AntIcon.astro';
+import { Github, Linkedin, Rss, ArrowUp } from 'lucide-astro';
+import { SITE_LOCATION } from '../consts';
+import { SECTIONS, SECTION_META } from '../utils/garden';
+
+const year = new Date().getFullYear();
+
+const explorer = [
+    { href: '/jardin', label: 'Le jardin' },
+    { href: '/legende', label: 'Légende' },
+    { href: '/tags', label: 'Tags' },
+    { href: '/recherche', label: 'Rechercher' },
+    { href: '/outils', label: 'Outils' },
+    { href: '/projets', label: 'Projets' },
+];
+
+const ailleurs = [
+    { href: 'https://github.com/mirfou111', label: 'GitHub', icon: Github, external: true },
+    { href: 'https://linkedin.com/in/mirfou111', label: 'LinkedIn', icon: Linkedin, external: true },
+    { href: '/rss.xml', label: 'Flux RSS', icon: Rss, external: false },
+];
+---
+
+<footer class="site-footer" data-pagefind-ignore>
+    <div class="footer-inner">
+
+        <div class="footer-grid">
+
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">
+                    <AntIcon size={18} />
+                    <span>mirfou</span>
+                </a>
+                <p class="footer-tagline">
+                    Un jardin qui pousse grain par grain.<br />
+                    {SITE_LOCATION}
+                </p>
+            </div>
+
+            <nav class="footer-col" aria-label="Sections du jardin">
+                <h2 class="footer-title">Le jardin</h2>
+                <ul>
+                    {SECTIONS.map(s => (
+                        <li>
+                            <a href={`/${s}`} style={`--dot: var(${SECTION_META[s].cssVar})`}>
+                                {SECTION_META[s].label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
+            <nav class="footer-col" aria-label="Explorer">
+                <h2 class="footer-title">Explorer</h2>
+                <ul>
+                    {explorer.map(({ href, label }) => (
+                        <li><a href={href}>{label}</a></li>
+                    ))}
+                </ul>
+            </nav>
+
+            <nav class="footer-col" aria-label="Ailleurs">
+                <h2 class="footer-title">Ailleurs</h2>
+                <ul>
+                    {ailleurs.map(({ href, label, icon: Icon, external }) => (
+                        <li>
+                            <a
+                                href={href}
+                                class="footer-ext"
+                                {...(external ? { target: '_blank', rel: 'me noopener' } : {})}
+                            >
+                                <Icon size={13} />
+                                <span>{label}</span>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-legal">
+                © {year} Ousmane Ndieguene · Textes sous
+                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a>
+                · Construit avec <a href="https://astro.build" target="_blank" rel="noopener">Astro</a>
+            </p>
+            <a href="#top" class="footer-top">
+                <ArrowUp size={13} />
+                <span>Haut de page</span>
+            </a>
+        </div>
+
+    </div>
+</footer>
+
+<style>
+    .site-footer {
+        margin-top: auto;
+        border-top: 1px solid var(--color-border);
+        background: var(--color-surface);
+    }
+
+    .footer-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2.5rem 3rem 2rem;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: 1.5fr repeat(3, 1fr);
+        gap: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Marque */
+    .footer-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-text);
+        font-size: 1.05rem;
+        font-weight: 700;
+        font-style: italic;
+        margin-bottom: 0.6rem;
+    }
+
+    .footer-logo :global(svg) { color: var(--color-accent); }
+    .footer-logo:hover { color: var(--color-accent); }
+
+    .footer-tagline {
+        font-size: 0.78rem;
+        color: var(--color-muted);
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Colonnes */
+    .footer-title {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+        font-weight: 600;
+        margin: 0 0 0.7rem;
+    }
+
+    .footer-col ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-col a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        transition: color 0.2s;
+    }
+
+    .footer-col a:hover { color: var(--color-accent); }
+
+    /* Pastille de couleur devant les sections */
+    .footer-col a[style]::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--dot);
+        flex-shrink: 0;
+    }
+
+    .footer-ext :global(svg) { flex-shrink: 0; opacity: 0.8; }
+
+    /* Bas de page */
+    .footer-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .footer-legal {
+        font-size: 0.72rem;
+        color: var(--color-muted);
+        margin: 0;
+        line-height: 1.7;
+    }
+
+    .footer-legal a {
+        color: var(--color-muted);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .footer-legal a:hover { color: var(--color-accent); }
+
+    .footer-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--color-muted);
+        white-space: nowrap;
+        transition: color 0.2s;
+    }
+
+    .footer-top:hover { color: var(--color-accent); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .footer-inner { padding: 2rem 1.5rem 1.5rem; }
+        .footer-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.75rem;
+        }
+        .footer-brand { grid-column: 1 / -1; }
+    }
+
+    @media print {
+        .site-footer { display: none; }
+    }
+</style>

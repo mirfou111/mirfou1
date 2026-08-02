@@ -1,6 +1,8 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
 import Sidebar from '../components/Sidebar.astro';
+import Footer from '../components/Footer.astro';
+import AntSprite from '../components/AntSprite.astro';
 import { Menu } from 'lucide-astro';
 
 interface Props {
@@ -17,22 +19,33 @@ const { title, description, image } = Astro.props;
     <head>
         <BaseHead title={title} description={description} image={image} />
     </head>
-    <body>
+    <body id="top">
+
+        <AntSprite />
 
         <!-- Burger mobile -->
-        <button class="burger" id="burger-btn" aria-label="Ouvrir le menu">
+        <button
+            class="burger"
+            id="burger-btn"
+            aria-label="Ouvrir le menu"
+            aria-expanded="false"
+            aria-controls="sidebar"
+        >
             <Menu size={20} />
         </button>
 
-        <!-- Sidebar -->
-        <aside data-pagefind-ignore>
+        <!-- Sidebar (le <aside> est rendu par le composant lui-même) -->
+        <div data-pagefind-ignore>
             <Sidebar />
-        </aside>
+        </div>
 
         <!-- Contenu principal -->
-        <main class="main-content">
-            <slot />
-        </main>
+        <div class="main-content">
+            <main>
+                <slot />
+            </main>
+            <Footer />
+        </div>
 
     </body>
 </html>
@@ -42,9 +55,38 @@ const { title, description, image } = Astro.props;
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
 
-    btn?.addEventListener('click', () => {
-        sidebar?.classList.toggle('open');
-        overlay?.classList.toggle('active');
+    const isOpen = () => sidebar?.classList.contains('open') ?? false;
+
+    function setMenu(open: boolean) {
+        sidebar?.classList.toggle('open', open);
+        overlay?.classList.toggle('active', open);
+        btn?.setAttribute('aria-expanded', String(open));
+        btn?.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+        // Empêche le défilement de la page derrière le menu
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (open) sidebar?.querySelector<HTMLAnchorElement>('a')?.focus();
+    }
+
+    btn?.addEventListener('click', () => setMenu(!isOpen()));
+    overlay?.addEventListener('click', () => setMenu(false));
+
+    // Le menu se referme dès qu'on suit un lien — mais pas sur le bouton de thème,
+    // qu'on peut vouloir actionner sans quitter le menu
+    sidebar?.addEventListener('click', e => {
+        if ((e.target as HTMLElement).closest('a')) setMenu(false);
+    });
+
+    // Échap referme et rend le focus au burger
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && isOpen()) {
+            setMenu(false);
+            btn?.focus();
+        }
+    });
+
+    // Retour au format bureau : on remet tout à plat
+    window.matchMedia('(min-width: 769px)').addEventListener('change', e => {
+        if (e.matches) setMenu(false);
     });
 </script>
 
@@ -74,11 +116,15 @@ const { title, description, image } = Astro.props;
         color: var(--color-accent);
     }
 
+    /* Colonne verticale : le contenu pousse, le pied de page reste en bas
+       même sur les pages courtes (grâce à margin-top:auto côté footer). */
     .main-content {
         margin-left: var(--sidebar-width);
         flex: 1;
         min-width: 0;
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 
     @media (max-width: 768px) {
