@@ -1,85 +1,241 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AntIcon from '../components/AntIcon.astro';
-import { getCollection } from 'astro:content';
-import MementoMori from '../components/MementoMori.astro';
-import { BookOpen, Scroll, Terminal, Brain, FlaskConical, ArrowRight } from 'lucide-astro';
+import HeroGalleries from '../components/HeroGalleries.astro';
+import PostCard from '../components/PostCard.astro';
+import OriginBadge from '../components/OriginBadge.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import {
+    BookOpen, Scroll, Terminal, Brain, FlaskConical,
+    ArrowRight, Compass, Sprout, Network, KeyRound, Hourglass,
+} from 'lucide-astro';
+import { SITE_DESCRIPTION, FEATURED } from '../consts';
+import {
+    getGarden, getLinks, getOrphans, pick, recent,
+    SECTIONS, SECTION_META, type Section,
+} from '../utils/garden';
 
-const [articles, contes, tutos, reflexions, recherches] = await Promise.all([
-    getCollection('articles', ({ data }) => !data.draft),
-    getCollection('contes', ({ data }) => !data.draft),
-    getCollection('tutos', ({ data }) => !data.draft),
-    getCollection('reflexions', ({ data }) => !data.draft),
-    getCollection('recherches', ({ data }) => !data.draft),
-]);
+const garden = await getGarden();
 
-const sort = (arr: any[]) => arr.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 4);
+// « Par où commencer » — sélection à la main, validée au build
+const featured = pick(garden, FEATURED, 'FEATURED (consts.ts)');
 
-const sections = [
-    { label: 'Articles',    href: '/articles',   icon: BookOpen,     items: sort(articles),   color: '#8b6340' },
-    { label: 'Contes',      href: '/contes',      icon: Scroll,       items: sort(contes),     color: '#4a7c5e' },
-    { label: 'Tutos',       href: '/tutos',       icon: Terminal,     items: sort(tutos),      color: '#4a6a8b' },
-    { label: 'Réflexions',  href: '/reflexions',  icon: Brain,        items: sort(reflexions), color: '#7a5e8b' },
-    { label: 'Recherches',  href: '/recherches',  icon: FlaskConical, items: sort(recherches), color: '#6b7a5e' },
-];
+// Flux récent, toutes sections confondues, sans redite avec la sélection
+const derniers = recent(garden, 6, FEATURED);
+
+// Chiffres du réseau
+const links = getLinks(garden);
+const orphans = getOrphans(garden, links);
+const liensPoses = links.filter(l => l.kind === 'explicite').length;
+
+// Compteur par section
+const parSection = SECTIONS.map(s => ({
+    section: s,
+    ...SECTION_META[s],
+    href: `/${s}`,
+    count: garden.nodes.filter(n => n.section === s).length,
+}));
+
+const icones: Record<Section, any> = {
+    articles: BookOpen,
+    contes: Scroll,
+    tutos: Terminal,
+    reflexions: Brain,
+    recherches: FlaskConical,
+};
+
 ---
 
-<BaseLayout title="mirfou's garder">
+<BaseLayout
+    title="mirfou — le jardin secret d'Ousmane Ndieguene"
+    description={SITE_DESCRIPTION}
+>
     <div class="home">
 
         <!-- Hero -->
-         
-        <!-- Memento Mori -->
-        <section class="home-section" id="memento">
-            <MementoMori />
+        <header class="hero">
+            <HeroGalleries />
+            <div class="hero-text">
+                <h1 class="hero-title">mirfou</h1>
+                <p class="hero-name">
+                    Ousmane Ndieguene — Master 2 IA · Thiès, Sénégal
+                </p>
+                <p class="hero-sub">
+                    J'écris ce que j'apprends : modèles, code, contes,
+                    et ce qui reste quand on éteint l'écran.
+                </p>
+            </div>
+        </header>
+
+        <!-- Par où commencer -->
+        {featured.length > 0 && (
+            <section class="block">
+                <div class="block-head">
+                    <h2 class="block-title">
+                        <Compass size={14} />
+                        <span>Par où commencer</span>
+                    </h2>
+                    <p class="block-sub">Trois textes si tu ne sais pas où entrer.</p>
+                </div>
+                <div class="cards">
+                    {featured.map(n => (
+                        <PostCard
+                            title={n.title}
+                            description={n.description}
+                            pubDate={n.pubDate}
+                            href={n.href}
+                            tags={n.tags}
+                            origin={n.origin}
+                            status={n.status}
+                            section={n.section}
+                            heroImage={n.heroImage}
+                            body={n.body}
+                            accentColor={SECTION_META[n.section].color}
+                            showSection
+                        />
+                    ))}
+                </div>
+            </section>
+        )}
+
+        <!-- Récemment planté -->
+        <section class="block">
+            <div class="block-head">
+                <h2 class="block-title">
+                    <Sprout size={14} />
+                    <span>Récemment planté</span>
+                </h2>
+                <p class="block-sub">Les derniers ajouts, toutes sections confondues.</p>
+            </div>
+            <div class="cards">
+                {derniers.map(n => (
+                    <PostCard
+                        title={n.title}
+                        description={n.description}
+                        pubDate={n.pubDate}
+                        href={n.href}
+                        tags={n.tags}
+                        origin={n.origin}
+                        status={n.status}
+                        section={n.section}
+                        heroImage={n.heroImage}
+                        body={n.body}
+                        accentColor={SECTION_META[n.section].color}
+                        showSection
+                    />
+                ))}
+            </div>
         </section>
 
-        <!-- Juste un séparateur avec la signature -->
-        <div class="garden-intro">
-            <span class="garden-quote">
-                La fourmi ne compte pas les grains déjà portés.<br/>
-                Elle regarde ceux qui restent à porter.
-            </span>
-            <span class="garden-label">Le jardin</span>
-        </div>
+        <!-- Les conventions -->
+        <section class="block conventions">
+            <div class="block-head">
+                <h2 class="block-title">
+                    <KeyRound size={14} />
+                    <span>Les conventions du jardin</span>
+                </h2>
+            </div>
+            <p class="conv-text">
+                Chaque texte affiche <strong>qui l'a écrit</strong> et
+                <strong>à quel point il est fini</strong>. Tout n'est pas mûr ici,
+                et tout n'est pas de ma main — autant le dire.
+            </p>
+            <div class="conv-badges">
+                <OriginBadge origin="authentique" linked />
+                <OriginBadge origin="assiste" linked />
+                <OriginBadge origin="genere" linked />
+                <span class="conv-sep"></span>
+                <StatusBadge status="graine" linked />
+                <StatusBadge status="pousse" linked />
+                <StatusBadge status="mature" linked />
+            </div>
+            <a href="/legende" class="conv-link">
+                <span>Lire la légende complète</span>
+                <ArrowRight size={13} />
+            </a>
+        </section>
 
-        <div class="divider"></div>
-
-        <!-- Sections -->
-        <div class="sections">
-            {sections.map(({ label, href, icon: Icon, items, color }) => (
-                <section class="section">
-                    <div class="section-header">
-                        <div class="section-title-group">
-                            <Icon size={16} style={`color: ${color}`} />
-                            <h2 class="section-title" style={`color: ${color}`}>{label}</h2>
-                        </div>
-                        <a href={href} class="section-link">
-                            <span>Tout voir</span>
-                            <ArrowRight size={13} />
-                        </a>
+        <!-- Aperçu du jardin -->
+        <section class="block">
+            <div class="block-head">
+                <h2 class="block-title">
+                    <Network size={14} />
+                    <span>Le jardin</span>
+                </h2>
+                <p class="block-sub">Ce qui relie les contenus entre eux.</p>
+            </div>
+            <a href="/jardin" class="garden-card">
+                <div class="garden-stats">
+                    <div class="gstat">
+                        <span class="gstat-value">{garden.nodes.length}</span>
+                        <span class="gstat-label">contenus</span>
                     </div>
+                    <div class="gstat">
+                        <span class="gstat-value">{liensPoses}</span>
+                        <span class="gstat-label">liens posés</span>
+                    </div>
+                    <div class="gstat">
+                        <span class="gstat-value" class:list={[{ warn: orphans.length > 0 }]}>
+                            {orphans.length}
+                        </span>
+                        <span class="gstat-label">orphelins</span>
+                    </div>
+                </div>
+                <span class="garden-cta">
+                    <span>Parcourir le réseau</span>
+                    <ArrowRight size={13} />
+                </span>
+            </a>
+        </section>
 
-                    {items.length === 0 ? (
-                        <p class="empty">Bientôt...</p>
-                    ) : (
-                        <ul class="item-list">
-                            {items.map((item: any) => (
-                                <li>
-                                    <a href={`${href}/${item.id}`} class="item">
-                                        <AntIcon size={11} class="item-ant" />
-                                        <span class="item-title">{item.data.title}</span>
-                                        <time class="item-date">
-                                            {item.data.pubDate.toLocaleDateString('fr-FR')}
-                                        </time>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </section>
-            ))}
-        </div>
+        <!-- Explorer -->
+        <section class="block">
+            <div class="block-head">
+                <h2 class="block-title">
+                    <BookOpen size={14} />
+                    <span>Explorer</span>
+                </h2>
+            </div>
+            <div class="sections-grid">
+                {parSection.map(({ section, label, href, cssVar, count }) => {
+                    const Icon = icones[section];
+                    return (
+                        <a href={href} class="sec-card" style={`--sec: var(${cssVar})`}>
+                            <Icon size={18} />
+                            <span class="sec-label">{label}</span>
+                            <span class="sec-count">{count}</span>
+                        </a>
+                    );
+                })}
+            </div>
+            <div class="quick-links">
+                <a href="/tags">Tags</a>
+                <a href="/recherche">Rechercher</a>
+                <a href="/outils">Outils</a>
+                <a href="/projets">Projets</a>
+                <a href="/about">À propos</a>
+            </div>
+        </section>
+
+        <!-- Memento Mori — encart vers la page dédiée -->
+        <a href="/memento-mori" class="memento-teaser">
+            <div class="mm-grid" aria-hidden="true">
+                <span class="mm-past"></span>
+            </div>
+            <div class="mm-text">
+                <span class="mm-title">
+                    <Hourglass size={13} />
+                    <span>Memento Mori</span>
+                </span>
+                <p>
+                    Un humain vit en moyenne 72 ans — environ 3 744 semaines.
+                    Combien t'en reste-t-il ?
+                </p>
+                <span class="mm-cta">
+                    <span>Compter les tiennes</span>
+                    <ArrowRight size={13} />
+                </span>
+            </div>
+        </a>
 
     </div>
 </BaseLayout>
@@ -91,186 +247,314 @@ const sections = [
         padding: 3rem 3rem 6rem;
     }
 
-    /* Hero */
+    /* ── Hero ─────────────────────────────────── */
     .hero {
+        position: relative;
+        isolation: isolate;
+        min-height: 260px;
         display: flex;
         align-items: center;
-        gap: 2rem;
-        padding: 2rem 0 2.5rem;
+        padding: 2.5rem 0 3rem;
+        margin-bottom: 3rem;
+        border-bottom: 1px solid var(--color-border);
+        overflow: hidden;
     }
 
-    .hero-ant {
-        color: var(--color-accent);
-        flex-shrink: 0;
-        opacity: 0.9;
+    .hero-text {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+        padding: 0.5rem 2rem 0.5rem 0;
+    }
+
+    /* Halo à la couleur du fond : le texte reste net, les galeries
+       restent visibles entre les lettres. Pas de bloc opaque. */
+    .hero-title,
+    .hero-name,
+    .hero-sub {
+        text-shadow:
+            0 0 4px var(--color-bg),
+            0 0 10px var(--color-bg),
+            0 0 18px var(--color-bg);
     }
 
     .hero-title {
         font-family: var(--font-main);
-        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-size: clamp(2.75rem, 7vw, 4.25rem);
         font-weight: 700;
         font-style: italic;
         color: var(--color-text);
         line-height: 1;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
         letter-spacing: -0.02em;
+    }
+
+    .hero-name {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        color: var(--color-accent);
+        margin-bottom: 0.9rem;
     }
 
     .hero-sub {
         color: var(--color-muted);
         font-size: 0.95rem;
         line-height: 1.8;
+        margin: 0;
+        max-width: 38ch;
     }
 
-    /* Divider */
-    .divider {
-        height: 1px;
-        background: var(--color-border);
-        margin: 0.5rem 0 2.5rem;
-    }
+    /* ── Blocs ────────────────────────────────── */
+    .block { margin-bottom: 3.5rem; }
 
-    /* Sections */
-    .sections {
-        display: flex;
-        flex-direction: column;
-        gap: 2.5rem;
-    }
+    .block-head { margin-bottom: 1rem; }
 
-    .section-header {
+    .block-title {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0.9rem;
-    }
-
-    .section-title-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .section-title {
-        font-size: 0.85rem;
+        gap: 0.45rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.1em;
+        color: var(--color-text);
+        margin: 0 0 0.25rem;
+    }
+
+    .block-title :global(svg) { color: var(--color-accent); flex-shrink: 0; }
+
+    .block-sub {
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        font-style: italic;
         margin: 0;
     }
 
-    .section-link {
+    .cards {
+        border-top: 1px solid var(--color-border);
+    }
+
+    /* ── Conventions ──────────────────────────── */
+    .conventions {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .conv-text {
+        font-size: 0.9rem;
+        line-height: 1.75;
+        color: var(--color-text);
+        margin: 0 0 1rem;
+    }
+
+    .conv-badges {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .conv-sep {
+        width: 1px;
+        height: 18px;
+        background: var(--color-border);
+        margin: 0 0.35rem;
+    }
+
+    .conv-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
         color: var(--color-muted);
-        font-size: 0.78rem;
         transition: color 0.2s;
     }
 
-    .section-link:hover {
-        color: var(--color-accent);
+    .conv-link:hover { color: var(--color-accent); }
+
+    /* ── Aperçu du jardin ─────────────────────── */
+    .garden-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-surface);
+        transition: border-color 0.2s;
     }
 
-    /* Items */
-    .item-list {
-        list-style: none;
+    .garden-card:hover { border-color: var(--color-accent); }
+
+    .garden-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .gstat {
         display: flex;
         flex-direction: column;
+        gap: 0.1rem;
     }
 
-    .item {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid var(--color-border);
-        color: var(--color-text);
-        font-size: 0.92rem;
-        transition: color 0.2s;
-        text-decoration: none;
-    }
-
-    .item:last-child {
-        border-bottom: none;
-    }
-
-    .item:hover {
-        color: var(--color-accent);
-    }
-
-    .item-ant {
-        color: var(--color-accent);
-        flex-shrink: 0;
-        opacity: 0.5;
-        transition: opacity 0.2s;
-    }
-
-    .item:hover .item-ant {
-        opacity: 1;
-    }
-
-    .item-title {
-        flex: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .item-date {
-        color: var(--color-muted);
-        font-size: 0.75rem;
-        white-space: nowrap;
-        flex-shrink: 0;
+    .gstat-value {
         font-family: var(--font-mono);
+        font-size: 1.3rem;
+        color: var(--color-text);
+        line-height: 1;
     }
 
-    .empty {
-        color: var(--color-muted);
-        font-size: 0.85rem;
-        font-style: italic;
-        padding: 0.5rem 0;
-    }
+    .gstat-value.warn { color: var(--color-accent); }
 
-    /* Mobile */
-    @media (max-width: 640px) {
-        .home { padding: 2rem 1.5rem 4rem; }
-        .hero { flex-direction: column; gap: 1rem; align-items: flex-start; }
-    }
-
-    .garden-intro {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 2.5rem 0;
-    text-align: center;
-    }
-
-    .garden-quote {
-        font-size: 0.95rem;
-        font-style: italic;
-        color: var(--color-muted);
-        line-height: 1.8;
-        max-width: 420px;
-    }
-
-    .garden-label {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
+    .gstat-label {
         font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.08em;
         color: var(--color-muted);
-        font-family: var(--font-mono);
-        white-space: nowrap;
     }
 
-    .garden-label::before,
-    .garden-label::after {
-        content: '';
+    .garden-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        color: var(--color-muted);
+    }
+
+    .garden-card:hover .garden-cta { color: var(--color-accent); }
+
+    /* ── Explorer ─────────────────────────────── */
+    .sections-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .sec-card {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-surface);
+        color: var(--sec);
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .sec-card:hover {
+        border-color: var(--sec);
+        background: color-mix(in srgb, var(--sec) 7%, transparent);
+    }
+
+    .sec-card :global(svg) { flex-shrink: 0; }
+
+    .sec-label {
         flex: 1;
-        height: 1px;
-        background: var(--color-border);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .sec-count {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--color-muted);
+    }
+
+    .quick-links {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-links a {
+        font-size: 0.8rem;
+        color: var(--color-muted);
+        transition: color 0.2s;
+    }
+
+    .quick-links a:hover { color: var(--color-accent); }
+
+    /* ── Memento Mori (encart statique) ───────── */
+    .memento-teaser {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-surface);
+        transition: border-color 0.2s;
+    }
+
+    .memento-teaser:hover { border-color: var(--color-accent); }
+
+    /* Grille décorative dessinée en dégradé plutôt qu'en 240 éléments DOM */
+    .mm-grid {
+        position: relative;
+        width: 160px;
+        height: 96px;
+        flex-shrink: 0;
+        background-image: radial-gradient(var(--color-border) 1.4px, transparent 1.5px);
+        background-size: 8px 8px;
+    }
+
+    .mm-past {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 38%;
+        background-image: radial-gradient(var(--color-accent) 1.4px, transparent 1.5px);
+        background-size: 8px 8px;
+        opacity: 0.55;
+    }
+
+    .mm-title {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .mm-title :global(svg) { color: var(--color-accent); }
+
+    .mm-text p {
+        font-size: 0.85rem;
+        line-height: 1.7;
+        color: var(--color-muted);
+        margin: 0 0 0.6rem;
+    }
+
+    .mm-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        color: var(--color-muted);
+    }
+
+    .memento-teaser:hover .mm-cta { color: var(--color-accent); }
+
+    /* ── Mobile ───────────────────────────────── */
+    @media (max-width: 640px) {
+        .home { padding: 2rem 1.5rem 4rem; }
+        .hero { min-height: 200px; padding: 2rem 0 2.5rem; }
+        .hero-text { padding-right: 0; }
+        .hero-sub { max-width: none; }
+        .garden-stats { gap: 1.5rem; }
+        .memento-teaser { grid-template-columns: 1fr; gap: 1.25rem; }
+        .mm-grid { width: 100%; height: 72px; }
     }
 </style>

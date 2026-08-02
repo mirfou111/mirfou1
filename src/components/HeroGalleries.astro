@@ -1,0 +1,149 @@
+---
+/**
+ * Fond décoratif du hero : un réseau de galeries de fourmi.
+ *
+ * La fourmi parcourt le tunnel principal via <animateMotion> (SMIL, aucun JS).
+ * Sous prefers-reduced-motion, la fourmi animée est masquée et une fourmi
+ * immobile la remplace — le décor ne disparaît pas pour autant.
+ */
+
+// Tunnel principal — c'est lui que la fourmi emprunte
+const trail =
+    'M -30 148 C 70 148 104 96 186 96 C 258 96 278 60 356 68 ' +
+    'C 442 77 500 130 582 120 C 662 110 704 130 800 124';
+
+// Galeries secondaires
+const branches = [
+    'M 186 96 C 202 58 222 28 276 22',
+    'M 356 68 C 362 112 388 148 452 154',
+    'M 582 120 C 598 156 630 174 704 172',
+    'M -30 42 C 74 42 118 16 214 16 C 292 16 336 28 396 26',
+    'M 214 16 C 238 44 252 60 276 22',
+];
+
+// Chambres aux intersections
+const chambers = [
+    { cx: 186, cy: 96, r: 5 },
+    { cx: 356, cy: 68, r: 6 },
+    { cx: 582, cy: 120, r: 5 },
+    { cx: 276, cy: 22, r: 4 },
+    { cx: 452, cy: 154, r: 4 },
+    { cx: 704, cy: 172, r: 3 },
+    { cx: 214, cy: 16, r: 3 },
+    { cx: 396, cy: 26, r: 3 },
+];
+
+// Grains dispersés dans la terre — semis déterministe
+let seed = 20240612;
+const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+};
+const grains = Array.from({ length: 26 }, () => ({
+    cx: Math.round(rand() * 760),
+    cy: Math.round(20 + rand() * 170),
+    r: Math.round((0.8 + rand() * 1.6) * 10) / 10,
+}));
+---
+
+<svg
+    class="galleries"
+    viewBox="0 0 760 200"
+    preserveAspectRatio="xMidYMid slice"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    aria-hidden="true"
+    focusable="false"
+>
+    <defs>
+        {/* Le réseau s'atténue à gauche, là où se trouve le texte,
+            et reprend toute sa présence à droite. */}
+        <linearGradient id="gal-fade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fff" stop-opacity="0.45" />
+            <stop offset="0.42" stop-color="#fff" stop-opacity="0.65" />
+            <stop offset="0.72" stop-color="#fff" stop-opacity="1" />
+        </linearGradient>
+        <mask id="gal-mask">
+            <rect x="0" y="0" width="760" height="200" fill="url(#gal-fade)" />
+        </mask>
+    </defs>
+
+    <g mask="url(#gal-mask)">
+        <g class="grains">
+            {grains.map(g => <circle cx={g.cx} cy={g.cy} r={g.r} />)}
+        </g>
+
+        <g class="tunnels">
+            <path id="trail" d={trail} />
+            {branches.map(d => <path d={d} />)}
+        </g>
+
+        <g class="chambers">
+            {chambers.map(c => <circle cx={c.cx} cy={c.cy} r={c.r} />)}
+        </g>
+
+        {/* La fourmi qui creuse */}
+        <g class="walker">
+            <animateMotion dur="34s" repeatCount="indefinite" rotate="auto">
+                {/* xlink:href en second : Safari l'a longtemps exigé ici */}
+                <mpath href="#trail" xlink:href="#trail" />
+            </animateMotion>
+            <g transform="rotate(90) translate(-10 -10)">
+                <use href="#ant-glyph" width="20" height="20" />
+            </g>
+        </g>
+
+        {/* Repli immobile quand les animations sont désactivées */}
+        <g class="walker-static" transform="translate(582 120)">
+            <g transform="rotate(90) translate(-10 -10)">
+                <use href="#ant-glyph" width="20" height="20" />
+            </g>
+        </g>
+    </g>
+</svg>
+
+<style>
+    .galleries {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .tunnels path {
+        fill: none;
+        stroke: var(--color-border);
+        stroke-width: 2;
+        stroke-linecap: round;
+    }
+
+    /* Le tunnel principal se distingue légèrement */
+    .tunnels #trail {
+        stroke-width: 2.5;
+        stroke: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+    }
+
+    .chambers circle {
+        fill: var(--color-bg);
+        stroke: var(--color-border);
+        stroke-width: 2;
+    }
+
+    .grains circle {
+        fill: var(--color-border);
+        opacity: 0.5;
+    }
+
+    .walker,
+    .walker-static {
+        color: var(--color-accent);
+        opacity: 0.85;
+    }
+
+    .walker-static { display: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .walker { display: none; }
+        .walker-static { display: block; }
+    }
+</style>
