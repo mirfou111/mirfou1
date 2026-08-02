@@ -452,9 +452,6 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
         .about-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
     }
 
-    <style>
-    /* ... styles existants ... */
-
     /* Inspirations */
     .inspi-grid {
         display: grid;
@@ -537,15 +534,15 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
     }
 
     .badge-authentique {
-        color: #4a7c5e;
-        border-color: #4a7c5e40;
-        background: #4a7c5e12;
+        color: var(--tone-positif);
+        border-color: color-mix(in srgb, var(--tone-positif) 25%, transparent);
+        background: color-mix(in srgb, var(--tone-positif) 8%, transparent);
     }
 
     .badge-assiste {
-        color: #c8922a;
-        border-color: #c8922a40;
-        background: #c8922a12;
+        color: var(--tone-encours);
+        border-color: color-mix(in srgb, var(--tone-encours) 25%, transparent);
+        background: color-mix(in srgb, var(--tone-encours) 8%, transparent);
     }
 
     .badge-genere {
@@ -555,15 +552,15 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
     }
 
     .badge-graine {
-        color: #c8922a;
-        border-color: #c8922a40;
-        background: #c8922a12;
+        color: var(--tone-encours);
+        border-color: color-mix(in srgb, var(--tone-encours) 25%, transparent);
+        background: color-mix(in srgb, var(--tone-encours) 8%, transparent);
     }
 
     .badge-pousse {
-        color: #4a7c5e;
-        border-color: #4a7c5e40;
-        background: #4a7c5e12;
+        color: var(--tone-positif);
+        border-color: color-mix(in srgb, var(--tone-positif) 25%, transparent);
+        background: color-mix(in srgb, var(--tone-positif) 8%, transparent);
     }
 
     .badge-mature {

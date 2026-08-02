@@ -46,9 +46,9 @@ const projets = [
 ];
 
 const statutConfig = {
-    encours: { label: 'En cours', color: '#c8922a' },
-    termine: { label: 'Terminé', color: '#4a7c5e' },
-    abandonne: { label: 'Abandonné', color: '#8a7e72' },
+    encours: { label: 'En cours', color: 'var(--tone-encours)' },
+    termine: { label: 'Terminé', color: 'var(--tone-positif)' },
+    abandonne: { label: 'Abandonné', color: 'var(--color-muted)' },
 };
 ---
 
@@ -84,7 +84,7 @@ const statutConfig = {
                                 <h2 class="projet-title">{projet.titre}</h2>
                                 <span
                                     class="projet-statut"
-                                    style={`color: ${statut.color}; border-color: ${statut.color}40; background: ${statut.color}12`}
+                                    style={`color: ${statut.color}; border-color: color-mix(in srgb, ${statut.color} 25%, transparent); background: color-mix(in srgb, ${statut.color} 8%, transparent)`}
                                 >
                                     {statut.label}
                                 </span>
@@ -139,7 +139,7 @@ const statutConfig = {
             <div class="projet-header">
                 <div class="projet-title-wrap">
                     <h2 class="projet-title">Mirfou — ce jardin</h2>
-                    <span class="projet-statut" style="color: #c8922a; border-color: #c8922a40; background: #c8922a12">
+                    <span class="projet-statut" style="color: var(--tone-encours); border-color: color-mix(in srgb, var(--tone-encours) 25%, transparent); background: color-mix(in srgb, var(--tone-encours) 8%, transparent)">
                         En cours
                     </span>
                 </div>
@@ -316,12 +316,12 @@ const statutConfig = {
         gap: 0.3rem;
         font-size: 0.75rem;
         font-family: var(--font-mono);
-        color: var(--color-border);
+        color: var(--color-muted);
         background: var(--color-surface);
         border: 1px solid var(--color-border);
         padding: 0.25rem 0.65rem;
         border-radius: 4px;
-        opacity: 0.5;
+        opacity: 0.75;
         cursor: not-allowed;
     }
 
