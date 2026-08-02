@@ -1,8 +1,11 @@
 ---
-import AntIcon from './AntIcon.astro';
 import OriginBadge from './OriginBadge.astro';
+import StatusBadge from './StatusBadge.astro';
+import PostThumb from './PostThumb.astro';
 import { Calendar, Clock } from 'lucide-astro';
 import { readingTime } from '../utils/readingTime';
+import type { Origin, Status } from '../utils/badges';
+import { SECTION_META, type Section } from '../utils/garden';
 
 interface Props {
     title: string;
@@ -10,9 +13,14 @@ interface Props {
     pubDate: Date;
     href: string;
     tags?: string[];
-    origin?: 'authentique' | 'assiste' | 'genere';
+    origin?: Origin;
+    status?: Status;
+    section: Section;
+    heroImage?: ImageMetadata;
     body?: string;
     accentColor?: string;
+    /** Affiche la section dans la carte — utile dans une liste toutes sections confondues */
+    showSection?: boolean;
 }
 
 const {
@@ -22,42 +30,57 @@ const {
     href,
     tags = [],
     origin = 'authentique',
+    status = 'mature',
+    section,
+    heroImage,
     body,
     accentColor = 'var(--color-accent)',
+    showSection = false,
 } = Astro.props;
 
 const readTime = readingTime(body);
 ---
 
 <a href={href} class="card">
-    <div class="card-header">
+    <PostThumb heroImage={heroImage} title={title} section={section} size={72} class="card-thumb" />
+
+    <div class="card-body">
         <h2 class="card-title" style={`color: ${accentColor}`}>{title}</h2>
-        <AntIcon size={12} class="card-ant" />
-    </div>
-    <p class="card-desc">{description}</p>
-    <div class="card-footer">
-        <div class="card-meta">
-            <span class="meta-item">
-                <Calendar size={12} />
-                <time>{pubDate.toLocaleDateString('fr-FR')}</time>
-            </span>
-            <span class="meta-item">
-                <Clock size={12} />
-                <span>{readTime}</span>
-            </span>
-        </div>
-        <div class="card-right">
-            {tags.slice(0, 2).map(tag => (
-                <span class="tag">{tag}</span>
-            ))}
-            <OriginBadge origin={origin} />
+        <p class="card-desc">{description}</p>
+        <div class="card-footer">
+            <div class="card-meta">
+                {showSection && (
+                    <span class="meta-section" style={`color: ${accentColor}`}>
+                        {SECTION_META[section].label}
+                    </span>
+                )}
+                <span class="meta-item">
+                    <Calendar size={12} />
+                    <time>{pubDate.toLocaleDateString('fr-FR')}</time>
+                </span>
+                <span class="meta-item">
+                    <Clock size={12} />
+                    <span>{readTime}</span>
+                </span>
+            </div>
+            <div class="card-right">
+                {tags.slice(0, 2).map(tag => (
+                    <span class="tag">{tag}</span>
+                ))}
+                <OriginBadge origin={origin} />
+                <StatusBadge status={status} />
+            </div>
         </div>
     </div>
 </a>
 
 <style>
     .card {
-        display: block;
+        display: grid;
+        /* La vignette s'adapte à la largeur disponible, sans point de rupture */
+        grid-template-columns: clamp(52px, 14vw, 72px) 1fr;
+        gap: 1rem;
+        align-items: start;
         padding: 1.25rem 0;
         border-bottom: 1px solid var(--color-border);
         transition: all 0.2s;
@@ -71,31 +94,28 @@ const readTime = readingTime(body);
         text-underline-offset: 3px;
     }
 
-    .card-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 0.4rem;
+    .card-body { min-width: 0; }
+
+    .card :global(.card-thumb) {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        transition: border-color 0.2s, opacity 0.2s;
+    }
+
+    .card:hover :global(.card-thumb) {
+        border-color: var(--color-accent);
     }
 
     .card-title {
         font-size: 1rem;
         font-weight: 700;
         line-height: 1.3;
-        margin: 0;
-        flex: 1;
+        margin: 0 0 0.4rem;
     }
 
-    .card-ant {
-        color: var(--color-border);
-        flex-shrink: 0;
-        margin-top: 0.2rem;
-        transition: color 0.2s;
-    }
-
-    .card:hover .card-ant {
-        color: var(--color-accent);
+    @media (max-width: 520px) {
+        .card { gap: 0.75rem; }
     }
 
     .card-desc {
@@ -121,6 +141,14 @@ const readTime = readingTime(body);
         display: flex;
         align-items: center;
         gap: 0.75rem;
+    }
+
+    .meta-section {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
     }
 
     .meta-item {

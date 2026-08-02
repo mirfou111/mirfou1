@@ -12,7 +12,7 @@ const reflexions = (await getCollection('reflexions', ({ data }) => !data.draft)
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
-                <Brain size={22} color="#7a5e8b" />
+                <Brain size={22} color="var(--section-reflexions)" />
                 <h1>Réflexions</h1>
             </div>
             <p class="page-sub">Fragments, pensées courtes, instants.</p>
@@ -30,8 +30,11 @@ const reflexions = (await getCollection('reflexions', ({ data }) => !data.draft)
                         href={`/reflexions/${reflexion.id}`}
                         tags={reflexion.data.tags}
                         origin={reflexion.data.origin}
+                        status={reflexion.data.status}
+                        section="reflexions"
+                        heroImage={reflexion.data.heroImage}
                         body={reflexion.body}
-                        accentColor="#7a5e8b"
+                        accentColor="var(--section-reflexions)"
                     />
                 ))}
             </div>

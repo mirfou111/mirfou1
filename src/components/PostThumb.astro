@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import { SECTION_META, type Section } from '../utils/garden';
+
+interface Props {
+    heroImage?: ImageMetadata;
+    title: string;
+    section: Section;
+    /** Côté de la vignette en pixels (carré) */
+    size?: number;
+    class?: string;
+}
+
+const { heroImage, title, section, size = 72, class: className = '' } = Astro.props;
+const accent = `var(${SECTION_META[section].cssVar})`;
+
+/**
+ * Repli visuel : un semis de grains déterministe, dérivé du titre.
+ * Deux contenus différents n'ont donc jamais la même vignette,
+ * et la même vignette est stable d'un build à l'autre.
+ */
+function seedFrom(text: string): number {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+        h ^= text.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+}
+
+let seed = seedFrom(title + section);
+const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+};
+
+// Grains dispersés sur une grille 4×4 légèrement bruitée.
+// Le balisage est construit en chaîne puis injecté via set:html : cela évite
+// que le CSS scopé d'Astro ajoute un attribut sur chacun des 16 cercles,
+// et les coordonnées sont arrondies — sinon on écrit 17 décimales par nombre.
+const r1 = (n: number) => Math.round(n * 10) / 10;
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
+const grains = Array.from({ length: 16 }, (_, i) => {
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    return (
+        `<circle cx="${r1(12 + col * 25 + (rand() - 0.5) * 12)}"` +
+        ` cy="${r1(12 + row * 25 + (rand() - 0.5) * 12)}"` +
+        ` r="${r1(1.2 + rand() * 2.4)}"` +
+        ` opacity="${r2(0.18 + rand() * 0.4)}"/>`
+    );
+}).join('');
+---
+
+{heroImage ? (
+    <Image
+        src={heroImage}
+        alt=""
+        width={size * 2}
+        height={size * 2}
+        class:list={['thumb', 'thumb-img', className]}
+        loading="lazy"
+        decoding="async"
+    />
+) : (
+    <span
+        class:list={['thumb', 'thumb-fallback', className]}
+        style={`--accent: ${accent}`}
+        aria-hidden="true"
+    >
+        <svg
+            viewBox="0 0 100 100"
+            width={size}
+            height={size}
+            role="presentation"
+            fill="currentColor"
+            set:html={grains}
+        />
+        <svg
+            class="thumb-ant"
+            width={Math.round(size * 0.42)}
+            height={Math.round(size * 0.42)}
+            aria-hidden="true"
+        >
+            <use href="#ant-glyph" />
+        </svg>
+    </span>
+)}
+
+<style>
+    /* Taille par défaut, que le composant parent peut redéfinir
+       sans avoir à lutter contre un style en ligne. */
+    .thumb {
+        display: block;
+        width: 72px;
+        height: 72px;
+        flex-shrink: 0;
+        border-radius: 6px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        overflow: hidden;
+    }
+
+    .thumb-img {
+        object-fit: cover;
+    }
+
+    .thumb-fallback {
+        position: relative;
+        color: var(--accent);
+    }
+
+    .thumb-fallback svg {
+        display: block;
+    }
+
+    .thumb-ant {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--accent);
+        opacity: 0.85;
+    }
+</style>

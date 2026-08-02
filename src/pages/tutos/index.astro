@@ -12,7 +12,7 @@ const tutos = (await getCollection('tutos', ({ data }) => !data.draft))
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
-                <Terminal size={22} color="#4a6a8b" />
+                <Terminal size={22} color="var(--section-tutos)" />
                 <h1>Tutos</h1>
             </div>
             <p class="page-sub">Guides pratiques et techniques.</p>
@@ -30,8 +30,11 @@ const tutos = (await getCollection('tutos', ({ data }) => !data.draft))
                         href={`/tutos/${tuto.id}`}
                         tags={tuto.data.tags}
                         origin={tuto.data.origin}
+                        status={tuto.data.status}
+                        section="tutos"
+                        heroImage={tuto.data.heroImage}
                         body={tuto.body}
-                        accentColor="#4a6a8b"
+                        accentColor="var(--section-tutos)"
                     />
                 ))}
             </div>

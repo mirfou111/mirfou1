@@ -31,8 +31,11 @@ const articles = (await getCollection('articles', ({ data }) => !data.draft))
                         href={`/articles/${article.id}`}
                         tags={article.data.tags}
                         origin={article.data.origin}
+                        status={article.data.status}
+                        section="articles"
+                        heroImage={article.data.heroImage}
                         body={article.body}
-                        accentColor="#8b6340"
+                        accentColor="var(--section-articles)"
                     />
                 ))}
             </div>

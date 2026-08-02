@@ -1,35 +1,29 @@
 ---
+import { STATUSES, anchor, type Status } from '../utils/badges';
+
 interface Props {
-    status: 'graine' | 'pousse' | 'mature';
+    status: Status;
+    /** Rend le badge cliquable vers la légende. À laisser à false dans un lien parent. */
+    linked?: boolean;
 }
 
-const { status } = Astro.props;
+const { status, linked = false } = Astro.props;
+const { label, symbol, short, tone } = STATUSES[status];
 
-const config = {
-    graine: {
-        label: 'Graine',
-        symbol: '⬡',
-        title: 'Idée brute — contenu embryonnaire, notes en vrac',
-    },
-    pousse: {
-        label: 'Pousse',
-        symbol: '⬡',
-        title: 'En cours — contenu incomplet, encore en développement',
-    },
-    mature: {
-        label: 'Mature',
-        symbol: '⬡',
-        title: 'Finalisé — contenu stable et complet',
-    },
-};
+const Tag = linked ? 'a' : 'span';
+const attrs: Record<string, string> = linked
+    ? { href: anchor('maturite', status), title: `${short} — voir la légende` }
+    : { title: short };
 
-const { label, symbol, title } = config[status];
+const style = tone
+    ? `color: ${tone}; border-color: color-mix(in srgb, ${tone} 25%, transparent); background: color-mix(in srgb, ${tone} 8%, transparent)`
+    : '';
 ---
 
-<span class={`badge badge-${status}`} title={title}>
+<Tag class:list={['badge', { neutral: !tone, linked }]} style={style} {...attrs}>
     <span class="badge-symbol">{symbol}</span>
     <span class="badge-label">{label}</span>
-</span>
+</Tag>
 
 <style>
     .badge {
@@ -45,25 +39,23 @@ const { label, symbol, title } = config[status];
         transition: opacity 0.2s;
     }
 
-    .badge:hover { opacity: 0.8; }
-
-    .badge-symbol { font-size: 0.6rem; }
-
-    .badge-graine {
-        color: #c8922a;
-        border-color: #c8922a40;
-        background: #c8922a12;
-    }
-
-    .badge-pousse {
-        color: #4a7c5e;
-        border-color: #4a7c5e40;
-        background: #4a7c5e12;
-    }
-
-    .badge-mature {
+    .badge.neutral {
         color: var(--color-muted);
         border-color: var(--color-border);
         background: var(--color-surface);
     }
+
+    .badge:hover { opacity: 0.8; }
+
+    .badge.linked {
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .badge.linked:hover {
+        opacity: 1;
+        border-color: currentColor;
+    }
+
+    .badge-symbol { font-size: 0.6rem; }
 </style>

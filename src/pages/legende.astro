@@ -1,0 +1,283 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OriginBadge from '../components/OriginBadge.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import AntIcon from '../components/AntIcon.astro';
+import { KeyRound } from 'lucide-astro';
+import { ORIGINS, STATUSES, type Origin, type Status } from '../utils/badges';
+import { getGarden } from '../utils/garden';
+
+const garden = await getGarden();
+
+// Répartition réelle — la légende doit dire la vérité sur l'état du jardin
+const count = <T extends string>(pick: (n: typeof garden.nodes[number]) => T) =>
+    garden.nodes.reduce((acc, n) => {
+        const k = pick(n);
+        acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+    }, {} as Record<T, number>);
+
+const parOrigine = count(n => n.origin);
+const parStatut = count(n => n.status);
+const total = garden.nodes.length;
+
+const origins = Object.keys(ORIGINS) as Origin[];
+const statuses = Object.keys(STATUSES) as Status[];
+---
+
+<BaseLayout
+    title="Légende — mirfou"
+    description="Ce que signifient les badges du jardin : l'origine d'un texte (qui l'a écrit) et sa maturité (à quel point il est fini)."
+>
+    <div class="page">
+
+        <header class="page-header">
+            <div class="page-title-group">
+                <KeyRound size={22} color="var(--color-accent)" />
+                <h1>Légende</h1>
+            </div>
+            <p class="page-sub">
+                Chaque contenu du jardin porte deux badges. Voici ce qu'ils veulent dire.
+            </p>
+        </header>
+
+        <div class="intro">
+            <p>
+                Un jardin numérique n'est pas un magazine : tout n'y est pas fini, et tout
+                n'est pas écrit de la même main. Plutôt que de faire comme si, j'affiche
+                deux informations sur chaque texte.
+            </p>
+            <p>
+                <strong>L'origine</strong> dit qui a écrit — moi, moi avec une IA, ou une IA
+                que j'ai relue. <strong>La maturité</strong> dit à quel point le texte est fini.
+                Les deux axes sont indépendants : un texte peut être entièrement de ma main
+                et rester à l'état de graine.
+            </p>
+        </div>
+
+        <!-- Origine -->
+        <section class="section" id="origine">
+            <div class="section-head">
+                <h2>L'origine</h2>
+                <p class="section-sub">Qui a écrit ce texte ?</p>
+            </div>
+
+            <ul class="defs">
+                {origins.map(key => (
+                    <li class="def" id={`origine-${key}`}>
+                        <div class="def-badge">
+                            <OriginBadge origin={key} />
+                            <span class="def-count">
+                                {parOrigine[key] ?? 0} / {total}
+                            </span>
+                        </div>
+                        <p class="def-text">{ORIGINS[key].long}</p>
+                    </li>
+                ))}
+            </ul>
+
+            <p class="section-note">
+                <AntIcon size={11} />
+                <span>
+                    Ce badge existe parce que l'écriture assistée par IA est devenue banale
+                    et rarement déclarée. Le distinguer coûte peu et vaut mieux que le flou.
+                </span>
+            </p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Maturité -->
+        <section class="section" id="maturite">
+            <div class="section-head">
+                <h2>La maturité</h2>
+                <p class="section-sub">À quel point ce texte est-il fini ?</p>
+            </div>
+
+            <ul class="defs">
+                {statuses.map(key => (
+                    <li class="def" id={`maturite-${key}`}>
+                        <div class="def-badge">
+                            <StatusBadge status={key} />
+                            <span class="def-count">
+                                {parStatut[key] ?? 0} / {total}
+                            </span>
+                        </div>
+                        <p class="def-text">{STATUSES[key].long}</p>
+                    </li>
+                ))}
+            </ul>
+
+            <p class="section-note">
+                <AntIcon size={11} />
+                <span>
+                    Publier une idée à l'état de graine, c'est accepter d'être lu avant d'avoir
+                    raison. C'est le principe même du jardin : on plante, puis on revient arroser.
+                </span>
+            </p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Où les voir -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Où les trouver</h2>
+            </div>
+            <p class="def-text">
+                Les deux badges apparaissent sous le titre de chaque contenu, ainsi que dans
+                les listes de chaque section. Un clic sur un badge ramène ici, à l'explication
+                correspondante. Le réseau des contenus se parcourt depuis
+                <a href="/jardin">le jardin</a>.
+            </p>
+        </section>
+
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .intro {
+        margin-bottom: 3rem;
+    }
+
+    .intro p {
+        font-size: 0.95rem;
+        line-height: 1.8;
+        color: var(--color-text);
+        margin-bottom: 1rem;
+    }
+
+    .intro p:last-child { margin-bottom: 0; }
+
+    /* Sections */
+    .section { margin-bottom: 2rem; }
+
+    .section-head { margin-bottom: 1.25rem; }
+
+    .section-head h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0 0 0.2rem;
+    }
+
+    .section-sub {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        font-style: italic;
+        margin: 0;
+    }
+
+    .divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 2.5rem 0;
+    }
+
+    /* Définitions */
+    .defs {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 0;
+        margin: 0 0 1.5rem;
+    }
+
+    .def {
+        display: grid;
+        grid-template-columns: 190px 1fr;
+        gap: 1.25rem;
+        align-items: start;
+        scroll-margin-top: 2rem;
+    }
+
+    /* Surlignage à l'arrivée depuis un badge */
+    .def:target {
+        background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin: -0.75rem;
+    }
+
+    .def-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .def-count {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--color-muted);
+        padding-left: 0.15rem;
+    }
+
+    .def-text {
+        font-size: 0.9rem;
+        line-height: 1.75;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    /* Note */
+    .section-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--color-surface);
+        border-left: 2px solid var(--color-border);
+        border-radius: 0 6px 6px 0;
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: var(--color-muted);
+        margin: 0;
+    }
+
+    .section-note :global(svg) {
+        flex-shrink: 0;
+        margin-top: 0.3rem;
+        color: var(--color-accent);
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+        .page { padding: 2rem 1.5rem 4rem; }
+        .def { grid-template-columns: 1fr; gap: 0.5rem; }
+        .def-badge { flex-direction: row; align-items: center; gap: 0.6rem; }
+    }
+</style>

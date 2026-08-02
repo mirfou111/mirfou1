@@ -12,7 +12,7 @@ const contes = (await getCollection('contes', ({ data }) => !data.draft))
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
-                <Scroll size={22} color="#4a7c5e" />
+                <Scroll size={22} color="var(--section-contes)" />
                 <h1>Contes</h1>
             </div>
             <p class="page-sub">Histoires, fables et récits imaginaires.</p>
@@ -30,8 +30,11 @@ const contes = (await getCollection('contes', ({ data }) => !data.draft))
                         href={`/contes/${conte.id}`}
                         tags={conte.data.tags}
                         origin={conte.data.origin}
+                        status={conte.data.status}
+                        section="contes"
+                        heroImage={conte.data.heroImage}
                         body={conte.body}
-                        accentColor="#4a7c5e"
+                        accentColor="var(--section-contes)"
                     />
                 ))}
             </div>

@@ -12,7 +12,7 @@ const recherches = (await getCollection('recherches', ({ data }) => !data.draft)
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
-                <FlaskConical size={22} color="#6b7a5e" />
+                <FlaskConical size={22} color="var(--section-recherches)" />
                 <h1>Recherches</h1>
             </div>
             <p class="page-sub">Travaux académiques et résultats de recherche.</p>
@@ -41,8 +41,11 @@ const recherches = (await getCollection('recherches', ({ data }) => !data.draft)
                             href={`/recherches/${recherche.id}`}
                             tags={recherche.data.tags}
                             origin={recherche.data.origin}
+                        status={recherche.data.status}
+                        section="recherches"
+                        heroImage={recherche.data.heroImage}
                             body={recherche.body}
-                            accentColor="#6b7a5e"
+                            accentColor="var(--section-recherches)"
                         />
                     </div>
                 ))}
@@ -101,9 +104,9 @@ const recherches = (await getCollection('recherches', ({ data }) => !data.draft)
     .meta-badge {
         font-size: 0.68rem;
         font-family: var(--font-mono);
-        color: #6b7a5e;
-        background: #6b7a5e12;
-        border: 1px solid #6b7a5e40;
+        color: var(--section-recherches);
+        background: color-mix(in srgb, var(--section-recherches) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--section-recherches) 25%, transparent);
         padding: 0.15rem 0.5rem;
         border-radius: 3px;
     }
