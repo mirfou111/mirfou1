@@ -25,7 +25,8 @@ const { Content, headings } = await render(recherche);
     backLabel="Recherches"
     origin={recherche.data.origin}
     status={recherche.data.status}
-    relatedPosts={recherche.data.relatedPosts}
+    currentRef={`recherches/${recherche.id}`}
+    heroImage={recherche.data.heroImage}
     body={recherche.body}
     headings={headings}
 >

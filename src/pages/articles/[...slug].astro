@@ -23,9 +23,10 @@ const { Content, headings } = await render(article);
     backHref="/articles"
     backLabel="Articles"
     origin={article.data.origin}
+    heroImage={article.data.heroImage}
     body={article.body}
     status={article.data.status}
-    relatedPosts={article.data.relatedPosts}
+    currentRef={`articles/${article.id}`}
     headings={headings}
 >
     <Content />

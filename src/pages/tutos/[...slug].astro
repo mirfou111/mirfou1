@@ -24,7 +24,8 @@ const { Content, headings } = await render(tuto);
     backLabel="Tutos"
     origin={tuto.data.origin}
     status={tuto.data.status}
-    relatedPosts={tuto.data.relatedPosts}
+    currentRef={`tutos/${tuto.id}`}
+    heroImage={tuto.data.heroImage}
     body={tuto.body}
     headings={headings}
 >

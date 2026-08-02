@@ -24,7 +24,8 @@ const { Content, headings } = await render(reflexion);
     backLabel="Réflexions"
     origin={reflexion.data.origin}
     status={reflexion.data.status}
-    relatedPosts={reflexion.data.relatedPosts}
+    currentRef={`reflexions/${reflexion.id}`}
+    heroImage={reflexion.data.heroImage}
     body={reflexion.body}
     headings={headings}
 >
