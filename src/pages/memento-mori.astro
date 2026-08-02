@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AntIcon from '../components/AntIcon.astro';
+import MementoMori from '../components/MementoMori.astro';
 ---
 
 <BaseLayout title="Memento Mori — mirfou">
@@ -11,6 +12,11 @@ import AntIcon from '../components/AntIcon.astro';
             <h1>Memento Mori</h1>
             <p class="page-sub">Souviens-toi que tu mourras.</p>
         </header>
+
+        <!-- Le calculateur : c'est le cœur de cette page -->
+        <section class="calculator">
+            <MementoMori />
+        </section>
 
         <div class="divider"></div>
 
@@ -46,7 +52,7 @@ import AntIcon from '../components/AntIcon.astro';
                     pour celles qui viendront après.
                 </p>
                 <p>
-                    La grille sur la page d'accueil n'est pas là pour angoisser. Elle est là
+                    La grille ci-dessus n'est pas là pour angoisser. Elle est là
                     pour rappeler que chaque case cochée est irréversible — et que les cases
                     vides devant soi sont une chance, pas une dette.
                 </p>
@@ -118,6 +124,10 @@ import AntIcon from '../components/AntIcon.astro';
 
     .page-header {
         padding: 1rem 0 2rem;
+    }
+
+    .calculator {
+        margin-bottom: 1rem;
     }
 
     .page-kicker {

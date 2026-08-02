@@ -2,16 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CompteurTexte from '../components/outils/CompteurTexte.astro';
 import GenerateurSlug from '../components/outils/GenerateurSlug.astro';
-import Pomodoro from '../components/outils/Pomodoro.astro';
-import MarkdownPreview from '../components/outils/MarkdownPreview.astro';
 import PaletteMirfou from '../components/outils/PaletteMirfou.astro';
 import { Wrench } from 'lucide-astro';
 
 const outils = [
     { id: 'compteur', label: 'Compteur de texte' },
     { id: 'slug', label: 'Générateur de slug' },
-    { id: 'pomodoro', label: 'Pomodoro' },
-    { id: 'markdown', label: 'Markdown → HTML' },
     { id: 'palette', label: 'Palette mirfou' },
 ];
 ---
@@ -23,7 +19,11 @@ const outils = [
                 <Wrench size={22} color="var(--color-accent)" />
                 <h1>Outils</h1>
             </div>
-            <p class="page-sub">Petits outils utiles — tout tourne dans le navigateur, rien n'est envoyé nulle part.</p>
+            <p class="page-sub">
+                L'atelier du jardin. Ces outils appellent le code du site lui-même —
+                le slug affiché est celui que le site produirait, la palette est celle
+                qu'il applique vraiment. Tout tourne dans le navigateur, rien n'est envoyé nulle part.
+            </p>
         </header>
 
         <!-- Mini sommaire -->
@@ -40,12 +40,6 @@ const outils = [
             </section>
             <section id="slug" class="outil-section">
                 <GenerateurSlug />
-            </section>
-            <section id="pomodoro" class="outil-section">
-                <Pomodoro />
-            </section>
-            <section id="markdown" class="outil-section">
-                <MarkdownPreview />
             </section>
             <section id="palette" class="outil-section">
                 <PaletteMirfou />

@@ -1,62 +1,163 @@
+---
+/**
+ * Palette du design system.
+ *
+ * Les valeurs ne sont PAS écrites ici : elles sont lues à l'exécution depuis
+ * les variables CSS réellement appliquées. L'outil ne peut donc pas mentir
+ * sur la palette, et il suit automatiquement le thème clair ou sombre.
+ */
+
+const groupes = [
+    {
+        titre: 'Base',
+        vars: [
+            { name: '--color-bg', label: 'Fond' },
+            { name: '--color-surface', label: 'Surface' },
+            { name: '--color-surface-2', label: 'Surface 2' },
+            { name: '--color-border', label: 'Bordure' },
+            { name: '--color-text', label: 'Texte' },
+            { name: '--color-muted', label: 'Texte secondaire' },
+            { name: '--color-accent', label: 'Accent' },
+            { name: '--color-accent-soft', label: 'Accent doux' },
+        ],
+    },
+    {
+        titre: 'Sections',
+        vars: [
+            { name: '--section-articles', label: 'Articles' },
+            { name: '--section-contes', label: 'Contes' },
+            { name: '--section-tutos', label: 'Tutos' },
+            { name: '--section-reflexions', label: 'Réflexions' },
+            { name: '--section-recherches', label: 'Recherches' },
+        ],
+    },
+    {
+        titre: 'Badges',
+        vars: [
+            { name: '--tone-positif', label: 'Positif' },
+            { name: '--tone-encours', label: 'En cours' },
+        ],
+    },
+];
+---
+
 <div class="outil">
     <h2 class="outil-title">Palette mirfou</h2>
-    <p class="outil-desc">Les couleurs du design system. Clic pour copier la valeur CSS.</p>
+    <p class="outil-desc">
+        Lue directement dans le thème actif — elle suit donc le mode clair ou nuit,
+        et ne peut pas se désynchroniser du site. Le ratio indiqué est le contraste
+        sur le fond de page. Clic pour copier.
+    </p>
 
-    <div class="palette-section">
-        <p class="palette-mode-label">Mode clair — papier chaud</p>
-        <div class="swatches">
-            {[
-                { name: 'bg', value: '#f7f3ee', label: 'Fond' },
-                { name: 'surface', value: '#ede8e0', label: 'Surface' },
-                { name: 'surface-2', value: '#e4ddd3', label: 'Surface 2' },
-                { name: 'border', value: '#d4cdc4', label: 'Bordure' },
-                { name: 'text', value: '#1a1612', label: 'Texte' },
-                { name: 'muted', value: '#8a7e72', label: 'Muet' },
-                { name: 'accent', value: '#8b4513', label: 'Accent' },
-                { name: 'accent-soft', value: '#b8651a', label: 'Accent doux' },
-            ].map(c => (
-                <button
-                    class="swatch"
-                    data-value={`var(--color-${c.name})`}
-                    data-hex={c.value}
-                    title={`Copier ${c.value}`}
-                >
-                    <span class="swatch-color" style={`background: ${c.value}`}></span>
-                    <span class="swatch-name">{c.label}</span>
-                    <span class="swatch-hex">{c.value}</span>
-                </button>
-            ))}
+    {groupes.map(g => (
+        <div class="palette-section">
+            <p class="palette-mode-label">{g.titre}</p>
+            <div class="swatches">
+                {g.vars.map(v => (
+                    <button class="swatch" data-var={v.name} title={`Copier var(${v.name})`}>
+                        <span class="swatch-color" style={`background: var(${v.name})`}></span>
+                        <span class="swatch-name">{v.label}</span>
+                        <span class="swatch-hex" data-role="hex">—</span>
+                        <span class="swatch-ratio" data-role="ratio"></span>
+                    </button>
+                ))}
+            </div>
         </div>
-    </div>
+    ))}
 
-    <div class="palette-section">
-        <p class="palette-mode-label">Mode nuit — forêt profonde</p>
-        <div class="swatches">
-            {[
-                { name: 'bg-dark', value: '#0d0f0b', label: 'Fond' },
-                { name: 'surface-dark', value: '#161a13', label: 'Surface' },
-                { name: 'surface-2-dark', value: '#1e2419', label: 'Surface 2' },
-                { name: 'border-dark', value: '#2a3022', label: 'Bordure' },
-                { name: 'text-dark', value: '#e8e0d0', label: 'Texte' },
-                { name: 'muted-dark', value: '#6b7a5e', label: 'Muet' },
-                { name: 'accent-dark', value: '#c8922a', label: 'Accent' },
-                { name: 'accent-soft-dark', value: '#a07020', label: 'Accent doux' },
-            ].map(c => (
-                <button
-                    class="swatch"
-                    data-hex={c.value}
-                    title={`Copier ${c.value}`}
-                >
-                    <span class="swatch-color" style={`background: ${c.value}`}></span>
-                    <span class="swatch-name">{c.label}</span>
-                    <span class="swatch-hex">{c.value}</span>
-                </button>
-            ))}
-        </div>
-    </div>
-
-    <div class="copy-toast" id="palette-toast">Copié ✓</div>
+    <p class="palette-note" id="palette-theme"></p>
 </div>
+
+<script>
+    const swatches = document.querySelectorAll<HTMLButtonElement>('.swatch');
+    const themeLabel = document.getElementById('palette-theme');
+
+    // ── Couleurs ────────────────────────────────────────
+    const toRgb = (value: string): [number, number, number] | null => {
+        const probe = document.createElement('span');
+        probe.style.color = value;
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        const computed = getComputedStyle(probe).color;
+        probe.remove();
+        const m = computed.match(/-?[\d.]+/g);
+        return m && m.length >= 3 ? [+m[0], +m[1], +m[2]] : null;
+    };
+
+    const toHex = ([r, g, b]: [number, number, number]) =>
+        '#' + [r, g, b].map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
+
+    const lin = (c: number) => {
+        const s = c / 255;
+        return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    };
+    const luminance = ([r, g, b]: [number, number, number]) =>
+        0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+
+    const contrast = (a: [number, number, number], b: [number, number, number]) => {
+        const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+        return (hi + 0.05) / (lo + 0.05);
+    };
+
+    // ── Rendu ───────────────────────────────────────────
+    function refresh() {
+        const styles = getComputedStyle(document.documentElement);
+        const bg = toRgb(styles.getPropertyValue('--color-bg').trim() || '#fff');
+
+        swatches.forEach(btn => {
+            const name = btn.dataset.var!;
+            const raw = styles.getPropertyValue(name).trim();
+            const rgb = raw ? toRgb(raw) : null;
+
+            const hexEl = btn.querySelector('[data-role="hex"]')!;
+            const ratioEl = btn.querySelector('[data-role="ratio"]')!;
+
+            hexEl.textContent = rgb ? toHex(rgb) : '—';
+
+            // Le contraste n'a de sens que pour les couleurs de texte
+            if (rgb && bg && !name.includes('bg') && !name.includes('surface')) {
+                const r = contrast(rgb, bg);
+                ratioEl.textContent = `${r.toFixed(2)}:1`;
+                ratioEl.className = 'swatch-ratio ' + (r >= 4.5 ? 'pass' : r >= 3 ? 'large' : 'fail');
+                ratioEl.setAttribute(
+                    'title',
+                    r >= 4.5 ? 'Conforme AA' : r >= 3 ? 'AA grand texte seulement' : 'Insuffisant',
+                );
+            } else {
+                ratioEl.textContent = '';
+                ratioEl.className = 'swatch-ratio';
+            }
+        });
+
+        if (themeLabel) {
+            const dark = document.documentElement.classList.contains('dark');
+            themeLabel.textContent = dark
+                ? 'Thème nuit — bascule en mode clair pour voir l’autre palette.'
+                : 'Thème clair — bascule en mode nuit pour voir l’autre palette.';
+        }
+    }
+
+    refresh();
+
+    // Suit la bascule de thème
+    new MutationObserver(refresh).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+
+    // ── Copie ───────────────────────────────────────────
+    swatches.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const value = `var(${btn.dataset.var})`;
+            navigator.clipboard.writeText(value).then(() => {
+                const hexEl = btn.querySelector('[data-role="hex"]')!;
+                const before = hexEl.textContent;
+                hexEl.textContent = 'copié ✓';
+                setTimeout(() => { hexEl.textContent = before; }, 1400);
+            });
+        });
+    });
+</script>
 
 <style>
     .outil-title {
@@ -69,106 +170,74 @@
     .outil-desc {
         font-size: 0.85rem;
         color: var(--color-muted);
+        line-height: 1.7;
         margin-bottom: 1.5rem;
+        max-width: 60ch;
     }
 
-    .palette-section {
-        margin-bottom: 1.5rem;
-    }
+    .palette-section { margin-bottom: 1.75rem; }
 
     .palette-mode-label {
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.12em;
         color: var(--color-muted);
-        font-family: var(--font-mono);
         font-weight: 600;
         margin-bottom: 0.75rem;
     }
 
     .swatches {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 0.5rem;
     }
 
     .swatch {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.75rem 0.5rem;
+        gap: 0.6rem;
+        padding: 0.5rem 0.7rem;
         background: var(--color-surface);
         border: 1px solid var(--color-border);
-        border-radius: 8px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.2s;
-        text-align: center;
+        text-align: left;
+        font-family: inherit;
+        transition: border-color 0.2s;
     }
 
-    .swatch:hover {
-        border-color: var(--color-accent);
-        transform: translateY(-2px);
-    }
+    .swatch:hover { border-color: var(--color-accent); }
 
     .swatch-color {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
         border: 1px solid var(--color-border);
-        display: block;
+        flex-shrink: 0;
     }
 
     .swatch-name {
-        font-size: 0.72rem;
-        color: var(--color-text);
-        font-weight: 600;
-    }
-
-    .swatch-hex {
-        font-size: 0.65rem;
-        font-family: var(--font-mono);
-        color: var(--color-muted);
-    }
-
-    .copy-toast {
-        position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%) translateY(4rem);
-        background: var(--color-accent);
-        color: var(--color-bg);
-        padding: 0.5rem 1.25rem;
-        border-radius: 6px;
+        flex: 1;
         font-size: 0.82rem;
-        font-family: var(--font-mono);
-        opacity: 0;
-        transition: all 0.3s;
-        pointer-events: none;
-        z-index: 100;
+        color: var(--color-text);
     }
 
-    .copy-toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+    .swatch-hex,
+    .swatch-ratio {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--color-muted);
+        white-space: nowrap;
+    }
+
+    .swatch-ratio.pass { color: var(--tone-positif); }
+    .swatch-ratio.large { color: var(--tone-encours); }
+    .swatch-ratio.fail { color: var(--color-accent); font-weight: 600; }
+
+    .palette-note {
+        font-size: 0.78rem;
+        font-style: italic;
+        color: var(--color-muted);
+        margin: 0;
     }
 </style>
-
-<script>
-    const swatches = document.querySelectorAll('.swatch');
-    const toast = document.getElementById('palette-toast')!;
-    let toastTimeout: ReturnType<typeof setTimeout>;
-
-    swatches.forEach(swatch => {
-        swatch.addEventListener('click', () => {
-            const hex = (swatch as HTMLElement).dataset.hex ?? '';
-            navigator.clipboard.writeText(hex).then(() => {
-                clearTimeout(toastTimeout);
-                toast.classList.add('show');
-                toastTimeout = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 1800);
-            });
-        });
-    });
-</script>

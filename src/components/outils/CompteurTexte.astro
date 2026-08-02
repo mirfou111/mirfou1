@@ -64,7 +64,6 @@
     }
 
     .outil-textarea:focus {
-        outline: none;
         border-color: var(--color-accent);
     }
 
@@ -121,6 +120,8 @@
 </style>
 
 <script>
+    import { readingTime } from '../../utils/readingTime';
+
     const input = document.getElementById('compteur-input') as HTMLTextAreaElement;
     const clearBtn = document.getElementById('compteur-clear');
 
@@ -130,13 +131,15 @@
         const chars = text.length;
         const charsNoSpaces = text.replace(/\s/g, '').length;
         const phrases = text.trim() === '' ? 0 : (text.match(/[.!?]+/g) ?? []).length;
-        const lecture = Math.max(1, Math.ceil(mots / 200));
+        // Même fonction que celle qui affiche le temps de lecture sur un article :
+        // le chiffre annoncé ici est exactement celui que le site affichera.
+        const lecture = readingTime(text);
 
         document.getElementById('stat-mots')!.textContent = mots.toString();
         document.getElementById('stat-chars')!.textContent = chars.toString();
         document.getElementById('stat-chars-no-spaces')!.textContent = charsNoSpaces.toString();
         document.getElementById('stat-phrases')!.textContent = phrases.toString();
-        document.getElementById('stat-lecture')!.textContent = `${lecture} min`;
+        document.getElementById('stat-lecture')!.textContent = lecture;
     }
 
     input.addEventListener('input', update);

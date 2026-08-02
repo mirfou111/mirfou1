@@ -46,7 +46,6 @@
     }
 
     .outil-input:focus {
-        outline: none;
         border-color: var(--color-accent);
     }
 
@@ -89,25 +88,17 @@
 </style>
 
 <script>
+    import { tagSlug } from '../../utils/tags';
+
     const input = document.getElementById('slug-input') as HTMLInputElement;
     const output = document.getElementById('slug-output')!;
     const copyBtn = document.getElementById('slug-copy')!;
     const copyLabel = document.getElementById('slug-copy-label')!;
 
-    function toSlug(text: string): string {
-        return text
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-');
-    }
-
     input.addEventListener('input', () => {
-        const slug = toSlug(input.value);
-        output.textContent = slug || '—';
+        // On appelle la fonction du site, pas une copie : l'outil ne peut donc
+        // pas produire un slug différent de celui que le site générerait.
+        output.textContent = tagSlug(input.value) || '—';
     });
 
     copyBtn.addEventListener('click', () => {
