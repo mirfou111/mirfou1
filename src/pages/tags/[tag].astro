@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { Tag as TagIcon, ArrowLeft } from 'lucide-astro';
+import { tagSlug, groupTags } from '../../utils/tags';
 
 export async function getStaticPaths() {
     const [articles, contes, tutos, reflexions, recherches] = await Promise.all([
@@ -21,15 +22,15 @@ export async function getStaticPaths() {
         ...recherches.map(p => ({ ...p, section: 'recherches' })),
     ];
 
-    // Collecter tous les tags uniques
-    const allTags = [...new Set(allPosts.flatMap(p => p.data.tags ?? []))];
+    // Un slug par tag — fusionne les variantes de casse et d'accentuation
+    const entries = groupTags(allPosts.flatMap(p => p.data.tags ?? []));
 
-    return allTags.map(tag => ({
-        params: { tag },
+    return entries.map(({ slug, label }) => ({
+        params: { tag: slug },
         props: {
-            tag,
+            tag: label,
             posts: allPosts
-                .filter(p => p.data.tags?.includes(tag))
+                .filter(p => (p.data.tags ?? []).some(t => tagSlug(t) === slug))
                 .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
         },
     }));
@@ -38,7 +39,10 @@ export async function getStaticPaths() {
 const { tag, posts } = Astro.props;
 ---
 
-<BaseLayout title={`#${tag} — mirfou`}>
+<BaseLayout
+    title={`#${tag} — mirfou`}
+    description={`Tous les contenus du jardin mirfou marqués « ${tag} ».`}
+>
     <div class="page">
         <a href="/tags" class="back-link">
             <ArrowLeft size={14} />
@@ -64,6 +68,9 @@ const { tag, posts } = Astro.props;
                     href={`/${post.section}/${post.id}`}
                     tags={post.data.tags}
                     origin={post.data.origin}
+                    status={post.data.status}
+                    section={post.section as any}
+                    heroImage={post.data.heroImage}
                     body={post.body}
                 />
             ))}
