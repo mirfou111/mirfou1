@@ -1,0 +1,373 @@
+---
+/**
+ * Hero de la page d'accueil : un proverbe wolof et un verre de thé.
+ *
+ * Proverbe et visuel sont tirés au sort au chargement, puis retirés au sort
+ * chaque fois que le visiteur cesse de regarder : quand il change d'onglet,
+ * ou quand le hero sort de l'écran au défilement. Il ne voit donc jamais la
+ * transition — il constate seulement, un jour, que ce n'est plus la même chose.
+ * Le texte ne change jamais sous les yeux de quelqu'un qui est en train de lire.
+ *
+ * Le visuel est soit le verre dessiné (teinte, niveau, mousse et vapeur tirés
+ * au hasard), soit une image du dossier src/assets/hero/.
+ */
+import { getImage } from 'astro:assets';
+import { PROVERBES } from '../data/proverbes';
+import { SITE_AUTHOR, SITE_LOCATION } from '../consts';
+
+// Images du dossier src/assets/hero/ — ajoutées automatiquement au tirage
+const fichiers = import.meta.glob<{ default: ImageMetadata }>(
+    '../assets/hero/*.{png,jpg,jpeg,webp,avif,svg}',
+    { eager: true },
+);
+
+const images: string[] = await Promise.all(
+    Object.values(fichiers).map(async ({ default: meta }) => {
+        if (meta.format === 'svg') return meta.src;
+        const optimisee = await getImage({ src: meta, width: 480, format: 'webp' });
+        return optimisee.src;
+    }),
+);
+
+// Rendu serveur par défaut : visible tel quel sans JavaScript
+const premier = PROVERBES[0];
+const NIVEAU_DEFAUT = 82;
+---
+
+<header class="hero" id="hero-proverbe">
+    <div class="hero-text">
+        <p class="proverbe-kicker">Proverbe wolof</p>
+        <figure class="proverbe">
+            <blockquote class="proverbe-wo" lang="wo" data-wo>
+                « {premier.wolof} »
+            </blockquote>
+            <figcaption class="proverbe-fr" data-fr>{premier.fr}</figcaption>
+        </figure>
+
+        <div class="hero-sign">
+            <h1 class="hero-title">mirfou</h1>
+            <p class="hero-name">{SITE_AUTHOR} — Master 2 IA · {SITE_LOCATION}</p>
+        </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+        <svg
+            class="verre"
+            data-verre
+            data-teinte="doux"
+            data-vapeur="3"
+            viewBox="0 0 120 170"
+            focusable="false"
+        >
+            <defs>
+                <clipPath id="hp-verre">
+                    <polygon points="26,40 94,40 86,160 34,160" />
+                </clipPath>
+            </defs>
+
+            {/* Vapeur */}
+            <g class="vapeur">
+                <path class="vap vap-a" d="M48 34 q-5 -7 0 -14 q5 -7 0 -14" />
+                <path class="vap vap-b" d="M60 32 q5 -7 0 -14 q-5 -7 0 -14" />
+                <path class="vap vap-c" d="M72 34 q-5 -7 0 -14 q5 -7 0 -14" />
+            </g>
+
+            {/* Fond du verre, puis thé et mousse découpés à sa forme */}
+            <polygon class="verre-fond" points="26,40 94,40 86,160 34,160" />
+            <g clip-path="url(#hp-verre)">
+                <rect class="the" data-the x="0" y={NIVEAU_DEFAUT} width="120" height="170" />
+                <g class="mousse" data-mousse transform={`translate(0 ${NIVEAU_DEFAUT})`}>
+                    <path d="M0 -3 q7.5 -4 15 0 t15 0 t15 0 t15 0 t15 0 t15 0 t15 0 t15 0 V6 H0 Z" />
+                    <circle class="bulle" cx="44" cy="0" r="1.6" />
+                    <circle class="bulle" cx="61" cy="2" r="1.2" />
+                    <circle class="bulle" cx="74" cy="-1" r="1.4" />
+                </g>
+            </g>
+
+            {/* Contour, reflet et culot */}
+            <polygon class="verre-trait" points="26,40 94,40 86,160 34,160" />
+            <line class="reflet" x1="34" y1="54" x2="40" y2="146" />
+            <line class="culot" x1="34" y1="160" x2="86" y2="160" />
+        </svg>
+
+        <img class="hero-img" data-hero-img alt="" decoding="async" hidden />
+    </div>
+</header>
+
+<script is:inline define:vars={{ proverbes: PROVERBES, images }}>
+    const hero = document.getElementById('hero-proverbe');
+
+    if (hero) {
+        const wo = hero.querySelector('[data-wo]');
+        const fr = hero.querySelector('[data-fr]');
+        const verre = hero.querySelector('[data-verre]');
+        const the = hero.querySelector('[data-the]');
+        const mousse = hero.querySelector('[data-mousse]');
+        const img = hero.querySelector('[data-hero-img]');
+
+        const TEINTES = ['amer', 'doux', 'suave'];
+        const NIVEAUX = [62, 82, 102];
+
+        const au = (n) => Math.floor(Math.random() * n);
+
+        // Un indice au hasard, différent du précédent quand c'est possible
+        const autre = (n, precedent) => {
+            if (n <= 1) return 0;
+            let i;
+            do { i = au(n); } while (i === precedent);
+            return i;
+        };
+
+        let proverbeCourant = -1;
+        let visuelCourant = -1;
+        let verreCourant = '';
+
+        function tirerProverbe() {
+            proverbeCourant = autre(proverbes.length, proverbeCourant);
+            const p = proverbes[proverbeCourant];
+            wo.textContent = '« ' + p.wolof + ' »';
+            fr.textContent = p.fr;
+        }
+
+        function tirerVerre() {
+            let teinte, niveau, avecMousse, vapeur, cle;
+            do {
+                teinte = TEINTES[au(3)];
+                niveau = NIVEAUX[au(3)];
+                avecMousse = Math.random() < 0.75;
+                vapeur = 1 + au(3);
+                cle = [teinte, niveau, avecMousse, vapeur].join('|');
+            } while (cle === verreCourant);
+            verreCourant = cle;
+
+            verre.dataset.teinte = teinte;
+            verre.dataset.vapeur = String(vapeur);
+            the.setAttribute('y', String(niveau));
+            mousse.setAttribute('transform', 'translate(0 ' + niveau + ')');
+            mousse.style.display = avecMousse ? '' : 'none';
+        }
+
+        function tirerVisuel() {
+            // Le verre dessiné est une option parmi les images. Il peut revenir
+            // deux fois de suite (il change lui-même), une image non.
+            const total = images.length + 1;
+            let choix;
+            do { choix = au(total); }
+            while (choix !== 0 && choix === visuelCourant && images.length > 1);
+            visuelCourant = choix;
+
+            if (choix === 0) {
+                img.hidden = true;
+                verre.style.display = '';
+                tirerVerre();
+            } else {
+                img.src = images[choix - 1];
+                img.hidden = false;
+                verre.style.display = 'none';
+            }
+        }
+
+        function renouveler() {
+            tirerProverbe();
+            tirerVisuel();
+        }
+
+        // 1. Au chargement — ce script suit immédiatement le hero dans le HTML,
+        //    il s'exécute donc avant le premier affichage.
+        renouveler();
+
+        // 2. Quand le visiteur quitte l'onglet
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) renouveler();
+        });
+
+        // 3. Quand le hero sort entièrement de l'écran
+        if ('IntersectionObserver' in window) {
+            let visible = true;
+            new IntersectionObserver(([entree]) => {
+                if (!entree.isIntersecting && visible) renouveler();
+                visible = entree.isIntersecting;
+            }).observe(hero);
+        }
+    }
+</script>
+
+<style>
+    .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 2.5rem;
+        min-height: 300px;
+        padding: 3rem 0 3.5rem;
+        margin-bottom: 3.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .hero-text {
+        min-width: 0;
+    }
+
+    .proverbe-kicker {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--color-muted);
+        margin-bottom: 0.9rem;
+    }
+
+    .proverbe-wo {
+        font-family: var(--font-main);
+        font-size: clamp(1.6rem, 3.4vw, 2.5rem);
+        font-style: italic;
+        line-height: 1.25;
+        color: var(--color-text);
+        max-width: 22ch;
+        text-wrap: balance;
+        margin-bottom: 0.9rem;
+    }
+
+    .proverbe-fr {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--color-muted);
+        max-width: 46ch;
+    }
+
+    .hero-sign {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.9rem;
+        margin-top: 2.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--color-border);
+        max-width: 46ch;
+    }
+
+    .hero-title {
+        font-family: var(--font-main);
+        font-size: 1.6rem;
+        font-weight: 700;
+        font-style: italic;
+        line-height: 1;
+        color: var(--color-text);
+        letter-spacing: -0.01em;
+    }
+
+    .hero-name {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.03em;
+        color: var(--color-accent);
+    }
+
+    /* ── Visuel ───────────────────────────────── */
+    .hero-visual {
+        width: clamp(120px, 18vw, 200px);
+    }
+
+    .verre,
+    .hero-img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .hero-img {
+        aspect-ratio: 1;
+        object-fit: contain;
+    }
+
+    /* Teintes du thé — les trois verres de l'ataya */
+    .verre {
+        --the: #8a4a1a;
+        --mousse: #f4e7cf;
+        --verre-trait: var(--color-muted);
+        --verre-fond: color-mix(in srgb, var(--color-surface) 70%, transparent);
+    }
+
+    .verre[data-teinte='amer'] { --the: #5b2810; }
+    .verre[data-teinte='doux'] { --the: #8a4a1a; }
+    .verre[data-teinte='suave'] { --the: #b8772f; }
+
+    :global(html.dark) .verre { --mousse: #e9d7b3; }
+    :global(html.dark) .verre[data-teinte='amer'] { --the: #8f4a22; }
+    :global(html.dark) .verre[data-teinte='doux'] { --the: #b8692c; }
+    :global(html.dark) .verre[data-teinte='suave'] { --the: #dc9d50; }
+
+    .verre-fond { fill: var(--verre-fond); }
+    .the { fill: var(--the); }
+    .mousse path { fill: var(--mousse); }
+    .bulle { fill: var(--the); opacity: 0.22; }
+
+    .verre-trait {
+        fill: none;
+        stroke: var(--verre-trait);
+        stroke-width: 2;
+        stroke-linejoin: round;
+    }
+
+    /* Un reflet est toujours clair, quel que soit le thème :
+       la couleur du fond donnait une barre sombre en mode nuit. */
+    .reflet {
+        stroke: #fff;
+        stroke-width: 3;
+        stroke-linecap: round;
+        opacity: 0.35;
+    }
+
+    .culot {
+        stroke: var(--verre-trait);
+        stroke-width: 3.5;
+        stroke-linecap: round;
+    }
+
+    /* Vapeur : de une à trois volutes selon le tirage */
+    .vap {
+        fill: none;
+        stroke: var(--color-muted);
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: vapeur 4.2s ease-in-out infinite;
+    }
+
+    .vap-b { animation-delay: 1.4s; }
+    .vap-c { animation-delay: 2.8s; }
+
+    .verre[data-vapeur='1'] .vap-b,
+    .verre[data-vapeur='1'] .vap-c,
+    .verre[data-vapeur='2'] .vap-b {
+        display: none;
+    }
+
+    @keyframes vapeur {
+        0%   { opacity: 0;    transform: translateY(4px); }
+        40%  { opacity: 0.55; }
+        100% { opacity: 0;    transform: translateY(-10px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .vap {
+            animation: none;
+            opacity: 0.4;
+        }
+    }
+
+    /* ── Mobile ───────────────────────────────── */
+    @media (max-width: 560px) {
+        .hero {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            min-height: 0;
+            padding: 2rem 0 2.5rem;
+        }
+
+        .hero-visual {
+            order: -1;
+            width: 88px;
+        }
+    }
+</style>

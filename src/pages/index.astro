@@ -1,38 +1,51 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroGalleries from '../components/HeroGalleries.astro';
-import PostCard from '../components/PostCard.astro';
-import OriginBadge from '../components/OriginBadge.astro';
-import StatusBadge from '../components/StatusBadge.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroProverbe from "../components/HeroProverbe.astro";
+import Bientot from "../components/Bientot.astro";
+import PostCard from "../components/PostCard.astro";
+import OriginBadge from "../components/OriginBadge.astro";
+import StatusBadge from "../components/StatusBadge.astro";
 import {
-    BookOpen, Scroll, Terminal, Brain, FlaskConical,
-    ArrowRight, Compass, Sprout, Network, KeyRound, Hourglass,
-} from 'lucide-astro';
-import { SITE_DESCRIPTION, FEATURED } from '../consts';
+    BookOpen,
+    Scroll,
+    Terminal,
+    Brain,
+    FlaskConical,
+    ArrowRight,
+    Compass,
+    Network,
+    KeyRound,
+    Hourglass,
+    Beaker,
+} from "lucide-astro";
+import { SITE_DESCRIPTION, FEATURED } from "../consts";
 import {
-    getGarden, getLinks, getOrphans, pick, recent,
-    SECTIONS, SECTION_META, type Section,
-} from '../utils/garden';
+    getGarden,
+    getLinks,
+    getOrphans,
+    pick,
+    SECTIONS,
+    SECTION_META,
+    type Section,
+} from "../utils/garden";
 
 const garden = await getGarden();
+const jardinVide = garden.nodes.length === 0;
 
-// « Par où commencer » — sélection à la main, validée au build
-const featured = pick(garden, FEATURED, 'FEATURED (consts.ts)');
-
-// Flux récent, toutes sections confondues, sans redite avec la sélection
-const derniers = recent(garden, 6, FEATURED);
+// « Par où commencer » - sélection à la main, validée au build
+const featured = pick(garden, FEATURED, "FEATURED (consts.ts)");
 
 // Chiffres du réseau
 const links = getLinks(garden);
 const orphans = getOrphans(garden, links);
-const liensPoses = links.filter(l => l.kind === 'explicite').length;
+const liensPoses = links.filter((l) => l.kind === "explicite").length;
 
 // Compteur par section
-const parSection = SECTIONS.map(s => ({
+const parSection = SECTIONS.map((s) => ({
     section: s,
     ...SECTION_META[s],
     href: `/${s}`,
-    count: garden.nodes.filter(n => n.section === s).length,
+    count: garden.nodes.filter((n) => n.section === s).length,
 }));
 
 const icones: Record<Section, any> = {
@@ -41,90 +54,58 @@ const icones: Record<Section, any> = {
     tutos: Terminal,
     reflexions: Brain,
     recherches: FlaskConical,
+    labo: Beaker,
 };
-
 ---
 
 <BaseLayout
-    title="mirfou — le jardin secret d'Ousmane Ndieguene"
+    title="mirfou - le jardin secret d'Ousmane Ndieguene"
     description={SITE_DESCRIPTION}
 >
     <div class="home">
+        <HeroProverbe />
 
-        <!-- Hero -->
-        <header class="hero">
-            <HeroGalleries />
-            <div class="hero-text">
-                <h1 class="hero-title">mirfou</h1>
-                <p class="hero-name">
-                    Ousmane Ndieguene — Master 2 IA · Thiès, Sénégal
-                </p>
-                <p class="hero-sub">
-                    J'écris ce que j'apprends : modèles, code, contes,
-                    et ce qui reste quand on éteint l'écran.
-                </p>
+        {jardinVide && (
+            <div class="block">
+                <Bientot rubrique="accueil" />
             </div>
-        </header>
-
-        <!-- Par où commencer -->
-        {featured.length > 0 && (
-            <section class="block">
-                <div class="block-head">
-                    <h2 class="block-title">
-                        <Compass size={14} />
-                        <span>Par où commencer</span>
-                    </h2>
-                    <p class="block-sub">Trois textes si tu ne sais pas où entrer.</p>
-                </div>
-                <div class="cards">
-                    {featured.map(n => (
-                        <PostCard
-                            title={n.title}
-                            description={n.description}
-                            pubDate={n.pubDate}
-                            href={n.href}
-                            tags={n.tags}
-                            origin={n.origin}
-                            status={n.status}
-                            section={n.section}
-                            heroImage={n.heroImage}
-                            body={n.body}
-                            accentColor={SECTION_META[n.section].color}
-                            showSection
-                        />
-                    ))}
-                </div>
-            </section>
         )}
 
-        <!-- Récemment planté -->
-        <section class="block">
-            <div class="block-head">
-                <h2 class="block-title">
-                    <Sprout size={14} />
-                    <span>Récemment planté</span>
-                </h2>
-                <p class="block-sub">Les derniers ajouts, toutes sections confondues.</p>
-            </div>
-            <div class="cards">
-                {derniers.map(n => (
-                    <PostCard
-                        title={n.title}
-                        description={n.description}
-                        pubDate={n.pubDate}
-                        href={n.href}
-                        tags={n.tags}
-                        origin={n.origin}
-                        status={n.status}
-                        section={n.section}
-                        heroImage={n.heroImage}
-                        body={n.body}
-                        accentColor={SECTION_META[n.section].color}
-                        showSection
-                    />
-                ))}
-            </div>
-        </section>
+        <!-- Par où commencer -->
+        {
+            featured.length > 0 && (
+                <section class="block">
+                    <div class="block-head">
+                        <h2 class="block-title">
+                            <Compass size={14} />
+                            <span>Par où commencer</span>
+                        </h2>
+                        <p class="block-sub">
+                            Six portes d'entrée, une par chemin du jardin.
+                        </p>
+                    </div>
+                    <div class="tiles">
+                        {featured.map((n) => (
+                            <PostCard
+                                title={n.title}
+                                description={n.description}
+                                pubDate={n.pubDate}
+                                href={n.href}
+                                tags={n.tags}
+                                origin={n.origin}
+                                status={n.status}
+                                section={n.section}
+                                heroImage={n.heroImage}
+                                body={n.body}
+                                accentColor={SECTION_META[n.section].color}
+                                showSection
+                                variant="tile"
+                            />
+                        ))}
+                    </div>
+                </section>
+            )
+        }
 
         <!-- Les conventions -->
         <section class="block conventions">
@@ -136,8 +117,8 @@ const icones: Record<Section, any> = {
             </div>
             <p class="conv-text">
                 Chaque texte affiche <strong>qui l'a écrit</strong> et
-                <strong>à quel point il est fini</strong>. Tout n'est pas mûr ici,
-                et tout n'est pas de ma main — autant le dire.
+                <strong>à quel point il est fini</strong>. Tout n'est pas mûr
+                ici, et tout n'est pas de ma main - autant le dire.
             </p>
             <div class="conv-badges">
                 <OriginBadge origin="authentique" linked />
@@ -154,7 +135,7 @@ const icones: Record<Section, any> = {
             </a>
         </section>
 
-        <!-- Aperçu du jardin -->
+        {!jardinVide && (
         <section class="block">
             <div class="block-head">
                 <h2 class="block-title">
@@ -174,7 +155,10 @@ const icones: Record<Section, any> = {
                         <span class="gstat-label">liens posés</span>
                     </div>
                     <div class="gstat">
-                        <span class="gstat-value" class:list={[{ warn: orphans.length > 0 }]}>
+                        <span
+                            class="gstat-value"
+                            class:list={[{ warn: orphans.length > 0 }]}
+                        >
                             {orphans.length}
                         </span>
                         <span class="gstat-label">orphelins</span>
@@ -186,6 +170,7 @@ const icones: Record<Section, any> = {
                 </span>
             </a>
         </section>
+        )}
 
         <!-- Explorer -->
         <section class="block">
@@ -196,27 +181,35 @@ const icones: Record<Section, any> = {
                 </h2>
             </div>
             <div class="sections-grid">
-                {parSection.map(({ section, label, href, cssVar, count }) => {
-                    const Icon = icones[section];
-                    return (
-                        <a href={href} class="sec-card" style={`--sec: var(${cssVar})`}>
-                            <Icon size={18} />
-                            <span class="sec-label">{label}</span>
-                            <span class="sec-count">{count}</span>
-                        </a>
-                    );
-                })}
+                {
+                    parSection.map(
+                        ({ section, label, href, cssVar, count }) => {
+                            const Icon = icones[section];
+                            return (
+                                <a
+                                    href={href}
+                                    class="sec-card"
+                                    style={`--sec: var(${cssVar})`}
+                                >
+                                    <Icon size={18} />
+                                    <span class="sec-label">{label}</span>
+                                    <span class="sec-count">{count > 0 ? count : "bientôt"}</span>
+                                </a>
+                            );
+                        },
+                    )
+                }
             </div>
             <div class="quick-links">
                 <a href="/tags">Tags</a>
                 <a href="/recherche">Rechercher</a>
-                <a href="/outils">Outils</a>
+                <a href="/labo">Labo</a>
                 <a href="/projets">Projets</a>
                 <a href="/about">À propos</a>
             </div>
         </section>
 
-        <!-- Memento Mori — encart vers la page dédiée -->
+        <!-- Memento Mori - encart vers la page dédiée -->
         <a href="/memento-mori" class="memento-teaser">
             <div class="mm-grid" aria-hidden="true">
                 <span class="mm-past"></span>
@@ -227,7 +220,7 @@ const icones: Record<Section, any> = {
                     <span>Memento Mori</span>
                 </span>
                 <p>
-                    Un humain vit en moyenne 72 ans — environ 3 744 semaines.
+                    Un humain vit en moyenne 72 ans - environ 3 744 semaines.
                     Combien t'en reste-t-il ?
                 </p>
                 <span class="mm-cta">
@@ -236,79 +229,24 @@ const icones: Record<Section, any> = {
                 </span>
             </div>
         </a>
-
     </div>
 </BaseLayout>
 
 <style>
     .home {
-        max-width: 760px;
+        max-width: 1040px;
         margin: 0 auto;
         padding: 3rem 3rem 6rem;
     }
 
-    /* ── Hero ─────────────────────────────────── */
-    .hero {
-        position: relative;
-        isolation: isolate;
-        min-height: 260px;
-        display: flex;
-        align-items: center;
-        padding: 2.5rem 0 3rem;
-        margin-bottom: 3rem;
-        border-bottom: 1px solid var(--color-border);
-        overflow: hidden;
-    }
-
-    .hero-text {
-        position: relative;
-        z-index: 1;
-        min-width: 0;
-        padding: 0.5rem 2rem 0.5rem 0;
-    }
-
-    /* Halo à la couleur du fond : le texte reste net, les galeries
-       restent visibles entre les lettres. Pas de bloc opaque. */
-    .hero-title,
-    .hero-name,
-    .hero-sub {
-        text-shadow:
-            0 0 4px var(--color-bg),
-            0 0 10px var(--color-bg),
-            0 0 18px var(--color-bg);
-    }
-
-    .hero-title {
-        font-family: var(--font-main);
-        font-size: clamp(2.75rem, 7vw, 4.25rem);
-        font-weight: 700;
-        font-style: italic;
-        color: var(--color-text);
-        line-height: 1;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-    }
-
-    .hero-name {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.04em;
-        color: var(--color-accent);
-        margin-bottom: 0.9rem;
-    }
-
-    .hero-sub {
-        color: var(--color-muted);
-        font-size: 0.95rem;
-        line-height: 1.8;
-        margin: 0;
-        max-width: 38ch;
-    }
-
     /* ── Blocs ────────────────────────────────── */
-    .block { margin-bottom: 3.5rem; }
+    .block {
+        margin-bottom: 3.5rem;
+    }
 
-    .block-head { margin-bottom: 1rem; }
+    .block-head {
+        margin-bottom: 1rem;
+    }
 
     .block-title {
         display: flex;
@@ -322,7 +260,10 @@ const icones: Record<Section, any> = {
         margin: 0 0 0.25rem;
     }
 
-    .block-title :global(svg) { color: var(--color-accent); flex-shrink: 0; }
+    .block-title :global(svg) {
+        color: var(--color-accent);
+        flex-shrink: 0;
+    }
 
     .block-sub {
         font-size: 0.82rem;
@@ -331,8 +272,28 @@ const icones: Record<Section, any> = {
         margin: 0;
     }
 
-    .cards {
-        border-top: 1px solid var(--color-border);
+    /* Grille des tuiles : 3 colonnes, puis 2, puis 1 selon la place réelle
+       disponible (requête de conteneur : indépendante de la sidebar). */
+    .block:has(.tiles) {
+        container-type: inline-size;
+    }
+
+    .tiles {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    @container (min-width: 520px) {
+        .tiles {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @container (min-width: 820px) {
+        .tiles {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
     }
 
     /* ── Conventions ──────────────────────────── */
@@ -374,7 +335,9 @@ const icones: Record<Section, any> = {
         transition: color 0.2s;
     }
 
-    .conv-link:hover { color: var(--color-accent); }
+    .conv-link:hover {
+        color: var(--color-accent);
+    }
 
     /* ── Aperçu du jardin ─────────────────────── */
     .garden-card {
@@ -390,7 +353,9 @@ const icones: Record<Section, any> = {
         transition: border-color 0.2s;
     }
 
-    .garden-card:hover { border-color: var(--color-accent); }
+    .garden-card:hover {
+        border-color: var(--color-accent);
+    }
 
     .garden-stats {
         display: flex;
@@ -410,7 +375,9 @@ const icones: Record<Section, any> = {
         line-height: 1;
     }
 
-    .gstat-value.warn { color: var(--color-accent); }
+    .gstat-value.warn {
+        color: var(--color-accent);
+    }
 
     .gstat-label {
         font-size: 0.68rem;
@@ -427,7 +394,9 @@ const icones: Record<Section, any> = {
         color: var(--color-muted);
     }
 
-    .garden-card:hover .garden-cta { color: var(--color-accent); }
+    .garden-card:hover .garden-cta {
+        color: var(--color-accent);
+    }
 
     /* ── Explorer ─────────────────────────────── */
     .sections-grid {
@@ -446,7 +415,9 @@ const icones: Record<Section, any> = {
         border-radius: 8px;
         background: var(--color-surface);
         color: var(--sec);
-        transition: border-color 0.2s, background 0.2s;
+        transition:
+            border-color 0.2s,
+            background 0.2s;
     }
 
     .sec-card:hover {
@@ -454,7 +425,9 @@ const icones: Record<Section, any> = {
         background: color-mix(in srgb, var(--sec) 7%, transparent);
     }
 
-    .sec-card :global(svg) { flex-shrink: 0; }
+    .sec-card :global(svg) {
+        flex-shrink: 0;
+    }
 
     .sec-label {
         flex: 1;
@@ -480,7 +453,9 @@ const icones: Record<Section, any> = {
         transition: color 0.2s;
     }
 
-    .quick-links a:hover { color: var(--color-accent); }
+    .quick-links a:hover {
+        color: var(--color-accent);
+    }
 
     /* ── Memento Mori (encart statique) ───────── */
     .memento-teaser {
@@ -495,7 +470,9 @@ const icones: Record<Section, any> = {
         transition: border-color 0.2s;
     }
 
-    .memento-teaser:hover { border-color: var(--color-accent); }
+    .memento-teaser:hover {
+        border-color: var(--color-accent);
+    }
 
     /* Grille décorative dessinée en dégradé plutôt qu'en 240 éléments DOM */
     .mm-grid {
@@ -503,7 +480,10 @@ const icones: Record<Section, any> = {
         width: 160px;
         height: 96px;
         flex-shrink: 0;
-        background-image: radial-gradient(var(--color-border) 1.4px, transparent 1.5px);
+        background-image: radial-gradient(
+            var(--color-border) 1.4px,
+            transparent 1.5px
+        );
         background-size: 8px 8px;
     }
 
@@ -511,7 +491,10 @@ const icones: Record<Section, any> = {
         position: absolute;
         inset: 0 0 auto 0;
         height: 38%;
-        background-image: radial-gradient(var(--color-accent) 1.4px, transparent 1.5px);
+        background-image: radial-gradient(
+            var(--color-accent) 1.4px,
+            transparent 1.5px
+        );
         background-size: 8px 8px;
         opacity: 0.55;
     }
@@ -528,7 +511,9 @@ const icones: Record<Section, any> = {
         margin-bottom: 0.5rem;
     }
 
-    .mm-title :global(svg) { color: var(--color-accent); }
+    .mm-title :global(svg) {
+        color: var(--color-accent);
+    }
 
     .mm-text p {
         font-size: 0.85rem;
@@ -545,16 +530,25 @@ const icones: Record<Section, any> = {
         color: var(--color-muted);
     }
 
-    .memento-teaser:hover .mm-cta { color: var(--color-accent); }
+    .memento-teaser:hover .mm-cta {
+        color: var(--color-accent);
+    }
 
     /* ── Mobile ───────────────────────────────── */
     @media (max-width: 640px) {
-        .home { padding: 2rem 1.5rem 4rem; }
-        .hero { min-height: 200px; padding: 2rem 0 2.5rem; }
-        .hero-text { padding-right: 0; }
-        .hero-sub { max-width: none; }
-        .garden-stats { gap: 1.5rem; }
-        .memento-teaser { grid-template-columns: 1fr; gap: 1.25rem; }
-        .mm-grid { width: 100%; height: 72px; }
+        .home {
+            padding: 2rem 1.5rem 4rem;
+        }
+        .garden-stats {
+            gap: 1.5rem;
+        }
+        .memento-teaser {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+        .mm-grid {
+            width: 100%;
+            height: 72px;
+        }
     }
 </style>

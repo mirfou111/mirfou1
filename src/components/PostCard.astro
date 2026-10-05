@@ -1,11 +1,11 @@
 ---
-import OriginBadge from './OriginBadge.astro';
-import StatusBadge from './StatusBadge.astro';
-import PostThumb from './PostThumb.astro';
-import { Calendar, Clock } from 'lucide-astro';
-import { readingTime } from '../utils/readingTime';
-import type { Origin, Status } from '../utils/badges';
-import { SECTION_META, type Section } from '../utils/garden';
+import OriginBadge from "./OriginBadge.astro";
+import StatusBadge from "./StatusBadge.astro";
+import PostThumb from "./PostThumb.astro";
+import { Calendar, Clock } from "lucide-astro";
+import { readingTime } from "../utils/readingTime";
+import type { Origin, Status } from "../utils/badges";
+import { SECTION_META, type Section } from "../utils/garden";
 
 interface Props {
     title: string;
@@ -19,8 +19,10 @@ interface Props {
     heroImage?: ImageMetadata;
     body?: string;
     accentColor?: string;
-    /** Affiche la section dans la carte — utile dans une liste toutes sections confondues */
+    /** Affiche la section dans la carte - utile dans une liste toutes sections confondues */
     showSection?: boolean;
+    /** "row" : ligne avec vignette carrée (listes) · "tile" : tuile verticale (grilles) */
+    variant?: "row" | "tile";
 }
 
 const {
@@ -29,34 +31,55 @@ const {
     pubDate,
     href,
     tags = [],
-    origin = 'authentique',
-    status = 'mature',
+    origin = "authentique",
+    status = "mature",
     section,
     heroImage,
     body,
-    accentColor = 'var(--color-accent)',
+    accentColor = "var(--color-accent)",
     showSection = false,
+    variant = "row",
 } = Astro.props;
 
 const readTime = readingTime(body);
+const tile = variant === "tile";
 ---
 
-<a href={href} class="card">
-    <PostThumb heroImage={heroImage} title={title} section={section} size={72} class="card-thumb" />
+<a href={href} class:list={["card", { tile }]}>
+    <PostThumb
+        heroImage={heroImage}
+        title={title}
+        section={section}
+        size={72}
+        wide={tile}
+        class="card-thumb"
+    />
 
     <div class="card-body">
+        {
+            tile && showSection && (
+                <span class="tile-section" style={`color: ${accentColor}`}>
+                    {SECTION_META[section].label}
+                </span>
+            )
+        }
         <h2 class="card-title" style={`color: ${accentColor}`}>{title}</h2>
         <p class="card-desc">{description}</p>
         <div class="card-footer">
             <div class="card-meta">
-                {showSection && (
-                    <span class="meta-section" style={`color: ${accentColor}`}>
-                        {SECTION_META[section].label}
-                    </span>
-                )}
+                {
+                    !tile && showSection && (
+                        <span
+                            class="meta-section"
+                            style={`color: ${accentColor}`}
+                        >
+                            {SECTION_META[section].label}
+                        </span>
+                    )
+                }
                 <span class="meta-item">
                     <Calendar size={12} />
-                    <time>{pubDate.toLocaleDateString('fr-FR')}</time>
+                    <time>{pubDate.toLocaleDateString("fr-FR")}</time>
                 </span>
                 <span class="meta-item">
                     <Clock size={12} />
@@ -64,9 +87,7 @@ const readTime = readingTime(body);
                 </span>
             </div>
             <div class="card-right">
-                {tags.slice(0, 2).map(tag => (
-                    <span class="tag">{tag}</span>
-                ))}
+                {!tile && tags.slice(0, 2).map((tag) => <span class="tag">{tag}</span>)}
                 <OriginBadge origin={origin} />
                 <StatusBadge status={status} />
             </div>
@@ -87,20 +108,26 @@ const readTime = readingTime(body);
         text-decoration: none;
     }
 
-    .card:last-child { border-bottom: none; }
+    .card:last-child {
+        border-bottom: none;
+    }
 
     .card:hover .card-title {
         text-decoration: underline;
         text-underline-offset: 3px;
     }
 
-    .card-body { min-width: 0; }
+    .card-body {
+        min-width: 0;
+    }
 
     .card :global(.card-thumb) {
         width: 100%;
         height: auto;
         aspect-ratio: 1;
-        transition: border-color 0.2s, opacity 0.2s;
+        transition:
+            border-color 0.2s,
+            opacity 0.2s;
     }
 
     .card:hover :global(.card-thumb) {
@@ -115,7 +142,9 @@ const readTime = readingTime(body);
     }
 
     @media (max-width: 520px) {
-        .card { gap: 0.75rem; }
+        .card {
+            gap: 0.75rem;
+        }
     }
 
     .card-desc {
@@ -165,6 +194,67 @@ const readTime = readingTime(body);
         align-items: center;
         gap: 0.4rem;
         flex-wrap: wrap;
+    }
+
+    /* ── Variante tuile (grilles) ─────────────── */
+    .card.tile {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+        height: 100%;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg);
+        overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card.tile:last-child {
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .card.tile:hover {
+        border-color: var(--color-accent);
+        transform: translateY(-2px);
+    }
+
+    .card.tile :global(.card-thumb) {
+        aspect-ratio: 16 / 9;
+    }
+
+    .card.tile .card-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .tile-section {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.45rem;
+    }
+
+    .card.tile .card-desc {
+        -webkit-line-clamp: 3;
+    }
+
+    /* Le pied de carte se cale en bas : toutes les tuiles d'une ligne s'alignent */
+    .card.tile .card-footer {
+        margin-top: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .card.tile:hover {
+            transform: none;
+        }
     }
 
     .tag {
