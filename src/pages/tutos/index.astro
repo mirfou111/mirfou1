@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Bientot from '../../components/Bientot.astro';
 import PostCard from '../../components/PostCard.astro';
 import { Terminal } from 'lucide-astro';
 
@@ -8,7 +9,10 @@ const tutos = (await getCollection('tutos', ({ data }) => !data.draft))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Tutos — mirfou">
+<BaseLayout
+    title="Tutos — mirfou"
+    description="Guides techniques courts et pratiques : Git, Python, méthodes de travail. Écrits à mesure que je les apprends."
+>
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
@@ -19,7 +23,7 @@ const tutos = (await getCollection('tutos', ({ data }) => !data.draft))
         </header>
 
         {tutos.length === 0 ? (
-            <p class="empty">Aucun tuto pour le moment. Bientôt...</p>
+            <Bientot rubrique="tutos" />
         ) : (
             <div class="list">
                 {tutos.map(tuto => (

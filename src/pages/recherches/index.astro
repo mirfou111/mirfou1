@@ -1,56 +1,70 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import { FlaskConical } from 'lucide-astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Bientot from "../../components/Bientot.astro";
+import PostCard from "../../components/PostCard.astro";
+import { FlaskConical } from "lucide-astro";
 
-const recherches = (await getCollection('recherches', ({ data }) => !data.draft))
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const recherches = (
+    await getCollection("recherches", ({ data }) => !data.draft)
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Recherches — mirfou">
+<BaseLayout
+    title="Recherches - mirfou"
+    description="Travaux de recherche académique en IA et smart tech : réseaux électriques, apprentissage automatique, applications africaines."
+>
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
                 <FlaskConical size={22} color="var(--section-recherches)" />
                 <h1>Recherches</h1>
             </div>
-            <p class="page-sub">Travaux académiques et résultats de recherche.</p>
+            <p class="page-sub">
+                Travaux académiques et résultats de recherche.
+            </p>
         </header>
 
-        {recherches.length === 0 ? (
-            <p class="empty">Aucune recherche pour le moment. Bientôt...</p>
-        ) : (
-            <div class="list">
-                {recherches.map(recherche => (
-                    <div class="recherche-item">
-                        {(recherche.data.domaine || recherche.data.annee) && (
-                            <div class="recherche-meta">
-                                {recherche.data.domaine && (
-                                    <span class="meta-badge">{recherche.data.domaine}</span>
-                                )}
-                                {recherche.data.annee && (
-                                    <span class="meta-badge">{recherche.data.annee}</span>
-                                )}
-                            </div>
-                        )}
-                        <PostCard
-                            title={recherche.data.title}
-                            description={recherche.data.description}
-                            pubDate={recherche.data.pubDate}
-                            href={`/recherches/${recherche.id}`}
-                            tags={recherche.data.tags}
-                            origin={recherche.data.origin}
-                        status={recherche.data.status}
-                        section="recherches"
-                        heroImage={recherche.data.heroImage}
-                            body={recherche.body}
-                            accentColor="var(--section-recherches)"
-                        />
-                    </div>
-                ))}
-            </div>
-        )}
+        {
+            recherches.length === 0 ? (
+                <Bientot rubrique="recherches" />
+            ) : (
+                <div class="list">
+                    {recherches.map((recherche) => (
+                        <div class="recherche-item">
+                            {(recherche.data.domaine ||
+                                recherche.data.annee) && (
+                                <div class="recherche-meta">
+                                    {recherche.data.domaine && (
+                                        <span class="meta-badge">
+                                            {recherche.data.domaine}
+                                        </span>
+                                    )}
+                                    {recherche.data.annee && (
+                                        <span class="meta-badge">
+                                            {recherche.data.annee}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <PostCard
+                                title={recherche.data.title}
+                                description={recherche.data.description}
+                                pubDate={recherche.data.pubDate}
+                                href={`/recherches/${recherche.id}`}
+                                tags={recherche.data.tags}
+                                origin={recherche.data.origin}
+                                status={recherche.data.status}
+                                section="recherches"
+                                heroImage={recherche.data.heroImage}
+                                body={recherche.body}
+                                accentColor="var(--section-recherches)"
+                            />
+                        </div>
+                    ))}
+                </div>
+            )
+        }
     </div>
 </BaseLayout>
 
@@ -105,8 +119,13 @@ const recherches = (await getCollection('recherches', ({ data }) => !data.draft)
         font-size: 0.68rem;
         font-family: var(--font-mono);
         color: var(--section-recherches);
-        background: color-mix(in srgb, var(--section-recherches) 8%, transparent);
-        border: 1px solid color-mix(in srgb, var(--section-recherches) 25%, transparent);
+        background: color-mix(
+            in srgb,
+            var(--section-recherches) 8%,
+            transparent
+        );
+        border: 1px solid
+            color-mix(in srgb, var(--section-recherches) 25%, transparent);
         padding: 0.15rem 0.5rem;
         border-radius: 3px;
     }

@@ -1,15 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import AntIcon from '../../components/AntIcon.astro';
-import { BookOpen } from 'lucide-astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Bientot from "../../components/Bientot.astro";
+import PostCard from "../../components/PostCard.astro";
+import AntIcon from "../../components/AntIcon.astro";
+import { BookOpen } from "lucide-astro";
 
-const articles = (await getCollection('articles', ({ data }) => !data.draft))
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const articles = (
+    await getCollection("articles", ({ data }) => !data.draft)
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Articles — mirfou">
+<BaseLayout
+    title="Articles - mirfou"
+    description="Essais et réflexions longues d'Ousmane Ndieguene : intelligence artificielle, souveraineté numérique africaine, durabilité logicielle."
+>
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
@@ -19,27 +24,29 @@ const articles = (await getCollection('articles', ({ data }) => !data.draft))
             <p class="page-sub">Réflexions longues, essais, pensées de fond.</p>
         </header>
 
-        {articles.length === 0 ? (
-            <p class="empty">Aucun article pour le moment. Bientôt...</p>
-        ) : (
-            <div class="list">
-                {articles.map(article => (
-                    <PostCard
-                        title={article.data.title}
-                        description={article.data.description}
-                        pubDate={article.data.pubDate}
-                        href={`/articles/${article.id}`}
-                        tags={article.data.tags}
-                        origin={article.data.origin}
-                        status={article.data.status}
-                        section="articles"
-                        heroImage={article.data.heroImage}
-                        body={article.body}
-                        accentColor="var(--section-articles)"
-                    />
-                ))}
-            </div>
-        )}
+        {
+            articles.length === 0 ? (
+                <Bientot rubrique="articles" />
+            ) : (
+                <div class="list">
+                    {articles.map((article) => (
+                        <PostCard
+                            title={article.data.title}
+                            description={article.data.description}
+                            pubDate={article.data.pubDate}
+                            href={`/articles/${article.id}`}
+                            tags={article.data.tags}
+                            origin={article.data.origin}
+                            status={article.data.status}
+                            section="articles"
+                            heroImage={article.data.heroImage}
+                            body={article.body}
+                            accentColor="var(--section-articles)"
+                        />
+                    ))}
+                </div>
+            )
+        }
     </div>
 </BaseLayout>
 

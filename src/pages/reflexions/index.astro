@@ -1,14 +1,19 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import { Brain } from 'lucide-astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Bientot from "../../components/Bientot.astro";
+import PostCard from "../../components/PostCard.astro";
+import { Brain } from "lucide-astro";
 
-const reflexions = (await getCollection('reflexions', ({ data }) => !data.draft))
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const reflexions = (
+    await getCollection("reflexions", ({ data }) => !data.draft)
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Réflexions — mirfou">
+<BaseLayout
+    title="Réflexions - mirfou"
+    description="Notes brèves sur le métier de développeur, le rituel, l'erreur et la concentration - écrites depuis Thiès."
+>
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
@@ -18,27 +23,29 @@ const reflexions = (await getCollection('reflexions', ({ data }) => !data.draft)
             <p class="page-sub">Fragments, pensées courtes, instants.</p>
         </header>
 
-        {reflexions.length === 0 ? (
-            <p class="empty">Aucune réflexion pour le moment. Bientôt...</p>
-        ) : (
-            <div class="list">
-                {reflexions.map(reflexion => (
-                    <PostCard
-                        title={reflexion.data.title}
-                        description={reflexion.data.description}
-                        pubDate={reflexion.data.pubDate}
-                        href={`/reflexions/${reflexion.id}`}
-                        tags={reflexion.data.tags}
-                        origin={reflexion.data.origin}
-                        status={reflexion.data.status}
-                        section="reflexions"
-                        heroImage={reflexion.data.heroImage}
-                        body={reflexion.body}
-                        accentColor="var(--section-reflexions)"
-                    />
-                ))}
-            </div>
-        )}
+        {
+            reflexions.length === 0 ? (
+                <Bientot rubrique="reflexions" />
+            ) : (
+                <div class="list">
+                    {reflexions.map((reflexion) => (
+                        <PostCard
+                            title={reflexion.data.title}
+                            description={reflexion.data.description}
+                            pubDate={reflexion.data.pubDate}
+                            href={`/reflexions/${reflexion.id}`}
+                            tags={reflexion.data.tags}
+                            origin={reflexion.data.origin}
+                            status={reflexion.data.status}
+                            section="reflexions"
+                            heroImage={reflexion.data.heroImage}
+                            body={reflexion.body}
+                            accentColor="var(--section-reflexions)"
+                        />
+                    ))}
+                </div>
+            )
+        }
     </div>
 </BaseLayout>
 

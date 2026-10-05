@@ -1,12 +1,21 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import AntIcon from '../components/AntIcon.astro';
-import { Github, ExternalLink, FlaskConical } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AntIcon from "../components/AntIcon.astro";
+import { Github, ExternalLink, FlaskConical } from "lucide-astro";
+import { SITE_URL } from "../consts";
+import Bientot from "../components/Bientot.astro";
+
+/**
+ * Les fiches projets sont conservées ci-dessous mais masquées le temps de
+ * les réécrire. Passer à true pour les réafficher.
+ */
+const AFFICHER_PROJETS = false;
 
 const projets = [
     {
         titre: "Système Expert d'Orientation",
-        description: "Système expert en Prolog pour l'orientation académique et professionnelle. Le moteur d'inférence analyse le profil de l'étudiant — résultats, intérêts, contraintes — pour suggérer des filières et métiers adaptés.",
+        description:
+            "Système expert en Prolog pour l'orientation académique et professionnelle. Le moteur d'inférence analyse le profil de l'étudiant - résultats, intérêts, contraintes - pour suggérer des filières et métiers adaptés.",
         technologies: ["Prolog", "Système Expert", "IA Symbolique"],
         statut: "termine",
         github: null,
@@ -18,8 +27,9 @@ const projets = [
         ],
     },
     {
-        titre: "GestioSang — Gestion Intelligente du Stock de Sang",
-        description: "Système intelligent de gestion de stock sanguin avec prédiction de pénurie, suggestion automatique de transfert de poches entre établissements, et chatbot explicatif intégré.",
+        titre: "GestioSang - Gestion Intelligente du Stock de Sang",
+        description:
+            "Système intelligent de gestion de stock sanguin avec prédiction de pénurie, suggestion automatique de transfert de poches entre établissements, et chatbot explicatif intégré.",
         technologies: ["Python", "Machine Learning", "NLP", "Chatbot"],
         statut: "termine",
         github: null,
@@ -32,7 +42,8 @@ const projets = [
     },
     {
         titre: "Prédiction du Diabète",
-        description: "Modèle de machine learning pour la prédiction du risque diabétique à partir de données cliniques. Exploration, nettoyage et analyse du dataset Pima Indians Diabetes avec comparaison de plusieurs algorithmes.",
+        description:
+            "Modèle de machine learning pour la prédiction du risque diabétique à partir de données cliniques. Exploration, nettoyage et analyse du dataset Pima Indians Diabetes avec comparaison de plusieurs algorithmes.",
         technologies: ["Python", "Scikit-learn", "Pandas", "NumPy"],
         statut: "termine",
         github: null,
@@ -46,25 +57,29 @@ const projets = [
 ];
 
 const statutConfig = {
-    encours: { label: 'En cours', color: 'var(--tone-encours)' },
-    termine: { label: 'Terminé', color: 'var(--tone-positif)' },
-    abandonne: { label: 'Abandonné', color: 'var(--color-muted)' },
+    encours: { label: "En cours", color: "var(--tone-encours)" },
+    termine: { label: "Terminé", color: "var(--tone-positif)" },
+    abandonne: { label: "Abandonné", color: "var(--color-muted)" },
 };
 ---
 
-<BaseLayout title="Projets — mirfou">
+<BaseLayout
+    title="Projets - mirfou"
+    description="Systèmes experts, apprentissage automatique et gestion intelligente : ce qu'Ousmane Ndieguene a construit, grain par grain."
+>
     <div class="page">
-
         <header class="page-header">
             <div class="page-title-group">
                 <FlaskConical size={22} color="var(--color-accent)" />
                 <h1>Projets</h1>
             </div>
-            <p class="page-sub">
-                Ce que j'ai construit — grain par grain.
-            </p>
+            <p class="page-sub">Ce que j'ai construit - grain par grain.</p>
         </header>
 
+        {!AFFICHER_PROJETS ? (
+            <Bientot rubrique="projets" />
+        ) : (
+            <>
         <div class="note">
             <AntIcon size={12} />
             <span>
@@ -74,62 +89,81 @@ const statutConfig = {
         </div>
 
         <div class="projets-list">
-            {projets.map((projet, i) => {
-                const statut = statutConfig[projet.statut as keyof typeof statutConfig];
-                return (
-                    <article class="projet-card">
-
-                        <div class="projet-header">
-                            <div class="projet-title-wrap">
-                                <h2 class="projet-title">{projet.titre}</h2>
-                                <span
-                                    class="projet-statut"
-                                    style={`color: ${statut.color}; border-color: color-mix(in srgb, ${statut.color} 25%, transparent); background: color-mix(in srgb, ${statut.color} 8%, transparent)`}
-                                >
-                                    {statut.label}
-                                </span>
-                            </div>
-                            <div class="projet-links">
-                                {projet.github ? (
-                                    <a href={projet.github} target="_blank" class="projet-link" title="GitHub">
-                                        <Github size={16} />
-                                        <span>Code</span>
-                                    </a>
-                                ) : (
-                                    <span class="projet-link-disabled" title="Dépôt non disponible">
-                                        <Github size={16} />
-                                        <span>Privé</span>
+            {
+                projets.map((projet, i) => {
+                    const statut =
+                        statutConfig[
+                            projet.statut as keyof typeof statutConfig
+                        ];
+                    return (
+                        <article class="projet-card">
+                            <div class="projet-header">
+                                <div class="projet-title-wrap">
+                                    <h2 class="projet-title">{projet.titre}</h2>
+                                    <span
+                                        class="projet-statut"
+                                        style={`color: ${statut.color}; border-color: color-mix(in srgb, ${statut.color} 25%, transparent); background: color-mix(in srgb, ${statut.color} 8%, transparent)`}
+                                    >
+                                        {statut.label}
                                     </span>
-                                )}
-                                {projet.demo && (
-                                    <a href={projet.demo} target="_blank" class="projet-link" title="Démo">
-                                        <ExternalLink size={16} />
-                                        <span>Démo</span>
-                                    </a>
-                                )}
+                                </div>
+                                <div class="projet-links">
+                                    {projet.github ? (
+                                        <a
+                                            href={projet.github}
+                                            target="_blank"
+                                            class="projet-link"
+                                            title="GitHub"
+                                        >
+                                            <Github size={16} />
+                                            <span>Code</span>
+                                        </a>
+                                    ) : (
+                                        <span
+                                            class="projet-link-disabled"
+                                            title="Dépôt non disponible"
+                                        >
+                                            <Github size={16} />
+                                            <span>Privé</span>
+                                        </span>
+                                    )}
+                                    {projet.demo && (
+                                        <a
+                                            href={projet.demo}
+                                            target="_blank"
+                                            class="projet-link"
+                                            title="Démo"
+                                        >
+                                            <ExternalLink size={16} />
+                                            <span>Démo</span>
+                                        </a>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        <p class="projet-desc">{projet.description}</p>
+                            <p class="projet-desc">{projet.description}</p>
 
-                        <ul class="projet-highlights">
-                            {projet.highlights.map(h => (
-                                <li>
-                                    <AntIcon size={10} class="highlight-ant" />
-                                    <span>{h}</span>
-                                </li>
-                            ))}
-                        </ul>
+                            <ul class="projet-highlights">
+                                {projet.highlights.map((h) => (
+                                    <li>
+                                        <AntIcon
+                                            size={10}
+                                            class="highlight-ant"
+                                        />
+                                        <span>{h}</span>
+                                    </li>
+                                ))}
+                            </ul>
 
-                        <div class="projet-tech">
-                            {projet.technologies.map(tech => (
-                                <span class="tech-badge">{tech}</span>
-                            ))}
-                        </div>
-
-                    </article>
-                );
-            })}
+                            <div class="projet-tech">
+                                {projet.technologies.map((tech) => (
+                                    <span class="tech-badge">{tech}</span>
+                                ))}
+                            </div>
+                        </article>
+                    );
+                })
+            }
         </div>
 
         <!-- Mirfou lui-même -->
@@ -138,17 +172,24 @@ const statutConfig = {
         <article class="projet-card projet-card-special">
             <div class="projet-header">
                 <div class="projet-title-wrap">
-                    <h2 class="projet-title">Mirfou — ce jardin</h2>
-                    <span class="projet-statut" style="color: var(--tone-encours); border-color: color-mix(in srgb, var(--tone-encours) 25%, transparent); background: color-mix(in srgb, var(--tone-encours) 8%, transparent)">
+                    <h2 class="projet-title">Mirfou - ce jardin</h2>
+                    <span
+                        class="projet-statut"
+                        style="color: var(--tone-encours); border-color: color-mix(in srgb, var(--tone-encours) 25%, transparent); background: color-mix(in srgb, var(--tone-encours) 8%, transparent)"
+                    >
                         En cours
                     </span>
                 </div>
                 <div class="projet-links">
-                    <a href="https://github.com/mirfou111/mirfou" target="_blank" class="projet-link">
+                    <a
+                        href="https://github.com/mirfou111/mirfou"
+                        target="_blank"
+                        class="projet-link"
+                    >
                         <Github size={16} />
                         <span>Code</span>
                     </a>
-                    <a href="https://mirfou111.vercel.app" target="_blank" class="projet-link">
+                    <a href={SITE_URL} target="_blank" class="projet-link">
                         <ExternalLink size={16} />
                         <span>Live</span>
                     </a>
@@ -156,25 +197,46 @@ const statutConfig = {
             </div>
 
             <p class="projet-desc">
-                Ce site lui-même — un digital garden personnel construit avec Astro 5, MDX et Tailwind.
-                Espace de pensée, d'écriture et d'expérimentation. Construit grain par grain,
-                avec un système de badges d'honnêteté intellectuelle et un Memento Mori interactif.
+                Ce site lui-même - un digital garden personnel construit avec
+                Astro 5, MDX et Tailwind. Espace de pensée, d'écriture et
+                d'expérimentation. Construit grain par grain, avec un système de
+                badges d'honnêteté intellectuelle et un Memento Mori interactif.
             </p>
 
             <ul class="projet-highlights">
-                <li><AntIcon size={10} class="highlight-ant" /><span>Astro 5 + MDX + Tailwind v4</span></li>
-                <li><AntIcon size={10} class="highlight-ant" /><span>Recherche full-text avec Pagefind</span></li>
-                <li><AntIcon size={10} class="highlight-ant" /><span>Badges origine et maturité des contenus</span></li>
-                <li><AntIcon size={10} class="highlight-ant" /><span>Memento Mori interactif avec export PNG</span></li>
+                <li>
+                    <AntIcon size={10} class="highlight-ant" /><span
+                        >Astro 5 + MDX + Tailwind v4</span>
+                </li>
+                <li>
+                    <AntIcon size={10} class="highlight-ant" /><span
+                        >Recherche full-text avec Pagefind</span>
+                </li>
+                <li>
+                    <AntIcon size={10} class="highlight-ant" /><span
+                        >Badges origine et maturité des contenus</span>
+                </li>
+                <li>
+                    <AntIcon size={10} class="highlight-ant" /><span
+                        >Memento Mori interactif avec export PNG</span>
+                </li>
             </ul>
 
             <div class="projet-tech">
-                {['Astro 5', 'MDX', 'Tailwind v4', 'TypeScript', 'Pagefind', 'Vercel'].map(tech => (
-                    <span class="tech-badge">{tech}</span>
-                ))}
+                {
+                    [
+                        "Astro 5",
+                        "MDX",
+                        "Tailwind v4",
+                        "TypeScript",
+                        "Pagefind",
+                        "Vercel",
+                    ].map((tech) => <span class="tech-badge">{tech}</span>)
+                }
             </div>
         </article>
-
+            </>
+        )}
     </div>
 </BaseLayout>
 
@@ -227,7 +289,11 @@ const statutConfig = {
         line-height: 1.6;
     }
 
-    .note svg { flex-shrink: 0; margin-top: 0.15rem; color: var(--color-accent); }
+    .note svg {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+        color: var(--color-accent);
+    }
 
     /* Liste */
     .projets-list {
@@ -242,8 +308,12 @@ const statutConfig = {
         border-bottom: 1px solid var(--color-border);
     }
 
-    .projet-card:last-child { border-bottom: none; }
-    .projet-card-special { border-bottom: none; }
+    .projet-card:last-child {
+        border-bottom: none;
+    }
+    .projet-card-special {
+        border-bottom: none;
+    }
 
     .divider {
         height: 1px;
@@ -377,7 +447,11 @@ const statutConfig = {
     }
 
     @media (max-width: 640px) {
-        .page { padding: 2rem 1.5rem 4rem; }
-        .projet-header { flex-direction: column; }
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
+        .projet-header {
+            flex-direction: column;
+        }
     }
 </style>
