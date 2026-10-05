@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-    /* Mode clair — papier chaud */
+    /* Mode clair - papier chaud */
     --color-bg: #f7f3ee;
     --color-surface: #ede8e0;
     --color-surface-2: #e4ddd3;
     --color-border: #d4cdc4;
     --color-text: #1a1612;
-    /* Texte secondaire — assombri pour atteindre le contraste AA (4.5:1) sur bg et surface */
+    /* Texte secondaire - assombri pour atteindre le contraste AA (4.5:1) sur bg et surface */
     --color-muted: #5f574d;
     --color-accent: #8b4513;
     --color-accent-soft: #b8651a;
 
-    /* Couleurs de section — calibrées pour tenir AA (4.5:1) sur bg, surface et surface-2 */
+    /* Couleurs de section - calibrées pour tenir AA (4.5:1) sur bg, surface et surface-2 */
     --section-articles: #7d593a;
     --section-contes: #3f694f;
     --section-tutos: #456281;
     --section-reflexions: #715780;
     --section-recherches: #58644d;
+    --section-labo: #984467;
 
     /* Couleurs sémantiques des badges (origine, statut, projets) */
     --tone-positif: #3f694f;
@@ -29,7 +30,9 @@
     --sidebar-width: 220px;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -46,7 +49,7 @@ html.dark {
     --color-surface-2: #1e2419;
     --color-border: #2a3022;
     --color-text: #e8e0d0;
-    /* Texte secondaire — éclairci pour atteindre le contraste AA (4.5:1) sur bg et surface */
+    /* Texte secondaire - éclairci pour atteindre le contraste AA (4.5:1) sur bg et surface */
     --color-muted: #8b9c7d;
     --color-accent: #c8922a;
     --color-accent-soft: #a07020;
@@ -57,6 +60,7 @@ html.dark {
     --section-tutos: #6c8eb1;
     --section-reflexions: #9b81aa;
     --section-recherches: #7e906f;
+    --section-labo: #c07393;
 
     --tone-positif: #5a9773;
     --tone-encours: #c8922a;
@@ -93,10 +97,22 @@ a:hover {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
 
 /* Sélection */
 ::selection {

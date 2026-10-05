@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+    // Brouillons visibles en développement uniquement (voir labo/index.astro)
+    const demos = await getCollection('labo', ({ data }) => import.meta.env.DEV || !data.draft);
+    return demos.map((demo) => ({
+        params: { slug: demo.id },
+        props: { demo },
+    }));
+}
+
+const { demo } = Astro.props;
+const { Content, headings } = await render(demo);
+---
+
+<PostLayout
+    title={demo.data.title}
+    description={demo.data.description}
+    pubDate={demo.data.pubDate}
+    updatedDate={demo.data.updatedDate}
+    tags={demo.data.tags}
+    backHref="/labo"
+    backLabel="démonstrations du Labo"
+    origin={demo.data.origin}
+    status={demo.data.status}
+    currentRef={`labo/${demo.id}`}
+    heroImage={demo.data.heroImage}
+    body={demo.body}
+    headings={headings}
+>
+    {demo.data.draft && (
+        <p class="brouillon">
+            Brouillon — cette page n'apparaît qu'en développement et ne sera pas publiée
+            tant que <code>draft: true</code>.
+        </p>
+    )}
+    <Content />
+</PostLayout>
+
+<style>
+    .brouillon {
+        padding: 0.6rem 0.9rem;
+        border: 1px dashed var(--color-muted);
+        border-radius: 6px;
+        font-size: 0.82rem;
+        color: var(--color-muted);
+    }
+</style>

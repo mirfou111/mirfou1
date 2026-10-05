@@ -1,14 +1,30 @@
 ---
-import BaseLayout from './BaseLayout.astro';
-import OriginBadge from '../components/OriginBadge.astro';
-import StatusBadge from '../components/StatusBadge.astro';
-import AntIcon from '../components/AntIcon.astro';
-import { Calendar, Clock, Tag, ArrowLeft, CornerDownRight, CornerUpLeft, Sparkles, Network } from 'lucide-astro';
-import { Image } from 'astro:assets';
-import { readingTime } from '../utils/readingTime';
-import { tagSlug } from '../utils/tags';
-import { getGarden, resolve, suggestRelated, SECTION_META, REASON_LABEL } from '../utils/garden';
-import type { Section } from '../utils/garden';
+import BaseLayout from "./BaseLayout.astro";
+import OriginBadge from "../components/OriginBadge.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import AntIcon from "../components/AntIcon.astro";
+import {
+    Calendar,
+    Clock,
+    Tag,
+    ArrowLeft,
+    CornerDownRight,
+    CornerUpLeft,
+    Sparkles,
+    Network,
+} from "lucide-astro";
+import { Image } from "astro:assets";
+import { readingTime } from "../utils/readingTime";
+import { tagSlug } from "../utils/tags";
+import {
+    getGarden,
+    resolve,
+    suggestRelated,
+    SECTION_META,
+    REASON_LABEL,
+} from "../utils/garden";
+import { ogImage } from "../utils/og";
+import type { Section } from "../utils/garden";
 
 interface Props {
     title: string;
@@ -18,8 +34,8 @@ interface Props {
     tags?: string[];
     backHref: string;
     backLabel: string;
-    origin?: 'authentique' | 'assiste' | 'genere';
-    status?: 'graine' | 'pousse' | 'mature';
+    origin?: "authentique" | "assiste" | "genere";
+    status?: "graine" | "pousse" | "mature";
     /** Identifiant global du contenu courant, ex. "articles/mon-article" */
     currentRef: string;
     heroImage?: ImageMetadata;
@@ -35,8 +51,8 @@ const {
     tags = [],
     backHref,
     backLabel,
-    origin = 'authentique',
-    status = 'mature',
+    origin = "authentique",
+    status = "mature",
     currentRef,
     heroImage,
     body,
@@ -44,7 +60,7 @@ const {
 } = Astro.props;
 
 const readTime = readingTime(body);
-const tocItems = headings.filter(h => h.depth === 2 || h.depth === 3);
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 // ── Le jardin : liens sortants déclarés, rétroliens calculés, suggestions par tags
 const garden = await getGarden();
@@ -56,39 +72,53 @@ const incoming = resolve(garden, garden.incoming.get(currentRef) ?? []);
 const suggestions = suggestRelated(
     garden,
     currentRef,
-    Math.max(0, 3 - outgoing.length - incoming.length)
+    Math.max(0, 3 - outgoing.length - incoming.length),
 );
 
 // Le libellé du bloc reflète la raison dominante des suggestions
-const suggestionHint = suggestions.length > 0
-    ? REASON_LABEL[suggestions[0].reason]
-    : '';
+const suggestionHint =
+    suggestions.length > 0 ? REASON_LABEL[suggestions[0].reason] : "";
+
+// ── SEO : métadonnées d'article et image de partage dédiée
+const section = currentRef.split("/")[0];
+const articleMeta = {
+    publishedAt: pubDate,
+    updatedAt: updatedDate,
+    section:
+        SECTION_META[section as keyof typeof SECTION_META]?.label ?? section,
+    tags,
+    headline: title,
+};
 ---
 
-<BaseLayout title={`${title} — mirfou`} description={description}>
+<BaseLayout
+    title={`${title} - mirfou`}
+    description={description}
+    image={ogImage(currentRef)}
+    article={articleMeta}
+>
     <div class="post-page">
-
         <a href={backHref} class="back-link">
             <ArrowLeft size={14} />
             <span>{backLabel}</span>
         </a>
 
-        <div class={`post-layout ${tocItems.length > 0 ? 'has-toc' : ''}`}>
-
+        <div class={`post-layout ${tocItems.length > 0 ? "has-toc" : ""}`}>
             <div class="post-main">
-
-                {heroImage && (
-                    <figure class="post-hero">
-                        <Image
-                            src={heroImage}
-                            alt=""
-                            widths={[420, 760, 1140]}
-                            sizes="(max-width: 768px) 100vw, 68ch"
-                            loading="eager"
-                            fetchpriority="high"
-                        />
-                    </figure>
-                )}
+                {
+                    heroImage && (
+                        <figure class="post-hero">
+                            <Image
+                                src={heroImage}
+                                alt=""
+                                widths={[420, 760, 1140]}
+                                sizes="(max-width: 768px) 100vw, 68ch"
+                                loading="eager"
+                                fetchpriority="high"
+                            />
+                        </figure>
+                    )
+                }
 
                 <header class="post-header">
                     <h1 class="post-title">{title}</h1>
@@ -97,119 +127,178 @@ const suggestionHint = suggestions.length > 0
                     <div class="post-meta">
                         <span class="meta-item">
                             <Calendar size={13} />
-                            <time>{pubDate.toLocaleDateString('fr-FR', { dateStyle: 'long' })}</time>
+                            <time
+                                >{
+                                    pubDate.toLocaleDateString("fr-FR", {
+                                        dateStyle: "long",
+                                    })
+                                }</time
+                            >
                         </span>
                         <span class="meta-item">
                             <Clock size={13} />
                             <span>{readTime}</span>
                         </span>
-                        {updatedDate && (
-                            <span class="meta-item">
-                                <span>Mis à jour le</span>
-                                <time>{updatedDate.toLocaleDateString('fr-FR', { dateStyle: 'long' })}</time>
-                            </span>
-                        )}
+                        {
+                            updatedDate && (
+                                <span class="meta-item">
+                                    <span>Mis à jour le</span>
+                                    <time>
+                                        {updatedDate.toLocaleDateString(
+                                            "fr-FR",
+                                            { dateStyle: "long" },
+                                        )}
+                                    </time>
+                                </span>
+                            )
+                        }
                         <OriginBadge origin={origin} linked />
                         <StatusBadge status={status} linked />
                     </div>
 
-                    {tags.length > 0 && (
-                        <div class="post-tags">
-                            <Tag size={13} />
-                            {tags.map(tag => (
-                                <a href={`/tags/${tagSlug(tag)}`} class="tag">{tag}</a>
-                            ))}
-                        </div>
-                    )}
+                    {
+                        tags.length > 0 && (
+                            <div class="post-tags">
+                                <Tag size={13} />
+                                {tags.map((tag) => (
+                                    <a
+                                        href={`/tags/${tagSlug(tag)}`}
+                                        class="tag"
+                                    >
+                                        {tag}
+                                    </a>
+                                ))}
+                            </div>
+                        )
+                    }
                 </header>
 
                 <article class="post-content" data-pagefind-body>
                     <slot />
                 </article>
 
-                {(outgoing.length > 0 || incoming.length > 0 || suggestions.length > 0) && (
-                    <div class="related">
+                {
+                    (outgoing.length > 0 ||
+                        incoming.length > 0 ||
+                        suggestions.length > 0) && (
+                        <div class="related">
+                            {outgoing.length > 0 && (
+                                <section class="related-block">
+                                    <p class="related-title">
+                                        <CornerDownRight size={12} />
+                                        <span>Dans le même jardin</span>
+                                    </p>
+                                    <ul class="related-list">
+                                        {outgoing.map((item) => (
+                                            <li>
+                                                <a
+                                                    href={item.href}
+                                                    class="related-item"
+                                                >
+                                                    <AntIcon
+                                                        size={11}
+                                                        class="related-ant"
+                                                    />
+                                                    <span
+                                                        class="related-section"
+                                                        style={`color: ${SECTION_META[item.section as Section].color}`}
+                                                    >
+                                                        {item.section}
+                                                    </span>
+                                                    <span class="related-name">
+                                                        {item.title}
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                            )}
 
-                        {outgoing.length > 0 && (
-                            <section class="related-block">
-                                <p class="related-title">
-                                    <CornerDownRight size={12} />
-                                    <span>Dans le même jardin</span>
-                                </p>
-                                <ul class="related-list">
-                                    {outgoing.map(item => (
-                                        <li>
-                                            <a href={item.href} class="related-item">
-                                                <AntIcon size={11} class="related-ant" />
-                                                <span
-                                                    class="related-section"
-                                                    style={`color: ${SECTION_META[item.section as Section].color}`}
-                                                >{item.section}</span>
-                                                <span class="related-name">{item.title}</span>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-                        )}
+                            {incoming.length > 0 && (
+                                <section class="related-block">
+                                    <p class="related-title">
+                                        <CornerUpLeft size={12} />
+                                        <span>Mentionné dans</span>
+                                        <span class="related-hint">
+                                            rétroliens
+                                        </span>
+                                    </p>
+                                    <ul class="related-list">
+                                        {incoming.map((item) => (
+                                            <li>
+                                                <a
+                                                    href={item.href}
+                                                    class="related-item"
+                                                >
+                                                    <AntIcon
+                                                        size={11}
+                                                        class="related-ant"
+                                                    />
+                                                    <span
+                                                        class="related-section"
+                                                        style={`color: ${SECTION_META[item.section as Section].color}`}
+                                                    >
+                                                        {item.section}
+                                                    </span>
+                                                    <span class="related-name">
+                                                        {item.title}
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                            )}
 
-                        {incoming.length > 0 && (
-                            <section class="related-block">
-                                <p class="related-title">
-                                    <CornerUpLeft size={12} />
-                                    <span>Mentionné dans</span>
-                                    <span class="related-hint">rétroliens</span>
-                                </p>
-                                <ul class="related-list">
-                                    {incoming.map(item => (
-                                        <li>
-                                            <a href={item.href} class="related-item">
-                                                <AntIcon size={11} class="related-ant" />
-                                                <span
-                                                    class="related-section"
-                                                    style={`color: ${SECTION_META[item.section as Section].color}`}
-                                                >{item.section}</span>
-                                                <span class="related-name">{item.title}</span>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-                        )}
+                            {suggestions.length > 0 && (
+                                <section class="related-block">
+                                    <p class="related-title">
+                                        <Sparkles size={12} />
+                                        <span>À explorer</span>
+                                        <span class="related-hint">
+                                            {suggestionHint}
+                                        </span>
+                                    </p>
+                                    <ul class="related-list">
+                                        {suggestions.map(({ node, shared }) => (
+                                            <li>
+                                                <a
+                                                    href={node.href}
+                                                    class="related-item"
+                                                >
+                                                    <AntIcon
+                                                        size={11}
+                                                        class="related-ant"
+                                                    />
+                                                    <span
+                                                        class="related-section"
+                                                        style={`color: ${SECTION_META[node.section].color}`}
+                                                    >
+                                                        {node.section}
+                                                    </span>
+                                                    <span class="related-name">
+                                                        {node.title}
+                                                    </span>
+                                                    {shared.length > 0 && (
+                                                        <span class="related-shared">
+                                                            {shared.join(" · ")}
+                                                        </span>
+                                                    )}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                            )}
 
-                        {suggestions.length > 0 && (
-                            <section class="related-block">
-                                <p class="related-title">
-                                    <Sparkles size={12} />
-                                    <span>À explorer</span>
-                                    <span class="related-hint">{suggestionHint}</span>
-                                </p>
-                                <ul class="related-list">
-                                    {suggestions.map(({ node, shared }) => (
-                                        <li>
-                                            <a href={node.href} class="related-item">
-                                                <AntIcon size={11} class="related-ant" />
-                                                <span
-                                                    class="related-section"
-                                                    style={`color: ${SECTION_META[node.section].color}`}
-                                                >{node.section}</span>
-                                                <span class="related-name">{node.title}</span>
-                                                {shared.length > 0 && (
-                                                    <span class="related-shared">{shared.join(' · ')}</span>
-                                                )}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-                        )}
-
-                        <a href="/jardin" class="related-graph">
-                            <Network size={12} />
-                            <span>Voir le jardin en entier</span>
-                        </a>
-                    </div>
-                )}
+                            <a href="/jardin" class="related-graph">
+                                <Network size={12} />
+                                <span>Voir le jardin en entier</span>
+                            </a>
+                        </div>
+                    )
+                }
 
                 <footer class="post-footer">
                     <div class="footer-ant">
@@ -220,22 +309,22 @@ const suggestionHint = suggestions.length > 0
                         <span>Retour aux {backLabel}</span>
                     </a>
                 </footer>
-
             </div>
 
-            {tocItems.length > 0 && (
-                <aside class="toc">
-                    <p class="toc-title">Dans cet article</p>
-                    <ul>
-                        {tocItems.map(h => (
-                            <li class={`depth-${h.depth}`}>
-                                <a href={`#${h.slug}`}>{h.text}</a>
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
-            )}
-
+            {
+                tocItems.length > 0 && (
+                    <aside class="toc">
+                        <p class="toc-title">Dans cet article</p>
+                        <ul>
+                            {tocItems.map((h) => (
+                                <li class={`depth-${h.depth}`}>
+                                    <a href={`#${h.slug}`}>{h.text}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </aside>
+                )
+            }
         </div>
     </div>
 </BaseLayout>
@@ -257,7 +346,9 @@ const suggestionHint = suggestions.length > 0
         transition: color 0.2s;
     }
 
-    .back-link:hover { color: var(--color-accent); }
+    .back-link:hover {
+        color: var(--color-accent);
+    }
 
     /* Mesure de lecture constante : ~68 caractères, que l'article ait
        un sommaire ou non. Sans cette contrainte, un article sans titre h2
@@ -367,9 +458,15 @@ const suggestionHint = suggestions.length > 0
         line-height: 1.3;
     }
 
-    .post-content :global(h2) { font-size: 1.4rem; }
-    .post-content :global(h3) { font-size: 1.1rem; }
-    .post-content :global(p) { margin-bottom: 1.5rem; }
+    .post-content :global(h2) {
+        font-size: 1.4rem;
+    }
+    .post-content :global(h3) {
+        font-size: 1.1rem;
+    }
+    .post-content :global(p) {
+        margin-bottom: 1.5rem;
+    }
 
     .post-content :global(a) {
         color: var(--color-accent);
@@ -418,7 +515,9 @@ const suggestionHint = suggestions.length > 0
         margin-bottom: 1.5rem;
     }
 
-    .post-content :global(li) { margin-bottom: 0.4rem; }
+    .post-content :global(li) {
+        margin-bottom: 0.4rem;
+    }
 
     .post-content :global(table) {
         width: 100%;
@@ -529,7 +628,9 @@ const suggestionHint = suggestions.length > 0
         transition: color 0.2s;
     }
 
-    .related-graph:hover { color: var(--color-accent); }
+    .related-graph:hover {
+        color: var(--color-accent);
+    }
 
     .related-item {
         display: flex;
@@ -540,7 +641,9 @@ const suggestionHint = suggestions.length > 0
         transition: color 0.2s;
     }
 
-    .related-item:hover { color: var(--color-accent); }
+    .related-item:hover {
+        color: var(--color-accent);
+    }
 
     .related-ant {
         color: var(--color-accent);
@@ -549,7 +652,9 @@ const suggestionHint = suggestions.length > 0
         transition: opacity 0.2s;
     }
 
-    .related-item:hover .related-ant { opacity: 1; }
+    .related-item:hover .related-ant {
+        opacity: 1;
+    }
 
     .related-section {
         font-family: var(--font-mono);
@@ -592,7 +697,9 @@ const suggestionHint = suggestions.length > 0
         transition: color 0.2s;
     }
 
-    .back-link-bottom:hover { color: var(--color-accent); }
+    .back-link-bottom:hover {
+        color: var(--color-accent);
+    }
 
     /* TOC */
     .toc {
@@ -625,16 +732,28 @@ const suggestionHint = suggestions.length > 0
         display: block;
     }
 
-    .toc a:hover { color: var(--color-accent); }
+    .toc a:hover {
+        color: var(--color-accent);
+    }
 
-    .depth-3 { padding-left: 0.75rem; }
-    .depth-3 a { font-size: 0.75rem; }
+    .depth-3 {
+        padding-left: 0.75rem;
+    }
+    .depth-3 a {
+        font-size: 0.75rem;
+    }
 
     /* Mobile */
     @media (max-width: 768px) {
-        .post-page { padding: 2rem 1.5rem 4rem; }
+        .post-page {
+            padding: 2rem 1.5rem 4rem;
+        }
         .post-layout,
-        .post-layout.has-toc { grid-template-columns: minmax(0, 1fr); }
-        .toc { display: none; }
+        .post-layout.has-toc {
+            grid-template-columns: minmax(0, 1fr);
+        }
+        .toc {
+            display: none;
+        }
     }
 </style>

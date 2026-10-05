@@ -1,0 +1,149 @@
+---
+/**
+ * Carte de renvoi vers un autre contenu du jardin, à placer dans un texte MDX.
+ *
+ *   import VoirAussi from '../../components/VoirAussi.astro';
+ *   <VoirAussi ref="labo/tris/tri-rapide" />
+ *   <VoirAussi ref="tutos/mon-tuto" note="Le même algorithme, expliqué pas à pas." />
+ *
+ * La carte compte comme un lien du jardin : la page visée affichera ce texte
+ * dans ses rétroliens (« Mentionné dans »), sans rien déclarer d'autre.
+ *
+ * Si la cible est encore en brouillon, la carte ne s'affiche pas en production
+ * (et se signale en développement) : elle apparaîtra le jour de sa publication.
+ * Si la cible n'existe pas, le build échoue — c'est presque toujours une faute de frappe.
+ */
+import { ArrowRight, Beaker } from 'lucide-astro';
+import { getGarden, SECTION_META, SECTIONS } from '../utils/garden';
+
+interface Props {
+    /** Référence « section/id », par exemple "labo/tris/tri-rapide" */
+    ref: string;
+    /** Phrase d'accroche facultative, à la place de la description de la cible */
+    note?: string;
+}
+
+const { ref, note } = Astro.props;
+const garden = await getGarden();
+const cible = garden.byRef.get(ref);
+const enBrouillon = !cible && garden.brouillons.has(ref);
+
+if (!cible && !enBrouillon) {
+    throw new Error(
+        `[VoirAussi] Référence introuvable : « ${ref} ».\n` +
+        `Format attendu : "section/id", par exemple "labo/tris/tri-rapide".\n` +
+        `Sections valides : ${SECTIONS.join(', ')}.`,
+    );
+}
+
+const estDemo = cible?.section === 'labo';
+const action = estDemo ? 'Ouvrir la démonstration' : 'Lire';
+---
+
+{cible && (
+    <aside class="voir" style={`--sec: var(${SECTION_META[cible.section].cssVar})`}>
+        <a href={cible.href} class="voir-lien">
+            <span class="voir-section">
+                {estDemo && <Beaker size={13} />}
+                {SECTION_META[cible.section].label}
+            </span>
+            <span class="voir-titre">{cible.title}</span>
+            <span class="voir-desc">{note ?? cible.description}</span>
+            <span class="voir-action">
+                <span>{action}</span>
+                <ArrowRight size={14} />
+            </span>
+        </a>
+    </aside>
+)}
+
+{enBrouillon && import.meta.env.DEV && (
+    <aside class="voir voir-brouillon">
+        <span class="voir-section">Lien en attente</span>
+        <span class="voir-desc">
+            « {ref} » est encore en brouillon. Cette carte apparaîtra quand il sera publié.
+        </span>
+    </aside>
+)}
+
+<style>
+    .voir {
+        margin: 2rem 0;
+    }
+
+    .voir-lien {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 1rem 1.2rem;
+        border: 1px solid var(--color-border);
+        border-left: 3px solid var(--sec);
+        border-radius: 0 8px 8px 0;
+        background: var(--color-surface);
+        text-decoration: none !important;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .voir-lien:hover {
+        border-color: var(--sec);
+        background: color-mix(in srgb, var(--sec) 6%, var(--color-surface));
+    }
+
+    .voir-section {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--sec, var(--color-muted));
+    }
+
+    .voir-titre {
+        font-size: 1.02rem;
+        font-weight: 700;
+        line-height: 1.35;
+        color: var(--color-text);
+    }
+
+    .voir-desc {
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: var(--color-muted);
+    }
+
+    .voir-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.3rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--sec);
+    }
+
+    .voir-lien:hover .voir-action :global(svg) {
+        transform: translateX(2px);
+    }
+
+    .voir-action :global(svg) {
+        transition: transform 0.2s;
+    }
+
+    .voir-brouillon {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.8rem 1rem;
+        border: 1px dashed var(--color-muted);
+        border-radius: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .voir-action :global(svg) {
+            transition: none;
+        }
+    }
+</style>

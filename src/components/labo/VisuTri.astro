@@ -1,0 +1,582 @@
+---
+/**
+ * Démonstration interactive d'un algorithme de tri.
+ *
+ * Usage dans un fichier MDX :
+ *   <VisuTri algo="bulles" />
+ *   <VisuTri algo="rapide" taille={24} donnees="presque-trie" />
+ *
+ * Plusieurs démonstrations peuvent cohabiter sur la même page.
+ * Clavier (démonstration sélectionnée) : espace = lecture/pause,
+ * ← → = pas précédent/suivant, Début/Fin = première/dernière étape.
+ */
+import { SkipBack, StepBack, Play, Pause, StepForward, SkipForward, Shuffle } from 'lucide-astro';
+import { TRIS, type NomTri } from '../../labo/tris';
+import { DONNEES, type Donnees } from '../../labo/moteur';
+
+interface Props {
+    algo: NomTri;
+    taille?: 8 | 12 | 16 | 24 | 32;
+    donnees?: Donnees;
+}
+
+const { algo, taille = 16, donnees = 'aleatoire' } = Astro.props;
+const tri = TRIS[algo];
+if (!tri) throw new Error(`[labo] Tri inconnu : « ${algo} ». Disponibles : ${Object.keys(TRIS).join(', ')}.`);
+
+const TAILLES = [8, 12, 16, 24, 32];
+const uid = `tri-${algo}-${Math.random().toString(36).slice(2, 7)}`;
+const oui = (b: boolean) => (b ? 'oui' : 'non');
+---
+
+<figure
+    class="visu"
+    data-visu-tri
+    data-algo={algo}
+    tabindex="0"
+    aria-labelledby={`${uid}-titre`}
+    aria-describedby={`${uid}-aide`}
+>
+    <figcaption class="visu-tete">
+        <span class="visu-titre" id={`${uid}-titre`}>{tri.nom}</span>
+        <dl class="fiche">
+            <div><dt>Meilleur</dt><dd>{tri.fiche.meilleur}</dd></div>
+            <div><dt>Moyen</dt><dd>{tri.fiche.moyen}</dd></div>
+            <div><dt>Pire</dt><dd>{tri.fiche.pire}</dd></div>
+            <div><dt>Mémoire</dt><dd>{tri.fiche.memoire}</dd></div>
+            <div><dt>Stable</dt><dd>{oui(tri.fiche.stable)}</dd></div>
+            <div><dt>En place</dt><dd>{oui(tri.fiche.enPlace)}</dd></div>
+        </dl>
+    </figcaption>
+
+    {/* Barres */}
+    <div class="barres" data-barres aria-hidden="true"></div>
+
+    <ul class="legende" aria-hidden="true">
+        <li><span class="pastille compare"></span>comparés</li>
+        <li><span class="pastille echange"></span>échangés</li>
+        <li><span class="pastille marque"></span>pivot / minimum</li>
+        <li><span class="pastille place"></span>à sa place</li>
+    </ul>
+
+    {/* Frise */}
+    <label class="frise">
+        <span class="sr-only">Étape</span>
+        <input type="range" min="0" max="0" value="0" step="1" data-frise />
+    </label>
+
+    {/* Commandes */}
+    <div class="commandes">
+        <div class="lecteur">
+            <button type="button" data-action="debut" aria-label="Revenir au début"><SkipBack size={16} /></button>
+            <button type="button" data-action="prec" aria-label="Étape précédente"><StepBack size={16} /></button>
+            <button type="button" class="principal" data-action="lecture" aria-label="Lecture">
+                <span class="ic-lecture"><Play size={16} /></span>
+                <span class="ic-pause"><Pause size={16} /></span>
+            </button>
+            <button type="button" data-action="suiv" aria-label="Étape suivante"><StepForward size={16} /></button>
+            <button type="button" data-action="fin" aria-label="Aller à la fin"><SkipForward size={16} /></button>
+        </div>
+
+        <label class="reglage">
+            <span>Vitesse</span>
+            <input type="range" min="1" max="10" value="5" step="1" data-vitesse />
+        </label>
+
+        <label class="reglage">
+            <span>Taille</span>
+            <select data-taille>
+                {TAILLES.map(t => <option value={t} selected={t === taille}>{t}</option>)}
+            </select>
+        </label>
+
+        <label class="reglage">
+            <span>Données</span>
+            <select data-donnees>
+                {Object.entries(DONNEES).map(([v, l]) => (
+                    <option value={v} selected={v === donnees}>{l}</option>
+                ))}
+            </select>
+        </label>
+
+        <button type="button" class="nouveau" data-action="nouveau">
+            <Shuffle size={14} />
+            <span>Nouveau tirage</span>
+        </button>
+    </div>
+
+    {/* Pseudo-code et journal */}
+    <div class="bas">
+        <ol class="pseudo" data-pseudo aria-label="Pseudo-code">
+            {tri.lignes.map(l => <li><code>{l}</code></li>)}
+        </ol>
+
+        <div class="suivi">
+            <p class="journal" data-journal aria-live="polite"></p>
+            <dl class="compteurs">
+                <div><dt>Comparaisons</dt><dd data-cmp>0</dd></div>
+                <div><dt>Échanges</dt><dd data-ech>0</dd></div>
+                <div><dt>Étape</dt><dd data-pas>0</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <p class="sr-only" id={`${uid}-aide`}>
+        Espace pour lancer ou mettre en pause, flèches gauche et droite pour avancer
+        ou reculer d'une étape, touches Début et Fin pour sauter au début ou à la fin.
+    </p>
+</figure>
+
+<script>
+    import { TRIS, type NomTri } from '../../labo/tris';
+    import { enregistrer, generer, type Donnees, type Image } from '../../labo/moteur';
+
+    const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll<HTMLElement>('[data-visu-tri]').forEach((racine) => {
+        const tri = TRIS[racine.dataset.algo as NomTri];
+        const $ = <T extends Element>(s: string) => racine.querySelector<T>(s)!;
+
+        const barres = $<HTMLDivElement>('[data-barres]');
+        const frise = $<HTMLInputElement>('[data-frise]');
+        const vitesse = $<HTMLInputElement>('[data-vitesse]');
+        const taille = $<HTMLSelectElement>('[data-taille]');
+        const donnees = $<HTMLSelectElement>('[data-donnees]');
+        const lignes = [...racine.querySelectorAll<HTMLLIElement>('[data-pseudo] li')];
+        const journal = $<HTMLParagraphElement>('[data-journal]');
+        const cmp = $('[data-cmp]');
+        const ech = $('[data-ech]');
+        const pas = $('[data-pas]');
+        const btnLecture = $<HTMLButtonElement>('[data-action="lecture"]');
+
+        let images: Image[] = [];
+        let idx = 0;
+        let minuterie: number | null = null;
+        let colonnes: HTMLDivElement[] = [];
+
+        // ── Construction ─────────────────────────────
+        function preparer() {
+            arreter();
+            const depart = generer(donnees.value as Donnees, Number(taille.value));
+            images = enregistrer(tri.algo, depart);
+            frise.max = String(images.length - 1);
+            idx = 0;
+
+            barres.innerHTML = '';
+            barres.classList.toggle('dense', depart.length > 16);
+            colonnes = depart.map(() => {
+                const col = document.createElement('div');
+                col.className = 'col';
+                col.innerHTML = '<div class="barre"></div><span class="valeur"></span>';
+                barres.appendChild(col);
+                return col;
+            });
+            afficher();
+        }
+
+        // ── Rendu d'une image ────────────────────────
+        function afficher() {
+            const im = images[idx];
+            const { etape } = im;
+            const places = new Set(im.places);
+
+            colonnes.forEach((col, k) => {
+                const barre = col.firstElementChild as HTMLDivElement;
+                barre.style.height = `${im.valeurs[k]}%`;
+                (col.lastElementChild as HTMLSpanElement).textContent = String(im.valeurs[k]);
+
+                const concerne = k === etape.i || k === etape.j;
+                col.className = 'col';
+                if (places.has(k)) col.classList.add('place');
+                if (k === im.marque) col.classList.add('marque');
+                if (concerne && etape.type === 'compare') col.classList.add('compare');
+                if (concerne && etape.type === 'echange') col.classList.add('echange');
+                if (im.zone && (k < im.zone[0] || k > im.zone[1]) && !places.has(k)) col.classList.add('hors-zone');
+            });
+
+            lignes.forEach((li, n) => li.classList.toggle('active', n === etape.ligne));
+            journal.textContent = etape.message;
+            cmp.textContent = String(im.comparaisons);
+            ech.textContent = String(im.echanges);
+            pas.textContent = `${idx} / ${images.length - 1}`;
+            frise.value = String(idx);
+        }
+
+        // ── Lecture ──────────────────────────────────
+        const delai = () => Math.round(900 * Math.pow(0.7, Number(vitesse.value) - 1));
+
+        function aller(n: number) {
+            idx = Math.max(0, Math.min(images.length - 1, n));
+            afficher();
+        }
+
+        function boucle() {
+            if (idx >= images.length - 1) { arreter(); return; }
+            aller(idx + 1);
+            minuterie = window.setTimeout(boucle, delai());
+        }
+
+        function lancer() {
+            if (idx >= images.length - 1) aller(0);
+            racine.classList.add('en-lecture');
+            btnLecture.setAttribute('aria-label', 'Pause');
+            // Pendant la lecture, le journal défile trop vite pour être lu à voix haute
+            journal.setAttribute('aria-live', 'off');
+            boucle();
+        }
+
+        function arreter() {
+            if (minuterie !== null) window.clearTimeout(minuterie);
+            minuterie = null;
+            racine.classList.remove('en-lecture');
+            btnLecture.setAttribute('aria-label', 'Lecture');
+            journal.setAttribute('aria-live', 'polite');
+        }
+
+        const basculer = () => (minuterie === null ? lancer() : arreter());
+
+        const actions: Record<string, () => void> = {
+            debut: () => { arreter(); aller(0); },
+            prec: () => { arreter(); aller(idx - 1); },
+            lecture: basculer,
+            suiv: () => { arreter(); aller(idx + 1); },
+            fin: () => { arreter(); aller(images.length - 1); },
+            nouveau: preparer,
+        };
+
+        racine.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((b) =>
+            b.addEventListener('click', () => actions[b.dataset.action!]()),
+        );
+
+        frise.addEventListener('input', () => { arreter(); aller(Number(frise.value)); });
+        taille.addEventListener('change', preparer);
+        donnees.addEventListener('change', preparer);
+
+        // Clavier, uniquement quand la démonstration a le focus
+        racine.addEventListener('keydown', (e) => {
+            const cible = e.target as HTMLElement;
+            if (cible.matches('input, select')) return;
+            const touches: Record<string, () => void> = {
+                ' ': basculer,
+                ArrowRight: actions.suiv,
+                ArrowLeft: actions.prec,
+                Home: actions.debut,
+                End: actions.fin,
+            };
+            const action = touches[e.key];
+            if (action && !(cible.tagName === 'BUTTON' && e.key === ' ')) {
+                e.preventDefault();
+                action();
+            }
+        });
+
+        // Une démo qui sort de l'écran se met en pause
+        new IntersectionObserver(([entree]) => {
+            if (!entree.isIntersecting) arreter();
+        }).observe(racine);
+
+        if (reduit) racine.classList.add('sans-animation');
+        preparer();
+    });
+</script>
+
+<style>
+    .visu {
+        container-type: inline-size;
+        margin: 2rem 0;
+        padding: 1.25rem;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: var(--color-surface);
+        outline-offset: 4px;
+    }
+
+    /* ── En-tête et fiche ───────────────────────── */
+    .visu-tete {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .visu-titre {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--color-text);
+    }
+
+    .fiche {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0;
+    }
+
+    .fiche div {
+        display: flex;
+        gap: 0.3rem;
+        padding: 0.15rem 0.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+    }
+
+    .fiche dt { color: var(--color-muted); }
+    .fiche dd { margin: 0; color: var(--color-text); }
+
+    /* ── Barres ─────────────────────────────────── */
+    .barres {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 220px;
+        padding-bottom: 1.2rem;
+    }
+
+    .barres :global(.col) {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: stretch;
+        position: relative;
+        transition: opacity 0.2s;
+    }
+
+    .barres :global(.barre) {
+        border-radius: 3px 3px 0 0;
+        background: color-mix(in srgb, var(--color-muted) 45%, transparent);
+        transition: height 0.15s ease, background-color 0.15s;
+    }
+
+    .barres :global(.valeur) {
+        position: absolute;
+        bottom: -1.2rem;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--color-muted);
+    }
+
+    .barres.dense :global(.valeur) { display: none; }
+
+    .barres :global(.col.place .barre)   { background: var(--tone-positif); }
+    .barres :global(.col.marque .barre)  { background: var(--section-tutos); }
+    .barres :global(.col.compare .barre) { background: var(--tone-encours); }
+    .barres :global(.col.echange .barre) { background: var(--section-reflexions); }
+    .barres :global(.col.hors-zone)      { opacity: 0.3; }
+
+    .sans-animation .barres :global(.barre) { transition: none; }
+
+    .visu .legende {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 1rem;
+        list-style: none;
+        padding: 0;
+        margin: 0.4rem 0 0.9rem;
+        font-size: 0.72rem;
+        color: var(--color-muted);
+    }
+
+    .legende li { display: flex; align-items: center; gap: 0.35rem; }
+
+    .pastille {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+    }
+
+    .pastille.compare { background: var(--tone-encours); }
+    .pastille.echange { background: var(--section-reflexions); }
+    .pastille.marque  { background: var(--section-tutos); }
+    .pastille.place   { background: var(--tone-positif); }
+
+    /* ── Frise et commandes ─────────────────────── */
+    .frise { display: block; margin-bottom: 0.75rem; }
+    .frise input { width: 100%; accent-color: var(--color-accent); }
+
+    .commandes {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .lecteur { display: flex; gap: 0.25rem; }
+
+    .visu button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 0.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s;
+    }
+
+    .visu button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+    .visu button.principal {
+        min-width: 44px;
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-bg);
+    }
+
+    .visu button.principal:hover { color: var(--color-bg); opacity: 0.9; }
+
+    .ic-pause { display: none; }
+    .en-lecture .ic-pause { display: inline-flex; }
+    .en-lecture .ic-lecture { display: none; }
+    .ic-lecture, .ic-pause { align-items: center; }
+    .ic-lecture { display: inline-flex; }
+
+    .reglage {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+    }
+
+    .reglage input { width: 80px; accent-color: var(--color-accent); }
+
+    .reglage select {
+        height: 30px;
+        padding: 0 0.4rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: inherit;
+        font-size: 0.78rem;
+    }
+
+    .nouveau { margin-left: auto; }
+
+    /* ── Pseudo-code et suivi ───────────────────── */
+    .bas {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    @container (min-width: 560px) {
+        .bas { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+    }
+
+    .visu .pseudo {
+        list-style: none;
+        margin: 0;
+        padding: 0.6rem 0;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        counter-reset: ligne;
+    }
+
+    /* La colonne d'article impose un interligne de 1.85 et une marge sous
+       chaque <li> : on les neutralise, le code doit rester compact. */
+    .visu .pseudo li,
+    .visu .legende li {
+        margin: 0;
+        line-height: 1.55;
+    }
+
+    .pseudo li {
+        counter-increment: ligne;
+        display: flex;
+        gap: 0.6rem;
+        padding: 0.12rem 0.75rem;
+        border-left: 3px solid transparent;
+    }
+
+    .pseudo li::before {
+        content: counter(ligne);
+        min-width: 1.2em;
+        text-align: right;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--color-muted);
+        opacity: 0.6;
+    }
+
+    .pseudo code {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        white-space: pre;
+        color: var(--color-text);
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .pseudo li.active {
+        border-left-color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    }
+
+    .visu .journal {
+        min-height: 3.2em;
+        margin: 0 0 0.75rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--color-text);
+    }
+
+    .visu .compteurs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.25rem;
+        margin: 0;
+    }
+
+    .compteurs div { display: flex; flex-direction: column; }
+
+    .compteurs dt {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+    }
+
+    .compteurs dd {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: var(--color-text);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    @media (max-width: 560px) {
+        .visu { padding: 1rem 0.85rem; }
+        .barres { height: 170px; }
+        .nouveau { margin-left: 0; }
+    }
+</style>

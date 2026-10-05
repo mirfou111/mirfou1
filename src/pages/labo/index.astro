@@ -1,0 +1,276 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Bientot from '../../components/Bientot.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { Beaker, ArrowDownWideNarrow, Waypoints, Binary, ArrowRight } from 'lucide-astro';
+import { FAMILLES, ORDRE_FAMILLES, type Famille } from '../../data/labo';
+
+// En développement, les brouillons restent visibles (et signalés) pour
+// pouvoir travailler dessus. En production, seules les pages publiées sortent.
+const visible = ({ data }: { data: { draft: boolean } }) => import.meta.env.DEV || !data.draft;
+
+const demos = (await getCollection('labo', visible)).sort(
+    (a, b) => a.data.ordre - b.data.ordre || a.data.title.localeCompare(b.data.title, 'fr'),
+);
+
+const icones: Record<Famille, any> = {
+    tris: ArrowDownWideNarrow,
+    graphes: Waypoints,
+    combinatoire: Binary,
+};
+
+const familles = ORDRE_FAMILLES.map((cle) => {
+    const liste = demos.filter((d) => d.data.famille === cle);
+    const deja = new Set(liste.map((d) => d.data.title.toLowerCase()));
+    return {
+        cle,
+        ...FAMILLES[cle],
+        liste,
+        avenir: FAMILLES[cle].prevus.filter((p) => !deja.has(p.toLowerCase())),
+    };
+});
+---
+
+<BaseLayout
+    title="Labo — mirfou"
+    description="Des démonstrations interactives pour voir les algorithmes travailler pas à pas : tris, graphes, combinatoire."
+>
+    <div class="page">
+        <header class="page-header">
+            <div class="page-title-group">
+                <Beaker size={22} color="var(--color-accent)" />
+                <h1>Labo</h1>
+            </div>
+            <p class="page-sub">
+                On regarde l'algorithme travailler, étape par étape, avant de
+                comprendre pourquoi il marche.
+            </p>
+        </header>
+
+        {demos.length === 0 && (
+            <div class="attente">
+                <Bientot rubrique="labo" />
+            </div>
+        )}
+
+        {familles.map(({ cle, nom, intro, liste, avenir }) => {
+            const Icone = icones[cle];
+            return (
+                <section class="famille" aria-labelledby={`famille-${cle}`}>
+                    <div class="famille-tete">
+                        <h2 id={`famille-${cle}`}>
+                            <Icone size={16} />
+                            <span>{nom}</span>
+                        </h2>
+                        <p class="famille-intro">{intro}</p>
+                    </div>
+
+                    {liste.length > 0 && (
+                        <ul class="demos">
+                            {liste.map((d) => (
+                                <li>
+                                    <a href={`/labo/${d.id}`} class="demo">
+                                        <span class="demo-titre">{d.data.title}</span>
+                                        <span class="demo-desc">{d.data.description}</span>
+                                        <span class="demo-pied">
+                                            <StatusBadge status={d.data.status} />
+                                            {d.data.draft && <span class="brouillon">brouillon</span>}
+                                            <ArrowRight size={14} class="demo-fleche" />
+                                        </span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    {avenir.length > 0 && (
+                        <div class="avenir">
+                            <span class="avenir-label">À venir</span>
+                            <ul>
+                                {avenir.map((t) => <li>{t}</li>)}
+                            </ul>
+                        </div>
+                    )}
+                </section>
+            );
+        })}
+    </div>
+</BaseLayout>
+
+<style>
+    .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    .page-sub {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        max-width: 56ch;
+        margin: 0;
+    }
+
+    .attente {
+        margin-bottom: 3rem;
+    }
+
+    /* ── Familles ───────────────────────────────── */
+    .famille {
+        margin-bottom: 3rem;
+    }
+
+    .famille-tete {
+        margin-bottom: 1rem;
+    }
+
+    .famille h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-text);
+        margin: 0 0 0.25rem;
+    }
+
+    .famille h2 :global(svg) {
+        color: var(--color-accent);
+    }
+
+    .famille-intro {
+        font-size: 0.85rem;
+        font-style: italic;
+        color: var(--color-muted);
+        margin: 0;
+    }
+
+    /* ── Cartes de démonstration ────────────────── */
+    .demos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 0.75rem;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem;
+    }
+
+    .demo {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        height: 100%;
+        padding: 1rem 1.1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-surface);
+        transition: border-color 0.2s;
+    }
+
+    .demo:hover {
+        border-color: var(--color-accent);
+    }
+
+    .demo-titre {
+        font-weight: 700;
+        font-size: 0.98rem;
+        color: var(--color-text);
+    }
+
+    .demo-desc {
+        font-size: 0.84rem;
+        line-height: 1.55;
+        color: var(--color-muted);
+    }
+
+    .demo-pied {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: auto;
+        padding-top: 0.4rem;
+    }
+
+    .demo-pied :global(.demo-fleche) {
+        margin-left: auto;
+        color: var(--color-muted);
+        transition: color 0.2s, transform 0.2s;
+    }
+
+    .demo:hover :global(.demo-fleche) {
+        color: var(--color-accent);
+        transform: translateX(2px);
+    }
+
+    .brouillon {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        padding: 0.1rem 0.4rem;
+        border: 1px dashed var(--color-muted);
+        border-radius: 4px;
+        color: var(--color-muted);
+    }
+
+    /* ── À venir ────────────────────────────────── */
+    .avenir {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem 0.75rem;
+    }
+
+    .avenir-label {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-muted);
+    }
+
+    .avenir ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .avenir li {
+        font-size: 0.78rem;
+        padding: 0.2rem 0.6rem;
+        border: 1px dashed var(--color-border);
+        border-radius: 999px;
+        color: var(--color-muted);
+    }
+
+    @media (max-width: 640px) {
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
+    }
+</style>

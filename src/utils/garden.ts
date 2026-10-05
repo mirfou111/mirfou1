@@ -3,20 +3,27 @@ import { tagSlug } from './tags';
 import type { Origin, Status } from './badges';
 
 /**
- * Le jardin — graphe des contenus.
+ * Le jardin - graphe des contenus.
  *
- * Principe : un lien ne se déclare qu'UNE seule fois, dans un seul sens,
- * via `relatedPosts` dans le frontmatter. Le sens inverse (le rétrolien)
- * est calculé au build. Personne n'a à maintenir la réciprocité à la main.
+ * Principe : un lien ne se déclare qu'UNE seule fois, dans un seul sens.
+ * Le sens inverse (le rétrolien) est calculé au build. Personne n'a à
+ * maintenir la réciprocité à la main.
+ *
+ * Deux façons de déclarer un lien, qui comptent toutes les deux :
+ *   - dans le frontmatter :  relatedPosts: ["labo/tris/tri-rapide"]
+ *   - dans le texte, avec une carte :  <VoirAussi ref="labo/tris/tri-rapide" />
+ *
+ * Le Labo est une section comme les autres : un article peut renvoyer vers
+ * une démonstration, et la démonstration affichera l'article en rétrolien.
  */
 
-export const SECTIONS = ['articles', 'contes', 'tutos', 'reflexions', 'recherches'] as const;
+export const SECTIONS = ['articles', 'contes', 'tutos', 'reflexions', 'recherches', 'labo'] as const;
 export type Section = (typeof SECTIONS)[number];
 
 /**
  * Couleurs de section : on référence les variables CSS définies dans global.css,
  * qui ont une valeur distincte en thème clair et en thème sombre. Aucune couleur
- * en dur ici — sinon elle ne suivrait pas le thème.
+ * en dur ici - sinon elle ne suivrait pas le thème.
  */
 export const SECTION_META: Record<Section, { label: string; cssVar: string; color: string }> = {
     articles: { label: 'Articles', cssVar: '--section-articles', color: 'var(--section-articles)' },
@@ -24,7 +31,20 @@ export const SECTION_META: Record<Section, { label: string; cssVar: string; colo
     tutos: { label: 'Tutos', cssVar: '--section-tutos', color: 'var(--section-tutos)' },
     reflexions: { label: 'Réflexions', cssVar: '--section-reflexions', color: 'var(--section-reflexions)' },
     recherches: { label: 'Recherches', cssVar: '--section-recherches', color: 'var(--section-recherches)' },
+    labo: { label: 'Labo', cssVar: '--section-labo', color: 'var(--section-labo)' },
 };
+
+/**
+ * Références posées dans le corps d'un texte via <VoirAussi ref="…" />.
+ * Lues directement dans le MDX brut : la carte et le lien du graphe
+ * ne peuvent donc jamais se contredire.
+ */
+const VOIR_AUSSI = /<VoirAussi\b[^>]*?\bref\s*=\s*["']([^"']+)["']/g;
+
+function refsDansLeTexte(body: string | undefined): string[] {
+    if (!body) return [];
+    return [...body.matchAll(VOIR_AUSSI)].map((m) => m[1].trim());
+}
 
 export type GardenNode = {
     /** Identifiant global, ex. "articles/mon-article" */
@@ -40,9 +60,9 @@ export type GardenNode = {
     origin: Origin;
     status: Status;
     heroImage?: any;
-    /** Corps brut — sert au calcul du temps de lecture */
+    /** Corps brut - sert au calcul du temps de lecture */
     body?: string;
-    /** Liens déclarés dans le frontmatter (sens sortant) */
+    /** Liens déclarés par ce contenu (frontmatter + cartes VoirAussi), sens sortant */
     outgoing: string[];
 };
 
@@ -53,6 +73,8 @@ export type Garden = {
     outgoing: Map<string, string[]>;
     /** ref -> refs qui citent ce contenu (calculé) */
     incoming: Map<string, string[]>;
+    /** Contenus existants mais en brouillon : un lien vers eux est ignoré, pas une erreur */
+    brouillons: Set<string>;
 };
 
 let cache: Promise<Garden> | null = null;
@@ -64,17 +86,24 @@ export function getGarden(): Promise<Garden> {
 }
 
 async function build(): Promise<Garden> {
+    // On charge tout, brouillons compris : il faut savoir distinguer une
+    // référence vers un brouillon (normal, le texte n'est pas encore publié)
+    // d'une référence vers un contenu qui n'existe pas (faute de frappe).
     const collections = await Promise.all(
         SECTIONS.map(section =>
-            getCollection(section as any, ({ data }: any) => !data.draft)
-                .then(entries => ({ section, entries }))
+            getCollection(section as any).then(entries => ({ section, entries }))
         )
     );
 
     const nodes: GardenNode[] = [];
+    const brouillons = new Set<string>();
 
     for (const { section, entries } of collections) {
         for (const entry of entries as any[]) {
+            if (entry.data.draft) {
+                brouillons.add(`${section}/${entry.id}`);
+                continue;
+            }
             const tags: string[] = entry.data.tags ?? [];
             nodes.push({
                 ref: `${section}/${entry.id}`,
@@ -90,7 +119,7 @@ async function build(): Promise<Garden> {
                 status: entry.data.status ?? 'mature',
                 heroImage: entry.data.heroImage,
                 body: entry.body,
-                outgoing: entry.data.relatedPosts ?? [],
+                outgoing: [...(entry.data.relatedPosts ?? []), ...refsDansLeTexte(entry.body)],
             });
         }
     }
@@ -106,12 +135,18 @@ async function build(): Promise<Garden> {
     }
 
     // Résolution + validation : une référence cassée fait échouer le build,
-    // au lieu de disparaître en silence.
+    // au lieu de disparaître en silence. Une référence vers un brouillon est
+    // simplement mise de côté : le lien apparaîtra le jour de sa publication.
     const broken: string[] = [];
+    const enAttente: string[] = [];
 
     for (const node of nodes) {
         for (const ref of node.outgoing) {
             if (ref === node.ref) continue;              // auto-référence ignorée
+            if (brouillons.has(ref)) {
+                enAttente.push(`  « ${ref} » cité par ${node.ref}`);
+                continue;
+            }
             if (!byRef.has(ref)) {
                 broken.push(`  « ${ref} » cité par ${node.ref}`);
                 continue;
@@ -127,14 +162,21 @@ async function build(): Promise<Garden> {
 
     if (broken.length > 0) {
         throw new Error(
-            `[jardin] ${broken.length} référence(s) relatedPosts introuvable(s) :\n` +
+            `[jardin] ${broken.length} référence(s) introuvable(s) :\n` +
             broken.join('\n') +
-            `\n\nFormat attendu : "section/id", par exemple "reflexions/le-bug-est-un-maitre".` +
+            `\n\nFormat attendu : "section/id", par exemple "labo/tris/tri-rapide".` +
             `\nSections valides : ${SECTIONS.join(', ')}.`
         );
     }
 
-    return { nodes, byRef, outgoing, incoming };
+    if (enAttente.length > 0) {
+        console.info(
+            `[jardin] ${enAttente.length} lien(s) vers un brouillon, mis en attente jusqu'à sa publication :\n` +
+            enAttente.join('\n')
+        );
+    }
+
+    return { nodes, byRef, outgoing, incoming, brouillons };
 }
 
 /**
@@ -142,10 +184,12 @@ async function build(): Promise<Garden> {
  * Une ref introuvable fait échouer le build, avec le contexte fourni.
  */
 export function pick(garden: Garden, refs: readonly string[], contexte: string): GardenNode[] {
+    // Un brouillon est ignoré sans bruit : il apparaîtra à sa publication
+    refs = refs.filter(r => !garden.brouillons.has(r));
     const manquantes = refs.filter(r => !garden.byRef.has(r));
     if (manquantes.length > 0) {
         throw new Error(
-            `[jardin] ${contexte} : référence(s) introuvable(s) — ${manquantes.map(r => `« ${r} »`).join(', ')}.\n` +
+            `[jardin] ${contexte} : référence(s) introuvable(s) - ${manquantes.map(r => `« ${r} »`).join(', ')}.\n` +
             `Format attendu : "section/id". Sections valides : ${SECTIONS.join(', ')}.`
         );
     }
@@ -206,7 +250,7 @@ export function suggestRelated(garden: Garden, ref: string, limit = 3): Suggesti
 
     const candidates = garden.nodes.filter(n => !taken.has(n.ref));
 
-    // 1. Tags partagés — le plus de tags communs d'abord, puis le plus récent
+    // 1. Tags partagés - le plus de tags communs d'abord, puis le plus récent
     const mine = new Set(node.tagSlugs);
     if (mine.size > 0) {
         candidates
@@ -271,7 +315,7 @@ export function getLinks(garden: Garden): GardenLink[] {
     return links;
 }
 
-/** Contenus sans aucune connexion — ni lien explicite, ni tag partagé. */
+/** Contenus sans aucune connexion - ni lien explicite, ni tag partagé. */
 export function getOrphans(garden: Garden, links: GardenLink[]): GardenNode[] {
     const connected = new Set<string>();
     for (const l of links) {

@@ -1,37 +1,23 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import { Tag as TagIcon, ArrowLeft } from 'lucide-astro';
-import { tagSlug, groupTags } from '../../utils/tags';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { Tag as TagIcon, ArrowLeft } from "lucide-astro";
+import { groupTags } from "../../utils/tags";
+import { getGarden, SECTION_META } from "../../utils/garden";
 
 export async function getStaticPaths() {
-    const [articles, contes, tutos, reflexions, recherches] = await Promise.all([
-        getCollection('articles', ({ data }) => !data.draft),
-        getCollection('contes', ({ data }) => !data.draft),
-        getCollection('tutos', ({ data }) => !data.draft),
-        getCollection('reflexions', ({ data }) => !data.draft),
-        getCollection('recherches', ({ data }) => !data.draft),
-    ]);
+    // Tous les contenus publiés, toutes sections (Labo compris), via le graphe du jardin
+    const { nodes } = await getGarden();
 
-    const allPosts = [
-        ...articles.map(p => ({ ...p, section: 'articles' })),
-        ...contes.map(p => ({ ...p, section: 'contes' })),
-        ...tutos.map(p => ({ ...p, section: 'tutos' })),
-        ...reflexions.map(p => ({ ...p, section: 'reflexions' })),
-        ...recherches.map(p => ({ ...p, section: 'recherches' })),
-    ];
-
-    // Un slug par tag — fusionne les variantes de casse et d'accentuation
-    const entries = groupTags(allPosts.flatMap(p => p.data.tags ?? []));
+    // Un slug par tag - fusionne les variantes de casse et d'accentuation
+    const entries = groupTags(nodes.flatMap((n) => n.tags));
 
     return entries.map(({ slug, label }) => ({
         params: { tag: slug },
         props: {
             tag: label,
-            posts: allPosts
-                .filter(p => (p.data.tags ?? []).some(t => tagSlug(t) === slug))
-                .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+            // garden.nodes est déjà trié du plus récent au plus ancien
+            posts: nodes.filter((n) => n.tagSlugs.includes(slug)),
         },
     }));
 }
@@ -40,7 +26,7 @@ const { tag, posts } = Astro.props;
 ---
 
 <BaseLayout
-    title={`#${tag} — mirfou`}
+    title={`#${tag} - mirfou`}
     description={`Tous les contenus du jardin mirfou marqués « ${tag} ».`}
 >
     <div class="page">
@@ -55,25 +41,29 @@ const { tag, posts } = Astro.props;
                 <h1>{tag}</h1>
             </div>
             <p class="page-sub">
-                {posts.length} contenu{posts.length > 1 ? 's' : ''}
+                {posts.length} contenu{posts.length > 1 ? "s" : ""}
             </p>
         </header>
 
         <div class="list">
-            {posts.map(post => (
-                <PostCard
-                    title={post.data.title}
-                    description={post.data.description}
-                    pubDate={post.data.pubDate}
-                    href={`/${post.section}/${post.id}`}
-                    tags={post.data.tags}
-                    origin={post.data.origin}
-                    status={post.data.status}
-                    section={post.section as any}
-                    heroImage={post.data.heroImage}
-                    body={post.body}
-                />
-            ))}
+            {
+                posts.map((post) => (
+                    <PostCard
+                        title={post.title}
+                        description={post.description}
+                        pubDate={post.pubDate}
+                        href={post.href}
+                        tags={post.tags}
+                        origin={post.origin}
+                        status={post.status}
+                        section={post.section}
+                        heroImage={post.heroImage}
+                        body={post.body}
+                        accentColor={SECTION_META[post.section].color}
+                        showSection
+                    />
+                ))
+            }
         </div>
     </div>
 </BaseLayout>
@@ -95,7 +85,9 @@ const { tag, posts } = Astro.props;
         transition: color 0.2s;
     }
 
-    .back-link:hover { color: var(--color-accent); }
+    .back-link:hover {
+        color: var(--color-accent);
+    }
 
     .page-header {
         margin-bottom: 2.5rem;
@@ -125,6 +117,8 @@ const { tag, posts } = Astro.props;
     }
 
     @media (max-width: 640px) {
-        .page { padding: 2rem 1.5rem 4rem; }
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
     }
 </style>

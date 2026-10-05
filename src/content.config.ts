@@ -43,4 +43,14 @@ export const collections = {
             institution: z.string().optional(),
         }),
     }),
+    // Démonstrations interactives : une page MDX par algorithme, rangée
+    // dans un sous-dossier par famille (labo/tris/tri-a-bulles.mdx).
+    labo: defineCollection({
+        loader: glob({ base: './src/content/labo', pattern: '**/*.{md,mdx}' }),
+        schema: ({ image }) => baseSchema({ image }).extend({
+            famille: z.enum(['tris', 'graphes', 'combinatoire']),
+            /** Ordre d'affichage dans la famille (du plus simple au plus avancé) */
+            ordre: z.number().default(100),
+        }),
+    }),
 };
