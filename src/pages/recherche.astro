@@ -1,9 +1,12 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { Search } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Search } from "lucide-astro";
 ---
 
-<BaseLayout title="Recherche — mirfou">
+<BaseLayout
+    title="Recherche - mirfou"
+    description="Chercher dans l'ensemble du jardin : articles, contes, tutos, réflexions et recherches."
+>
     <div class="page">
         <header class="page-header">
             <div class="page-title-group">
@@ -90,7 +93,9 @@ import { Search } from 'lucide-astro';
     }
 
     @media (max-width: 640px) {
-        .page { padding: 2rem 1.5rem 4rem; }
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
     }
 </style>
 
@@ -98,31 +103,33 @@ import { Search } from 'lucide-astro';
     async function initSearch() {
         try {
             // 1. Import dynamique du script de recherche
-            const pagefind = await import('/pagefind/pagefind-ui.js');
-            
+            const pagefind = await import("/pagefind/pagefind-ui.js");
+
             // 2. Initialisation correcte du constructeur
             // PagefindUI est souvent attaché directement à l'objet importé ou à window
             const Constructor = pagefind.PagefindUI || window.PagefindUI;
-            
+
             if (Constructor) {
                 new Constructor({
-                    element: '#pagefind-ui',
+                    element: "#pagefind-ui",
                     showSubResults: true,
                     translations: {
-                        placeholder: 'Chercher dans le jardin...',
-                        zero_results: 'Aucun résultat pour [SEARCH_TERM]',
+                        placeholder: "Chercher dans le jardin...",
+                        zero_results: "Aucun résultat pour [SEARCH_TERM]",
                     },
                 });
             } else {
-                throw new Error("Le constructeur PagefindUI n'a pas été trouvé.");
+                throw new Error(
+                    "Le constructeur PagefindUI n'a pas été trouvé.",
+                );
             }
-        } catch(e) {
-            console.error('Erreur Pagefind :', e);
-            const uiElement = document.getElementById('pagefind-ui');
-            const hintElement = document.getElementById('search-unavailable');
-            
-            if (uiElement) uiElement.style.display = 'none';
-            if (hintElement) hintElement.style.display = 'block';
+        } catch (e) {
+            console.error("Erreur Pagefind :", e);
+            const uiElement = document.getElementById("pagefind-ui");
+            const hintElement = document.getElementById("search-unavailable");
+
+            if (uiElement) uiElement.style.display = "none";
+            if (hintElement) hintElement.style.display = "block";
         }
     }
 
@@ -130,5 +137,5 @@ import { Search } from 'lucide-astro';
     initSearch();
 
     // Support pour les View Transitions d'Astro (si activées)
-    document.addEventListener('astro:page-load', initSearch);
+    document.addEventListener("astro:page-load", initSearch);
 </script>

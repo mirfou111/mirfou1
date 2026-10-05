@@ -1,12 +1,59 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import AntIcon from '../components/AntIcon.astro';
-import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AntIcon from "../components/AntIcon.astro";
+import { Mail, Linkedin, MapPin, ExternalLink } from "lucide-astro";
+import { SITE_AUTHOR, SITE_ALIAS, SITE_PROFILES, SITE_URL } from "../consts";
+
+// Fiche identité pour les moteurs : c'est la page de référence sur la personne
+const schema = {
+    "@type": "ProfilePage",
+    mainEntity: {
+        "@type": "Person",
+        name: SITE_AUTHOR,
+        alternateName: SITE_ALIAS,
+        url: `${SITE_URL}/about`,
+        image: `${SITE_URL}/og-image.png`,
+        jobTitle: "Étudiant en Master 2 Intelligence Artificielle & Smart Tech",
+        description:
+            "Développeur et étudiant en IA, au croisement de l'apprentissage automatique, " +
+            "du développement logiciel et de l'ingénierie des données.",
+        address: {
+            "@type": "PostalAddress",
+            addressLocality: "Thiès",
+            addressCountry: "SN",
+        },
+        alumniOf: [
+            {
+                "@type": "CollegeOrUniversity",
+                name: "Université Assane Seck de Ziguinchor",
+            },
+            {
+                "@type": "CollegeOrUniversity",
+                name: "Université Iba Der Thiam de Thiès",
+            },
+            {
+                "@type": "CollegeOrUniversity",
+                name: "Université de Technologie de Troyes",
+            },
+        ],
+        knowsAbout: [
+            "Intelligence artificielle",
+            "Apprentissage automatique",
+            "Ingénierie des données",
+            "Développement web",
+            "Internet des objets",
+        ],
+        sameAs: SITE_PROFILES,
+    },
+};
 ---
 
-<BaseLayout title="About — mirfou">
+<BaseLayout
+    title="À propos - mirfou"
+    description="Ousmane Ndieguene, alias mirfou - Master 2 IA à Thiès, Sénégal. Le totem fourmi, le parcours, les compétences et ce jardin."
+    schema={schema}
+>
     <div class="page">
-
         <!-- En-tête -->
         <header class="about-header">
             <div class="about-ant">
@@ -14,7 +61,9 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             </div>
             <div>
                 <h1 class="about-name">Ousmane Ndieguene</h1>
-                <p class="about-aka">alias <em>mirfou</em> — le verlan de fourmi</p>
+                <p class="about-aka">
+                    alias <em>mirfou</em> - le verlan de fourmi
+                </p>
                 <div class="about-location">
                     <MapPin size={13} />
                     <span>Thiès, Sénégal</span>
@@ -30,17 +79,20 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <div class="prose">
                 <p>
                     Étudiant en Master 2 Intelligence Artificielle & Smart Tech
-                    à l'Université Technologique de Troyes et à l'Université Iba Der Thiam de Thiès.
-                    Titulaire d'une licence en ingénierie informatique de l'Université Assane Seck de Ziguinchor.
+                    à l'Université Technologique de Troyes et à l'Université Iba
+                    Der Thiam de Thiès. Titulaire d'une licence en ingénierie
+                    informatique de l'Université Assane Seck de Ziguinchor.
                 </p>
                 <p>
-                    Je transforme des données et des algorithmes en solutions numériques concrètes —
-                    au croisement de l'IA, du développement logiciel et de l'ingénierie des données.
+                    Je transforme des données et des algorithmes en solutions
+                    numériques concrètes - au croisement de l'IA, du
+                    développement logiciel et de l'ingénierie des données.
                     Flexible, curieux, orienté apprentissage continu.
                 </p>
                 <p>
-                    En dehors du code : passionné de contes traditionnels, de karaté,
-                    d'agriculture urbaine et de veille technologique sur l'IA pour le développement durable.
+                    En dehors du code : passionné de contes traditionnels, de
+                    karaté, d'agriculture urbaine et de veille technologique sur
+                    l'IA pour le développement durable.
                 </p>
             </div>
         </section>
@@ -52,13 +104,15 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <h2 class="section-title">Le totem fourmi</h2>
             <div class="prose">
                 <p>
-                    Mirfou, c'est le verlan de fourmi. Mon totem depuis longtemps.
-                    La fourmi porte cinquante fois son poids. Elle construit des galeries complexes
-                    sans architecte central. Elle communique sans parler. Elle ne s'arrête jamais.
+                    Mirfou, c'est le verlan de fourmi. Mon totem depuis
+                    longtemps. La fourmi porte cinquante fois son poids. Elle
+                    construit des galeries complexes sans architecte central.
+                    Elle communique sans parler. Elle ne s'arrête jamais.
                 </p>
                 <p>
-                    C'est ce que j'essaie d'être — quelqu'un qui construit patiemment,
-                    grain par grain, avec méthode et persévérance. Ce jardin en est le reflet.
+                    C'est ce que j'essaie d'être - quelqu'un qui construit
+                    patiemment, grain par grain, avec méthode et persévérance.
+                    Ce jardin en est le reflet.
                 </p>
             </div>
         </section>
@@ -70,13 +124,15 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <h2 class="section-title">Ce jardin</h2>
             <div class="prose">
                 <p>
-                    Mirfou.space est mon espace personnel — un jardin secret ouvert à qui veut s'y promener.
-                    On y trouve des articles de fond, des réflexions courtes, des tutos techniques,
-                    des contes, et mes travaux de recherche académique.
+                    Mirfou.space est mon espace personnel - un jardin secret
+                    ouvert à qui veut s'y promener. On y trouve des articles de
+                    fond, des réflexions courtes, des tutos techniques, des
+                    contes, et mes travaux de recherche académique.
                 </p>
                 <p>
-                    Pas un portfolio. Pas un blog corporate. Un espace pour penser à voix haute,
-                    partager ce que j'apprends, raconter des histoires, et laisser des traces.
+                    Pas un portfolio. Pas un blog corporate. Un espace pour
+                    penser à voix haute, partager ce que j'apprends, raconter
+                    des histoires, et laisser des traces.
                 </p>
             </div>
         </section>
@@ -89,11 +145,17 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <div class="skills-grid">
                 <div class="skill-group">
                     <h3>IA & Données</h3>
-                    <p>Scikit-learn, Pandas, NumPy, apprentissage supervisé & non supervisé, web scraping, analyse exploratoire</p>
+                    <p>
+                        Scikit-learn, Pandas, NumPy, apprentissage supervisé &
+                        non supervisé, web scraping, analyse exploratoire
+                    </p>
                 </div>
                 <div class="skill-group">
                     <h3>Développement</h3>
-                    <p>Spring Boot, Node.js, React, Angular, PostgreSQL, REST APIs</p>
+                    <p>
+                        Spring Boot, Node.js, React, Angular, PostgreSQL, REST
+                        APIs
+                    </p>
                 </div>
                 <div class="skill-group">
                     <h3>IoT</h3>
@@ -101,7 +163,10 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
                 </div>
                 <div class="skill-group">
                     <h3>Systèmes & Outils</h3>
-                    <p>Git/GitHub, Scrum, administration de bases de données, sécurité informatique</p>
+                    <p>
+                        Git/GitHub, Scrum, administration de bases de données,
+                        sécurité informatique
+                    </p>
                 </div>
             </div>
         </section>
@@ -116,16 +181,28 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
                     <span class="timeline-date">Depuis juin 2024</span>
                     <div class="timeline-content">
                         <strong>Secrétaire Général du Comité des Alumni</strong>
-                        <span class="timeline-org">Fondation Mastercard, Zone UEMOA</span>
-                        <p>Sélectionné parmi de jeunes leaders africains pour un programme intensif de leadership, d'innovation et d'entrepreneuriat.</p>
+                        <span class="timeline-org"
+                            >Fondation Mastercard, Zone UEMOA</span
+                        >
+                        <p>
+                            Sélectionné parmi de jeunes leaders africains pour
+                            un programme intensif de leadership, d'innovation et
+                            d'entrepreneuriat.
+                        </p>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <span class="timeline-date">Depuis déc. 2025</span>
                     <div class="timeline-content">
                         <strong>Kectil Colleague</strong>
-                        <span class="timeline-org">The Kectil Program — Global</span>
-                        <p>Participation à des discussions mondiales sur l'environnement, la gouvernance et le changement social.</p>
+                        <span class="timeline-org"
+                            >The Kectil Program - Global</span
+                        >
+                        <p>
+                            Participation à des discussions mondiales sur
+                            l'environnement, la gouvernance et le changement
+                            social.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -138,57 +215,99 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <h2 class="section-title">Colophon</h2>
             <div class="prose">
                 <p>
-                    Ce site est construit avec <a href="https://astro.build" target="_blank">Astro 5</a>,
-                    stylisé avec <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>,
-                    typographié en <a href="https://fonts.google.com/specimen/Texturina" target="_blank">Texturina</a>
-                    et <a href="https://fonts.google.com/specimen/Fira+Code" target="_blank">Fira Code</a>.
-                    Le contenu est écrit en MDX. Déployé sur
-                    <a href="https://vercel.com" target="_blank">Vercel</a>.
-                    Le code source est disponible sur
-                    <a href="https://github.com/mirfou111/mirfou" target="_blank">GitHub</a>.
+                    Ce site est construit avec <a
+                        href="https://astro.build"
+                        target="_blank">Astro 5</a
+                    >, stylisé avec <a
+                        href="https://tailwindcss.com"
+                        target="_blank">Tailwind CSS</a
+                    >, typographié en <a
+                        href="https://fonts.google.com/specimen/Texturina"
+                        target="_blank">Texturina</a
+                    >
+                    et <a
+                        href="https://fonts.google.com/specimen/Fira+Code"
+                        target="_blank">Fira Code</a
+                    >. Le contenu est écrit en MDX. Déployé sur
+                    <a href="https://vercel.com" target="_blank">Vercel</a>. Le
+                    code source est disponible sur
+                    <a
+                        href="https://github.com/mirfou111/mirfou"
+                        target="_blank">GitHub</a
+                    >.
                 </p>
                 <p>
-                    Le logo est une fourmi géométrique dessinée en SVG — variante B,
-                    choisie pour son thorax en losange, distinctif et mémorable.
+                    Le logo est une fourmi géométrique dessinée en SVG -
+                    variante B, choisie pour son thorax en losange, distinctif
+                    et mémorable.
                 </p>
             </div>
         </section>
 
-            <div class="divider"></div>
+        <div class="divider"></div>
         <!-- Inspirations -->
         <section class="section">
             <h2 class="section-title">Inspirations & transparence</h2>
             <div class="prose">
                 <p>
-                    Ce jardin n'est pas né de rien. Il doit beaucoup à des personnes
-                    qui ont pensé et publié avant moi sur ce que signifie écrire sur le web
-                    avec honnêteté et méthode.
+                    Ce jardin n'est pas né de rien. Il doit beaucoup à des
+                    personnes qui ont pensé et publié avant moi sur ce que
+                    signifie écrire sur le web avec honnêteté et méthode.
                 </p>
             </div>
 
             <div class="inspi-grid">
-                <a href="https://tomcritchlow.com" target="_blank" class="inspi-item">
+                <a
+                    href="https://tomcritchlow.com"
+                    target="_blank"
+                    class="inspi-item"
+                >
                     <span class="inspi-name">Tom Critchlow</span>
-                    <span class="inspi-desc">L'idée du digital garden comme espace de pensée vivant, pas un blog figé.</span>
+                    <span class="inspi-desc"
+                        >L'idée du digital garden comme espace de pensée vivant,
+                        pas un blog figé.</span
+                    >
                 </a>
-                <a href="https://maggieappleton.com" target="_blank" class="inspi-item">
+                <a
+                    href="https://maggieappleton.com"
+                    target="_blank"
+                    class="inspi-item"
+                >
                     <span class="inspi-name">Maggie Appleton</span>
-                    <span class="inspi-desc">Les statuts de maturité des notes — graines, pousses, arbres matures.</span>
+                    <span class="inspi-desc"
+                        >Les statuts de maturité des notes - graines, pousses,
+                        arbres matures.</span
+                    >
                 </a>
-                <a href="https://paul.hanaoka.co" target="_blank" class="inspi-item">
+                <a
+                    href="https://paul.hanaoka.co"
+                    target="_blank"
+                    class="inspi-item"
+                >
                     <span class="inspi-name">Paul Hanaoka</span>
-                    <span class="inspi-desc">La sidebar compacte avec raccourcis clavier — navigation rapide et sobre.</span>
+                    <span class="inspi-desc"
+                        >La sidebar compacte avec raccourcis clavier -
+                        navigation rapide et sobre.</span
+                    >
                 </a>
-                <a href="https://astro.build" target="_blank" class="inspi-item">
+                <a
+                    href="https://astro.build"
+                    target="_blank"
+                    class="inspi-item"
+                >
                     <span class="inspi-name">Astro</span>
-                    <span class="inspi-desc">Le framework qui rend possible un site statique rapide avec du MDX et des collections de contenu.</span>
+                    <span class="inspi-desc"
+                        >Le framework qui rend possible un site statique rapide
+                        avec du MDX et des collections de contenu.</span
+                    >
                 </a>
             </div>
 
             <div class="prose" style="margin-top: 1.5rem">
                 <p>
-                    Chaque idée empruntée est adaptée, pas copiée. Comme la fourmi qui
-                    observe les autres colonies pour améliorer la sienne.
+                    Chaque idée empruntée est adaptée, pas copiée. Comme la
+                    fourmi qui observe les autres colonies pour améliorer la
+                    sienne.
                 </p>
             </div>
         </section>
@@ -200,30 +319,38 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
             <h2 class="section-title">Pourquoi des badges ?</h2>
             <div class="prose">
                 <p>
-                    L'IA génère du texte de plus en plus convaincant. Dans ce contexte,
-                    je pense qu'indiquer clairement la provenance d'un contenu est un acte
-                    de respect envers le lecteur. Ce n'est pas une honte d'utiliser des outils —
-                    c'est une honte de ne pas le dire.
+                    L'IA génère du texte de plus en plus convaincant. Dans ce
+                    contexte, je pense qu'indiquer clairement la provenance d'un
+                    contenu est un acte de respect envers le lecteur. Ce n'est
+                    pas une honte d'utiliser des outils - c'est une honte de ne
+                    pas le dire.
                 </p>
-                <p>
-                    Chaque contenu de ce jardin porte donc deux badges :
-                </p>
+                <p>Chaque contenu de ce jardin porte donc deux badges :</p>
             </div>
 
             <div class="badges-explain">
                 <div class="badge-explain-group">
                     <p class="badge-group-title">Origine</p>
                     <div class="badge-explain-item">
-                        <span class="badge-demo badge-authentique">✦ Authentique</span>
-                        <span class="badge-explain-text">Écrit entièrement par moi, sans assistance IA.</span>
+                        <span class="badge-demo badge-authentique"
+                            >✦ Authentique</span
+                        >
+                        <span class="badge-explain-text"
+                            >Écrit entièrement par moi, sans assistance IA.</span
+                        >
                     </div>
                     <div class="badge-explain-item">
                         <span class="badge-demo badge-assiste">◈ Assisté</span>
-                        <span class="badge-explain-text">Écrit par moi avec aide IA — structure, relecture ou suggestions.</span>
+                        <span class="badge-explain-text"
+                            >Écrit par moi avec aide IA - structure, relecture
+                            ou suggestions.</span
+                        >
                     </div>
                     <div class="badge-explain-item">
                         <span class="badge-demo badge-genere">◇ Généré</span>
-                        <span class="badge-explain-text">Contenu généré par IA, édité et validé par moi.</span>
+                        <span class="badge-explain-text"
+                            >Contenu généré par IA, édité et validé par moi.</span
+                        >
                     </div>
                 </div>
 
@@ -231,15 +358,23 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
                     <p class="badge-group-title">Maturité</p>
                     <div class="badge-explain-item">
                         <span class="badge-demo badge-graine">⬡ Graine</span>
-                        <span class="badge-explain-text">Idée brute, notes embryonnaires — pas encore développé.</span>
+                        <span class="badge-explain-text"
+                            >Idée brute, notes embryonnaires - pas encore
+                            développé.</span
+                        >
                     </div>
                     <div class="badge-explain-item">
                         <span class="badge-demo badge-pousse">⬡ Pousse</span>
-                        <span class="badge-explain-text">En cours — contenu incomplet, encore en développement.</span>
+                        <span class="badge-explain-text"
+                            >En cours - contenu incomplet, encore en
+                            développement.</span
+                        >
                     </div>
                     <div class="badge-explain-item">
                         <span class="badge-demo badge-mature">⬡ Mature</span>
-                        <span class="badge-explain-text">Finalisé — contenu stable et complet.</span>
+                        <span class="badge-explain-text"
+                            >Finalisé - contenu stable et complet.</span
+                        >
                     </div>
                 </div>
             </div>
@@ -264,14 +399,17 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
                     <Mail size={15} />
                     <span>fourmitux111@gmail.com</span>
                 </a>
-                <a href="https://linkedin.com/in/mirfou111" target="_blank" class="contact-item">
+                <a
+                    href="https://linkedin.com/in/mirfou111"
+                    target="_blank"
+                    class="contact-item"
+                >
                     <Linkedin size={15} />
                     <span>linkedin.com/in/mirfou111</span>
                     <ExternalLink size={11} />
                 </a>
             </div>
         </section>
-
     </div>
 </BaseLayout>
 
@@ -350,7 +488,9 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
         margin-bottom: 1rem;
     }
 
-    .prose p:last-child { margin-bottom: 0; }
+    .prose p:last-child {
+        margin-bottom: 0;
+    }
 
     .prose a {
         color: var(--color-accent);
@@ -446,10 +586,21 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
 
     /* Mobile */
     @media (max-width: 640px) {
-        .page { padding: 2rem 1.5rem 4rem; }
-        .skills-grid { grid-template-columns: 1fr; }
-        .timeline-item { grid-template-columns: 1fr; gap: 0.25rem; }
-        .about-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
+        .skills-grid {
+            grid-template-columns: 1fr;
+        }
+        .timeline-item {
+            grid-template-columns: 1fr;
+            gap: 0.25rem;
+        }
+        .about-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
     }
 
     /* Inspirations */
@@ -576,7 +727,13 @@ import { Mail, Linkedin, MapPin, ExternalLink } from 'lucide-astro';
     }
 
     @media (max-width: 640px) {
-        .inspi-grid { grid-template-columns: 1fr; }
-        .badge-explain-item { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+        .inspi-grid {
+            grid-template-columns: 1fr;
+        }
+        .badge-explain-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.4rem;
+        }
     }
 </style>

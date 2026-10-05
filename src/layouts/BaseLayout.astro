@@ -1,26 +1,39 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Sidebar from '../components/Sidebar.astro';
-import Footer from '../components/Footer.astro';
-import AntSprite from '../components/AntSprite.astro';
-import { Menu } from 'lucide-astro';
+import BaseHead from "../components/BaseHead.astro";
+import Sidebar from "../components/Sidebar.astro";
+import Footer from "../components/Footer.astro";
+import AntSprite from "../components/AntSprite.astro";
+import { Menu } from "lucide-astro";
 
 interface Props {
     title: string;
     description?: string;
     image?: string;
+    article?: {
+        publishedAt: Date;
+        updatedAt?: Date;
+        section: string;
+        tags?: string[];
+        headline?: string;
+    };
+    schema?: Record<string, any>;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, article, schema } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="fr">
     <head>
-        <BaseHead title={title} description={description} image={image} />
+        <BaseHead
+            title={title}
+            description={description}
+            image={image}
+            article={article}
+            schema={schema}
+        />
     </head>
     <body id="top">
-
         <AntSprite />
 
         <!-- Burger mobile -->
@@ -46,46 +59,48 @@ const { title, description, image } = Astro.props;
             </main>
             <Footer />
         </div>
-
     </body>
 </html>
 
 <script>
-    const btn = document.getElementById('burger-btn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+    const btn = document.getElementById("burger-btn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
 
-    const isOpen = () => sidebar?.classList.contains('open') ?? false;
+    const isOpen = () => sidebar?.classList.contains("open") ?? false;
 
     function setMenu(open: boolean) {
-        sidebar?.classList.toggle('open', open);
-        overlay?.classList.toggle('active', open);
-        btn?.setAttribute('aria-expanded', String(open));
-        btn?.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+        sidebar?.classList.toggle("open", open);
+        overlay?.classList.toggle("active", open);
+        btn?.setAttribute("aria-expanded", String(open));
+        btn?.setAttribute(
+            "aria-label",
+            open ? "Fermer le menu" : "Ouvrir le menu",
+        );
         // Empêche le défilement de la page derrière le menu
-        document.body.style.overflow = open ? 'hidden' : '';
-        if (open) sidebar?.querySelector<HTMLAnchorElement>('a')?.focus();
+        document.body.style.overflow = open ? "hidden" : "";
+        if (open) sidebar?.querySelector<HTMLAnchorElement>("a")?.focus();
     }
 
-    btn?.addEventListener('click', () => setMenu(!isOpen()));
-    overlay?.addEventListener('click', () => setMenu(false));
+    btn?.addEventListener("click", () => setMenu(!isOpen()));
+    overlay?.addEventListener("click", () => setMenu(false));
 
-    // Le menu se referme dès qu'on suit un lien — mais pas sur le bouton de thème,
+    // Le menu se referme dès qu'on suit un lien - mais pas sur le bouton de thème,
     // qu'on peut vouloir actionner sans quitter le menu
-    sidebar?.addEventListener('click', e => {
-        if ((e.target as HTMLElement).closest('a')) setMenu(false);
+    sidebar?.addEventListener("click", (e) => {
+        if ((e.target as HTMLElement).closest("a")) setMenu(false);
     });
 
     // Échap referme et rend le focus au burger
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && isOpen()) {
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && isOpen()) {
             setMenu(false);
             btn?.focus();
         }
     });
 
     // Retour au format bureau : on remet tout à plat
-    window.matchMedia('(min-width: 769px)').addEventListener('change', e => {
+    window.matchMedia("(min-width: 769px)").addEventListener("change", (e) => {
         if (e.matches) setMenu(false);
     });
 </script>
@@ -128,7 +143,11 @@ const { title, description, image } = Astro.props;
     }
 
     @media (max-width: 768px) {
-        .burger { display: flex; }
-        .main-content { margin-left: 0; }
+        .burger {
+            display: flex;
+        }
+        .main-content {
+            margin-left: 0;
+        }
     }
 </style>

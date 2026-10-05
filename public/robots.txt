@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Interface de recherche : aucun contenu propre à indexer
+Disallow: /recherche
+
+# Fichiers techniques de l'index de recherche
+Disallow: /pagefind/
+
+Sitemap: https://mirfou.space/sitemap-index.xml

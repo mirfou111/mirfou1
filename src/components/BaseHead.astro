@@ -1,19 +1,87 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
+import {
+    SITE_TITLE,
+    SITE_DESCRIPTION,
+    SITE_AUTHOR,
+    SITE_ALIAS,
+    SITE_PROFILES,
+    ANALYTICS,
+} from "../consts";
 
 interface Props {
     title: string;
     description?: string;
     image?: string;
+    /** Renseigné sur les pages de contenu : bascule les métadonnées en mode article */
+    article?: {
+        publishedAt: Date;
+        updatedAt?: Date;
+        section: string;
+        tags?: string[];
+        /** Titre sans le suffixe du site, pour le JSON-LD */
+        headline?: string;
+    };
+    /** JSON-LD supplémentaire, injecté tel quel */
+    schema?: Record<string, any>;
 }
 
 const {
     title,
-    description = 'Le jardin secret de mirfou — articles, réflexions, tutos, contes et recherches.',
-    image = '/og-image.png',
+    description = SITE_DESCRIPTION,
+    image = "/og-image.png",
+    article,
+    schema,
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
+const isHome = Astro.url.pathname === "/";
+
+// ── Données structurées ────────────────────────────────
+const personne = {
+    "@type": "Person",
+    name: SITE_AUTHOR,
+    alternateName: SITE_ALIAS,
+    url: new URL("/about", Astro.site).href,
+    sameAs: SITE_PROFILES,
+};
+
+const graphe: Record<string, any>[] = [];
+
+if (article) {
+    graphe.push({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: article.headline ?? title,
+        description,
+        image: imageURL.href,
+        datePublished: article.publishedAt.toISOString(),
+        ...(article.updatedAt && {
+            dateModified: article.updatedAt.toISOString(),
+        }),
+        author: personne,
+        publisher: personne,
+        inLanguage: "fr-FR",
+        articleSection: article.section,
+        ...(article.tags?.length && { keywords: article.tags.join(", ") }),
+        mainEntityOfPage: { "@type": "WebPage", "@id": canonical.href },
+    });
+} else if (isHome) {
+    graphe.push({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: SITE_TITLE,
+        description: SITE_DESCRIPTION,
+        url: new URL("/", Astro.site).href,
+        inLanguage: "fr-FR",
+        author: personne,
+    });
+}
+
+if (schema) graphe.push({ "@context": "https://schema.org", ...schema });
+
+const analyticsHost = Astro.site ? new URL(Astro.site).hostname : undefined;
 ---
 
 <!-- Charset & Viewport -->
@@ -24,39 +92,97 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
 <!-- Canonical -->
-<link rel="canonical" href={canonicalURL} />
+<link rel="canonical" href={canonical} />
 
 <!-- Primary Meta -->
 <title>{title}</title>
 <meta name="description" content={description} />
-<meta name="author" content="mirfou" />
+<meta name="author" content={SITE_AUTHOR} />
+<meta name="color-scheme" content="light dark" />
 
 <!-- Open Graph -->
-<meta property="og:site_name" content="mirfou" />
+<meta property="og:site_name" content={SITE_TITLE} />
 <meta property="og:locale" content="fr_FR" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content={canonicalURL} />
+<meta property="og:type" content={article ? "article" : "website"} />
+<meta property="og:url" content={canonical} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image, Astro.url)} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={article?.headline ?? title} />
+
+{
+    article && (
+        <>
+            <meta
+                property="article:published_time"
+                content={article.publishedAt.toISOString()}
+            />
+            {article.updatedAt && (
+                <meta
+                    property="article:modified_time"
+                    content={article.updatedAt.toISOString()}
+                />
+            )}
+            <meta property="article:author" content={SITE_AUTHOR} />
+            <meta property="article:section" content={article.section} />
+            {(article.tags ?? []).map((tag) => (
+                <meta property="article:tag" content={tag} />
+            ))}
+        </>
+    )
+}
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={new URL(image, Astro.url)} />
+<meta name="twitter:image" content={imageURL} />
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Texturina:ital,opsz,wght@0,12..44,300;0,12..44,400;0,12..44,600;0,12..44,700;1,12..44,400;1,12..44,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+<link
+    href="https://fonts.googleapis.com/css2?family=Texturina:ital,opsz,wght@0,12..44,300;0,12..44,400;0,12..44,600;0,12..44,700;1,12..44,400;1,12..44,700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet"
+/>
 
 <!-- RSS -->
-<link rel="alternate" type="application/rss+xml" title="mirfou" href="/rss.xml" />
-<!-- Theme — évite le flash au chargement -->
+<link
+    rel="alternate"
+    type="application/rss+xml"
+    title={SITE_TITLE}
+    href="/rss.xml"
+/>
+
+<!-- Données structurées -->
+{
+    graphe.map((bloc) => (
+        <script type="application/ld+json" set:html={JSON.stringify(bloc)} />
+    ))
+}
+
+<!-- Theme évite le flash au chargement -->
 <script is:inline>
-    const theme = localStorage.getItem('theme');
-    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+    const theme = localStorage.getItem("theme");
+    if (
+        theme === "dark" ||
+        (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+        document.documentElement.classList.add("dark");
     }
 </script>
+
+<!-- Mesure d'audience sans cookie - inactive tant que ANALYTICS.src est vide -->
+{
+    ANALYTICS.src && (
+        <script
+            is:inline
+            defer
+            src={ANALYTICS.src}
+            data-website-id={ANALYTICS.websiteId || undefined}
+            data-domain={ANALYTICS.websiteId ? undefined : analyticsHost}
+        />
+    )
+}
