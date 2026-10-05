@@ -1,62 +1,77 @@
-# Astro Starter Kit: Blog
+# mirfou
 
-```sh
-npm create astro@latest -- --template blog
-```
+Le jardin numérique d'Ousmane NDIEGUENE — [mirfou.space](https://mirfou.space).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Articles, contes, tutos, réflexions, recherches, et un **Labo** de démonstrations
+interactives d'algorithmes. *mirfou* est le verlan de *fourmi*.
 
-Features:
+Site statique construit avec [Astro](https://astro.build) et MDX.
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+## Commandes
 
-## 🚀 Project Structure
+| Commande          | Effet                                                        |
+| :---------------- | :----------------------------------------------------------- |
+| `npm install`     | Installe les dépendances                                     |
+| `npm run dev`     | Serveur local sur `localhost:4321` (brouillons du Labo visibles) |
+| `npm run build`   | Construit le site dans `dist/` et l'index de recherche       |
+| `npm run preview` | Sert localement le résultat du build                         |
+| `npm run og`      | Génère les images de partage dans `public/og/`               |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Où vit quoi
 
 ```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+site.config.mjs          Domaine, titre, auteur, profils, mesure d'audience
+src/consts.ts            Contenus mis en avant sur l'accueil (FEATURED)
+src/content/<section>/   Les textes, en MDX — un fichier par contenu
+src/content/labo/        Les pages de démonstration, rangées par famille
+src/data/                Proverbes du hero, messages d'attente, feuille de route du Labo
+src/assets/hero/         Images qui entrent dans le tirage du hero
+src/labo/                Moteur des démonstrations et algorithmes
+src/utils/garden.ts      Le graphe du jardin : liens, rétroliens, suggestions
+docs/                    Rapports d'audit
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Écrire un texte
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Créer `src/content/<section>/mon-titre.mdx` :
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+```mdx
+---
+title: "Mon titre"
+description: "Une phrase de résumé."
+pubDate: 2026-10-05
+draft: false
+origin: authentique     # authentique | assiste | genere
+status: graine          # graine | pousse | mature
+tags: ["Algorithmes"]
+---
 
-Any static assets, like images, can be placed in the `public/` directory.
+Le texte.
+```
 
-## 🧞 Commands
+Puis lancer `npm run og` pour générer son image de partage.
 
-All commands are run from the root of the project, from a terminal:
+**Relier deux contenus** — une seule déclaration suffit, le lien inverse est calculé :
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- dans le texte : `<VoirAussi ref="labo/tris/tri-rapide" />`
+- ou dans le frontmatter : `relatedPosts: ["labo/tris/tri-rapide"]`
 
-## 👀 Want to learn more?
+Une référence vers un brouillon est mise en attente jusqu'à sa publication.
+Une référence vers un contenu inexistant fait échouer le build.
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Ajouter une démonstration
 
-## Credit
+Les algorithmes sont des générateurs qui émettent leurs étapes (`src/labo/tris.ts`).
+Le lecteur, la frise, le pseudo-code et le journal sont communs à tous :
+ajouter un tri revient à écrire son générateur et son pseudo-code.
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+```mdx
+import VisuTri from '../../../components/labo/VisuTri.astro';
+
+<VisuTri algo="rapide" donnees="presque-trie" taille={24} />
+```
+
+## Licence
+
+Textes : [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr), comme indiqué en pied de page du site.
+Code : licence à définir.

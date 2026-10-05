@@ -1,5 +1,5 @@
 ---
-import { STATUSES, anchor, type Status } from '../utils/badges';
+import { STATUSES, anchor, type Status } from "../utils/badges";
 
 interface Props {
     status: Status;
@@ -10,17 +10,21 @@ interface Props {
 const { status, linked = false } = Astro.props;
 const { label, symbol, short, tone } = STATUSES[status];
 
-const Tag = linked ? 'a' : 'span';
+const Tag = linked ? "a" : "span";
 const attrs: Record<string, string> = linked
-    ? { href: anchor('maturite', status), title: `${short} — voir la légende` }
+    ? { href: anchor("maturite", status), title: `${short} - voir la légende` }
     : { title: short };
 
 const style = tone
     ? `color: ${tone}; border-color: color-mix(in srgb, ${tone} 25%, transparent); background: color-mix(in srgb, ${tone} 8%, transparent)`
-    : '';
+    : "";
 ---
 
-<Tag class:list={['badge', { neutral: !tone, linked }]} style={style} {...attrs}>
+<Tag
+    class:list={["badge", { neutral: !tone, linked }]}
+    style={style}
+    {...attrs}
+>
     <span class="badge-symbol">{symbol}</span>
     <span class="badge-label">{label}</span>
 </Tag>
@@ -45,7 +49,9 @@ const style = tone
         background: var(--color-surface);
     }
 
-    .badge:hover { opacity: 0.8; }
+    .badge:hover {
+        opacity: 0.8;
+    }
 
     .badge.linked {
         cursor: pointer;
@@ -57,5 +63,7 @@ const style = tone
         border-color: currentColor;
     }
 
-    .badge-symbol { font-size: 0.6rem; }
+    .badge-symbol {
+        font-size: 0.6rem;
+    }
 </style>

@@ -1,16 +1,15 @@
 <div class="memento-wrap">
-
     <!-- Accroche -->
     <div class="memento-intro">
         <p class="memento-phrase">
-            Un humain vit en moyenne <strong>72 ans</strong> — soit <strong>37 843 jours</strong>.<br />
-            Si je suis né le <span id="mm-date-display">01/01/2000</span>,
-            il me resterait environ <strong id="mm-reste">—</strong>.<br />
+            Un humain vit en moyenne <strong>72 ans</strong> - soit <strong
+                >37 843 jours</strong
+            >.<br />
+            Si je suis né le <span id="mm-date-display">01/01/2000</span>, il me
+            resterait environ <strong id="mm-reste">-</strong>.<br />
             Et vous ?
         </p>
-        <p class="memento-conclusion">
-            En attendant, je cultive mon jardin.
-        </p>
+        <p class="memento-conclusion">En attendant, je cultive mon jardin.</p>
     </div>
 
     <!-- Contrôles -->
@@ -21,7 +20,13 @@
         </div>
         <div class="control-group">
             <label for="mm-lifespan">Espérance de vie</label>
-            <input type="number" id="mm-lifespan" value="72" min="1" max="130" />
+            <input
+                type="number"
+                id="mm-lifespan"
+                value="72"
+                min="1"
+                max="130"
+            />
             <span class="control-unit">ans</span>
         </div>
         <div class="control-group">
@@ -39,19 +44,19 @@
     <!-- Stats -->
     <div class="memento-stats">
         <div class="mm-stat">
-            <span class="mm-stat-value" id="mm-total">—</span>
+            <span class="mm-stat-value" id="mm-total">-</span>
             <span class="mm-stat-label">total</span>
         </div>
         <div class="mm-stat">
-            <span class="mm-stat-value mm-stat-past" id="mm-past">—</span>
+            <span class="mm-stat-value mm-stat-past" id="mm-past">-</span>
             <span class="mm-stat-label">écoulés</span>
         </div>
         <div class="mm-stat">
-            <span class="mm-stat-value mm-stat-future" id="mm-future">—</span>
+            <span class="mm-stat-value mm-stat-future" id="mm-future">-</span>
             <span class="mm-stat-label">restants</span>
         </div>
         <div class="mm-stat">
-            <span class="mm-stat-value" id="mm-percent">—</span>
+            <span class="mm-stat-value" id="mm-percent">-</span>
             <span class="mm-stat-label">vécu</span>
         </div>
     </div>
@@ -88,7 +93,6 @@
             Télécharger mon Memento Mori
         </button>
     </div>
-
 </div>
 
 <style>
@@ -164,7 +168,9 @@
         border-color: var(--color-accent);
     }
 
-    .control-group input[type="number"] { width: 70px; }
+    .control-group input[type="number"] {
+        width: 70px;
+    }
 
     .control-unit {
         font-size: 0.78rem;
@@ -197,8 +203,12 @@
         color: var(--color-text);
     }
 
-    .mm-stat-past { color: var(--color-muted); }
-    .mm-stat-future { color: var(--color-accent); }
+    .mm-stat-past {
+        color: var(--color-muted);
+    }
+    .mm-stat-future {
+        color: var(--color-accent);
+    }
 
     .mm-stat-label {
         font-size: 0.65rem;
@@ -254,9 +264,16 @@
         display: inline-block;
     }
 
-    .legend-past { background: var(--color-muted); opacity: 0.5; }
-    .legend-future { background: var(--color-border); }
-    .legend-now { background: var(--color-accent); }
+    .legend-past {
+        background: var(--color-muted);
+        opacity: 0.5;
+    }
+    .legend-future {
+        background: var(--color-border);
+    }
+    .legend-now {
+        background: var(--color-accent);
+    }
 
     .legend-link {
         font-size: 0.75rem;
@@ -267,7 +284,9 @@
         transition: color 0.2s;
     }
 
-    .legend-link:hover { color: var(--color-accent); }
+    .legend-link:hover {
+        color: var(--color-accent);
+    }
 
     /* Actions */
     .memento-actions {
@@ -288,217 +307,241 @@
         transition: opacity 0.2s;
     }
 
-    .mm-btn-primary:hover { opacity: 0.85; }
+    .mm-btn-primary:hover {
+        opacity: 0.85;
+    }
 
     @media (max-width: 640px) {
-        .memento-stats { grid-template-columns: repeat(2, 1fr); }
-        .memento-legend { flex-direction: column; align-items: flex-start; }
+        .memento-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .memento-legend {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 </style>
 
 <script is:inline>
-(function() {
-
-    // --- Helpers ---
-    function getValues() {
-        const birthdate = document.getElementById('mm-birthdate').value;
-        const lifespan = parseInt(document.getElementById('mm-lifespan').value) || 72;
-        const unit = document.getElementById('mm-unit').value;
-        return { birthdate, lifespan, unit };
-    }
-
-    function compute(birthdate, lifespan, unit) {
-        const birth = new Date(birthdate);
-        const now = new Date();
-        const death = new Date(birth);
-        death.setFullYear(death.getFullYear() + lifespan);
-
-        const MS = {
-            years:   1000 * 60 * 60 * 24 * 365.25,
-            months:  1000 * 60 * 60 * 24 * 30.44,
-            weeks:   1000 * 60 * 60 * 24 * 7,
-            days:    1000 * 60 * 60 * 24,
-            hours:   1000 * 60 * 60,
-        };
-
-        const ms = MS[unit];
-        const total  = Math.floor((death - birth) / ms);
-        const past   = Math.min(Math.floor((now - birth) / ms), total);
-        const future = Math.max(total - past, 0);
-        const percent = ((past / total) * 100).toFixed(1);
-
-        return { total, past, future, percent };
-    }
-
-    function formatUnit(unit, value) {
-        const labels = {
-            years:  value > 1 ? 'ans' : 'an',
-            months: 'mois',
-            weeks:  value > 1 ? 'semaines' : 'semaine',
-            days:   value > 1 ? 'jours' : 'jour',
-            hours:  'heures',
-        };
-        return labels[unit];
-    }
-
-    function formatNumber(n) {
-        return n.toLocaleString('fr-FR');
-    }
-
-    // --- Canvas ---
-    function drawGrid(canvas, total, past, isDark) {
-        if (total <= 0) return;
-
-        const COLS = Math.min(Math.ceil(Math.sqrt(total * 1.6)), 80);
-        const ROWS = Math.ceil(total / COLS);
-        const DOT  = 12;
-        const GAP  = 4;
-        const PAD  = 20;
-
-        const W = COLS * (DOT + GAP) - GAP + PAD * 2;
-        const H = ROWS * (DOT + GAP) - GAP + PAD * 2;
-
-        canvas.width  = W;
-        canvas.height = H;
-
-        const ctx = canvas.getContext('2d');
-
-        // Fond
-        ctx.fillStyle = isDark ? '#161a13' : '#ede8e0';
-        ctx.fillRect(0, 0, W, H);
-
-        const colorPast   = isDark ? '#3a4030' : '#c4bdb4';
-        const colorFuture = isDark ? '#2a3022' : '#ddd8d0';
-        const colorNow    = isDark ? '#c8922a' : '#8b4513';
-
-        for (let i = 0; i < total; i++) {
-            const col = i % COLS;
-            const row = Math.floor(i / COLS);
-            const x = PAD + col * (DOT + GAP);
-            const y = PAD + row * (DOT + GAP);
-
-            ctx.beginPath();
-            ctx.roundRect(x, y, DOT, DOT, 2);
-
-            if (i === past) {
-                ctx.fillStyle = colorNow;
-            } else if (i < past) {
-                ctx.fillStyle = colorPast;
-            } else {
-                ctx.fillStyle = colorFuture;
-            }
-
-            ctx.fill();
+    (function () {
+        // --- Helpers ---
+        function getValues() {
+            const birthdate = document.getElementById("mm-birthdate").value;
+            const lifespan =
+                parseInt(document.getElementById("mm-lifespan").value) || 72;
+            const unit = document.getElementById("mm-unit").value;
+            return { birthdate, lifespan, unit };
         }
-    }
 
-    // --- Update UI ---
-    function update() {
-        const { birthdate, lifespan, unit } = getValues();
-        if (!birthdate) return;
+        function compute(birthdate, lifespan, unit) {
+            const birth = new Date(birthdate);
+            const now = new Date();
+            const death = new Date(birth);
+            death.setFullYear(death.getFullYear() + lifespan);
 
-        const { total, past, future, percent } = compute(birthdate, lifespan, unit);
-        const label = formatUnit(unit, future);
+            const MS = {
+                years: 1000 * 60 * 60 * 24 * 365.25,
+                months: 1000 * 60 * 60 * 24 * 30.44,
+                weeks: 1000 * 60 * 60 * 24 * 7,
+                days: 1000 * 60 * 60 * 24,
+                hours: 1000 * 60 * 60,
+            };
 
-        // Phrase
-        const birth = new Date(birthdate);
-        const dateStr = birth.toLocaleDateString('fr-FR');
-        document.getElementById('mm-date-display').textContent = dateStr;
-        document.getElementById('mm-reste').textContent =
-            `${formatNumber(future)} ${label}`;
+            const ms = MS[unit];
+            const total = Math.floor((death - birth) / ms);
+            const past = Math.min(Math.floor((now - birth) / ms), total);
+            const future = Math.max(total - past, 0);
+            const percent = ((past / total) * 100).toFixed(1);
 
-        // Stats
-        document.getElementById('mm-total').textContent   = formatNumber(total);
-        document.getElementById('mm-past').textContent    = formatNumber(past);
-        document.getElementById('mm-future').textContent  = formatNumber(future);
-        document.getElementById('mm-percent').textContent = `${percent}%`;
+            return { total, past, future, percent };
+        }
 
-        // Grille
-        const canvas = document.getElementById('mm-canvas');
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        function formatUnit(unit, value) {
+            const labels = {
+                years: value > 1 ? "ans" : "an",
+                months: "mois",
+                weeks: value > 1 ? "semaines" : "semaine",
+                days: value > 1 ? "jours" : "jour",
+                hours: "heures",
+            };
+            return labels[unit];
+        }
 
-        // Limiter à 2000 points max pour la lisibilité
-        const displayTotal = Math.min(total, 2000);
-        const ratio = displayTotal / total;
-        const displayPast = Math.floor(past * ratio);
+        function formatNumber(n) {
+            return n.toLocaleString("fr-FR");
+        }
 
-        drawGrid(canvas, displayTotal, displayPast, isDark);
-    }
+        // --- Canvas ---
+        function drawGrid(canvas, total, past, isDark) {
+            if (total <= 0) return;
 
-    // --- Download ---
-    function download() {
-        const { birthdate, lifespan, unit } = getValues();
-        const { total, past, future, percent } = compute(birthdate, lifespan, unit);
-        const label = formatUnit(unit, future);
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const COLS = Math.min(Math.ceil(Math.sqrt(total * 1.6)), 80);
+            const ROWS = Math.ceil(total / COLS);
+            const DOT = 12;
+            const GAP = 4;
+            const PAD = 20;
 
-        // Canvas haute résolution pour le téléchargement
-        const exportCanvas = document.createElement('canvas');
-        const displayTotal = Math.min(total, 2000);
-        const ratio = displayTotal / total;
-        const displayPast = Math.floor(past * ratio);
+            const W = COLS * (DOT + GAP) - GAP + PAD * 2;
+            const H = ROWS * (DOT + GAP) - GAP + PAD * 2;
 
-        drawGrid(exportCanvas, displayTotal, displayPast, isDark);
+            canvas.width = W;
+            canvas.height = H;
 
-        // Ajouter le titre en bas
-        const ctx = exportCanvas.getContext('2d');
-        const W = exportCanvas.width;
-        const extraH = 60;
-        const finalCanvas = document.createElement('canvas');
-        finalCanvas.width  = W;
-        finalCanvas.height = exportCanvas.height + extraH;
+            const ctx = canvas.getContext("2d");
 
-        const fCtx = finalCanvas.getContext('2d');
+            // Fond
+            ctx.fillStyle = isDark ? "#161a13" : "#ede8e0";
+            ctx.fillRect(0, 0, W, H);
 
-        // Fond
-        fCtx.fillStyle = isDark ? '#161a13' : '#ede8e0';
-        fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+            const colorPast = isDark ? "#3a4030" : "#c4bdb4";
+            const colorFuture = isDark ? "#2a3022" : "#ddd8d0";
+            const colorNow = isDark ? "#c8922a" : "#8b4513";
 
-        // Grille
-        fCtx.drawImage(exportCanvas, 0, 0);
+            for (let i = 0; i < total; i++) {
+                const col = i % COLS;
+                const row = Math.floor(i / COLS);
+                const x = PAD + col * (DOT + GAP);
+                const y = PAD + row * (DOT + GAP);
 
-        // Titre
-        const birth = new Date(birthdate);
-        const dateStr = birth.toLocaleDateString('fr-FR');
-        fCtx.fillStyle = isDark ? '#6b7a5e' : '#8a7e72';
-        fCtx.font = '13px monospace';
-        fCtx.textAlign = 'center';
-        fCtx.fillText(
-            `Memento Mori · né(e) le ${dateStr} · ${formatNumber(future)} ${label} restants · mirfou.space`,
-            W / 2,
-            exportCanvas.height + 22
-        );
+                ctx.beginPath();
+                ctx.roundRect(x, y, DOT, DOT, 2);
 
-        fCtx.fillStyle = isDark ? '#c8922a' : '#8b4513';
-        fCtx.font = '11px monospace';
-        fCtx.fillText(
-            'mirfou.space/memento-mori',
-            W / 2,
-            exportCanvas.height + 42
-        );
+                if (i === past) {
+                    ctx.fillStyle = colorNow;
+                } else if (i < past) {
+                    ctx.fillStyle = colorPast;
+                } else {
+                    ctx.fillStyle = colorFuture;
+                }
 
-        // Téléchargement
-        const link = document.createElement('a');
-        link.download = `memento-mori-${dateStr.replace(/\//g, '-')}.png`;
-        link.href = finalCanvas.toDataURL('image/png');
-        link.click();
-    }
+                ctx.fill();
+            }
+        }
 
-    // --- Events ---
-    document.getElementById('mm-birthdate').addEventListener('input', update);
-    document.getElementById('mm-lifespan').addEventListener('input', update);
-    document.getElementById('mm-unit').addEventListener('change', update);
-    document.getElementById('mm-download').addEventListener('click', download);
+        // --- Update UI ---
+        function update() {
+            const { birthdate, lifespan, unit } = getValues();
+            if (!birthdate) return;
 
-    // Réagir au changement de thème
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-theme']
-    });
+            const { total, past, future, percent } = compute(
+                birthdate,
+                lifespan,
+                unit,
+            );
+            const label = formatUnit(unit, future);
 
-    // Init
-    update();
+            // Phrase
+            const birth = new Date(birthdate);
+            const dateStr = birth.toLocaleDateString("fr-FR");
+            document.getElementById("mm-date-display").textContent = dateStr;
+            document.getElementById("mm-reste").textContent =
+                `${formatNumber(future)} ${label}`;
 
-})();
+            // Stats
+            document.getElementById("mm-total").textContent =
+                formatNumber(total);
+            document.getElementById("mm-past").textContent = formatNumber(past);
+            document.getElementById("mm-future").textContent =
+                formatNumber(future);
+            document.getElementById("mm-percent").textContent = `${percent}%`;
+
+            // Grille
+            const canvas = document.getElementById("mm-canvas");
+            const isDark =
+                document.documentElement.getAttribute("data-theme") === "dark";
+
+            // Limiter à 2000 points max pour la lisibilité
+            const displayTotal = Math.min(total, 2000);
+            const ratio = displayTotal / total;
+            const displayPast = Math.floor(past * ratio);
+
+            drawGrid(canvas, displayTotal, displayPast, isDark);
+        }
+
+        // --- Download ---
+        function download() {
+            const { birthdate, lifespan, unit } = getValues();
+            const { total, past, future, percent } = compute(
+                birthdate,
+                lifespan,
+                unit,
+            );
+            const label = formatUnit(unit, future);
+            const isDark =
+                document.documentElement.getAttribute("data-theme") === "dark";
+
+            // Canvas haute résolution pour le téléchargement
+            const exportCanvas = document.createElement("canvas");
+            const displayTotal = Math.min(total, 2000);
+            const ratio = displayTotal / total;
+            const displayPast = Math.floor(past * ratio);
+
+            drawGrid(exportCanvas, displayTotal, displayPast, isDark);
+
+            // Ajouter le titre en bas
+            const ctx = exportCanvas.getContext("2d");
+            const W = exportCanvas.width;
+            const extraH = 60;
+            const finalCanvas = document.createElement("canvas");
+            finalCanvas.width = W;
+            finalCanvas.height = exportCanvas.height + extraH;
+
+            const fCtx = finalCanvas.getContext("2d");
+
+            // Fond
+            fCtx.fillStyle = isDark ? "#161a13" : "#ede8e0";
+            fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // Grille
+            fCtx.drawImage(exportCanvas, 0, 0);
+
+            // Titre
+            const birth = new Date(birthdate);
+            const dateStr = birth.toLocaleDateString("fr-FR");
+            fCtx.fillStyle = isDark ? "#6b7a5e" : "#8a7e72";
+            fCtx.font = "13px monospace";
+            fCtx.textAlign = "center";
+            fCtx.fillText(
+                `Memento Mori · né(e) le ${dateStr} · ${formatNumber(future)} ${label} restants · mirfou.space`,
+                W / 2,
+                exportCanvas.height + 22,
+            );
+
+            fCtx.fillStyle = isDark ? "#c8922a" : "#8b4513";
+            fCtx.font = "11px monospace";
+            fCtx.fillText(
+                "mirfou.space/memento-mori",
+                W / 2,
+                exportCanvas.height + 42,
+            );
+
+            // Téléchargement
+            const link = document.createElement("a");
+            link.download = `memento-mori-${dateStr.replace(/\//g, "-")}.png`;
+            link.href = finalCanvas.toDataURL("image/png");
+            link.click();
+        }
+
+        // --- Events ---
+        document
+            .getElementById("mm-birthdate")
+            .addEventListener("input", update);
+        document
+            .getElementById("mm-lifespan")
+            .addEventListener("input", update);
+        document.getElementById("mm-unit").addEventListener("change", update);
+        document
+            .getElementById("mm-download")
+            .addEventListener("click", download);
+
+        // Réagir au changement de thème
+        const observer = new MutationObserver(update);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
+
+        // Init
+        update();
+    })();
 </script>

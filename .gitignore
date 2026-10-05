@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# pages web enregistrées depuis un navigateur (fichiers tiers, à ne pas publier)
+*.htm
+*_files/

@@ -1,24 +1,29 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import OriginBadge from '../components/OriginBadge.astro';
-import StatusBadge from '../components/StatusBadge.astro';
-import AntIcon from '../components/AntIcon.astro';
-import { KeyRound } from 'lucide-astro';
-import { ORIGINS, STATUSES, type Origin, type Status } from '../utils/badges';
-import { getGarden } from '../utils/garden';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import OriginBadge from "../components/OriginBadge.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import AntIcon from "../components/AntIcon.astro";
+import { KeyRound } from "lucide-astro";
+import { ORIGINS, STATUSES, type Origin, type Status } from "../utils/badges";
+import { getGarden } from "../utils/garden";
 
 const garden = await getGarden();
 
-// Répartition réelle — la légende doit dire la vérité sur l'état du jardin
-const count = <T extends string>(pick: (n: typeof garden.nodes[number]) => T) =>
-    garden.nodes.reduce((acc, n) => {
-        const k = pick(n);
-        acc[k] = (acc[k] ?? 0) + 1;
-        return acc;
-    }, {} as Record<T, number>);
+// Répartition réelle - la légende doit dire la vérité sur l'état du jardin
+const count = <T extends string>(
+    pick: (n: (typeof garden.nodes)[number]) => T,
+) =>
+    garden.nodes.reduce(
+        (acc, n) => {
+            const k = pick(n);
+            acc[k] = (acc[k] ?? 0) + 1;
+            return acc;
+        },
+        {} as Record<T, number>,
+    );
 
-const parOrigine = count(n => n.origin);
-const parStatut = count(n => n.status);
+const parOrigine = count((n) => n.origin);
+const parStatut = count((n) => n.status);
 const total = garden.nodes.length;
 
 const origins = Object.keys(ORIGINS) as Origin[];
@@ -26,32 +31,32 @@ const statuses = Object.keys(STATUSES) as Status[];
 ---
 
 <BaseLayout
-    title="Légende — mirfou"
+    title="Légende - mirfou"
     description="Ce que signifient les badges du jardin : l'origine d'un texte (qui l'a écrit) et sa maturité (à quel point il est fini)."
 >
     <div class="page">
-
         <header class="page-header">
             <div class="page-title-group">
                 <KeyRound size={22} color="var(--color-accent)" />
                 <h1>Légende</h1>
             </div>
             <p class="page-sub">
-                Chaque contenu du jardin porte deux badges. Voici ce qu'ils veulent dire.
+                Chaque contenu du jardin porte deux badges. Voici ce qu'ils
+                veulent dire.
             </p>
         </header>
 
         <div class="intro">
             <p>
-                Un jardin numérique n'est pas un magazine : tout n'y est pas fini, et tout
-                n'est pas écrit de la même main. Plutôt que de faire comme si, j'affiche
-                deux informations sur chaque texte.
+                Un jardin numérique n'est pas un magazine : tout n'y est pas
+                fini, et tout n'est pas écrit de la même main. Plutôt que de
+                faire comme si, j'affiche deux informations sur chaque texte.
             </p>
             <p>
-                <strong>L'origine</strong> dit qui a écrit — moi, moi avec une IA, ou une IA
-                que j'ai relue. <strong>La maturité</strong> dit à quel point le texte est fini.
-                Les deux axes sont indépendants : un texte peut être entièrement de ma main
-                et rester à l'état de graine.
+                <strong>L'origine</strong> dit qui a écrit - moi, moi avec une IA,
+                ou une IA que j'ai relue. <strong>La maturité</strong> dit à quel
+                point le texte est fini. Les deux axes sont indépendants : un texte
+                peut être entièrement de ma main et rester à l'état de graine.
             </p>
         </div>
 
@@ -63,24 +68,27 @@ const statuses = Object.keys(STATUSES) as Status[];
             </div>
 
             <ul class="defs">
-                {origins.map(key => (
-                    <li class="def" id={`origine-${key}`}>
-                        <div class="def-badge">
-                            <OriginBadge origin={key} />
-                            <span class="def-count">
-                                {parOrigine[key] ?? 0} / {total}
-                            </span>
-                        </div>
-                        <p class="def-text">{ORIGINS[key].long}</p>
-                    </li>
-                ))}
+                {
+                    origins.map((key) => (
+                        <li class="def" id={`origine-${key}`}>
+                            <div class="def-badge">
+                                <OriginBadge origin={key} />
+                                <span class="def-count">
+                                    {parOrigine[key] ?? 0} / {total}
+                                </span>
+                            </div>
+                            <p class="def-text">{ORIGINS[key].long}</p>
+                        </li>
+                    ))
+                }
             </ul>
 
             <p class="section-note">
                 <AntIcon size={11} />
                 <span>
-                    Ce badge existe parce que l'écriture assistée par IA est devenue banale
-                    et rarement déclarée. Le distinguer coûte peu et vaut mieux que le flou.
+                    Ce badge existe parce que l'écriture assistée par IA est
+                    devenue banale et rarement déclarée. Le distinguer coûte peu
+                    et vaut mieux que le flou.
                 </span>
             </p>
         </section>
@@ -95,24 +103,27 @@ const statuses = Object.keys(STATUSES) as Status[];
             </div>
 
             <ul class="defs">
-                {statuses.map(key => (
-                    <li class="def" id={`maturite-${key}`}>
-                        <div class="def-badge">
-                            <StatusBadge status={key} />
-                            <span class="def-count">
-                                {parStatut[key] ?? 0} / {total}
-                            </span>
-                        </div>
-                        <p class="def-text">{STATUSES[key].long}</p>
-                    </li>
-                ))}
+                {
+                    statuses.map((key) => (
+                        <li class="def" id={`maturite-${key}`}>
+                            <div class="def-badge">
+                                <StatusBadge status={key} />
+                                <span class="def-count">
+                                    {parStatut[key] ?? 0} / {total}
+                                </span>
+                            </div>
+                            <p class="def-text">{STATUSES[key].long}</p>
+                        </li>
+                    ))
+                }
             </ul>
 
             <p class="section-note">
                 <AntIcon size={11} />
                 <span>
-                    Publier une idée à l'état de graine, c'est accepter d'être lu avant d'avoir
-                    raison. C'est le principe même du jardin : on plante, puis on revient arroser.
+                    Publier une idée à l'état de graine, c'est accepter d'être
+                    lu avant d'avoir raison. C'est le principe même du jardin :
+                    on plante, puis on revient arroser.
                 </span>
             </p>
         </section>
@@ -125,13 +136,13 @@ const statuses = Object.keys(STATUSES) as Status[];
                 <h2>Où les trouver</h2>
             </div>
             <p class="def-text">
-                Les deux badges apparaissent sous le titre de chaque contenu, ainsi que dans
-                les listes de chaque section. Un clic sur un badge ramène ici, à l'explication
-                correspondante. Le réseau des contenus se parcourt depuis
+                Les deux badges apparaissent sous le titre de chaque contenu,
+                ainsi que dans les listes de chaque section. Un clic sur un
+                badge ramène ici, à l'explication correspondante. Le réseau des
+                contenus se parcourt depuis
                 <a href="/jardin">le jardin</a>.
             </p>
         </section>
-
     </div>
 </BaseLayout>
 
@@ -179,12 +190,18 @@ const statuses = Object.keys(STATUSES) as Status[];
         margin-bottom: 1rem;
     }
 
-    .intro p:last-child { margin-bottom: 0; }
+    .intro p:last-child {
+        margin-bottom: 0;
+    }
 
     /* Sections */
-    .section { margin-bottom: 2rem; }
+    .section {
+        margin-bottom: 2rem;
+    }
 
-    .section-head { margin-bottom: 1.25rem; }
+    .section-head {
+        margin-bottom: 1.25rem;
+    }
 
     .section-head h2 {
         font-size: 1.15rem;
@@ -276,8 +293,17 @@ const statuses = Object.keys(STATUSES) as Status[];
 
     /* Mobile */
     @media (max-width: 640px) {
-        .page { padding: 2rem 1.5rem 4rem; }
-        .def { grid-template-columns: 1fr; gap: 0.5rem; }
-        .def-badge { flex-direction: row; align-items: center; gap: 0.6rem; }
+        .page {
+            padding: 2rem 1.5rem 4rem;
+        }
+        .def {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        .def-badge {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.6rem;
+        }
     }
 </style>

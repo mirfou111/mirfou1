@@ -1,9 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import AntIcon from '../components/AntIcon.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AntIcon from "../components/AntIcon.astro";
 ---
 
-<BaseLayout title="404 — Page introuvable · mirfou">
+<BaseLayout title="404 - Page introuvable · mirfou">
     <div class="page">
         <div class="content">
             <div class="ant-wrap">
@@ -90,7 +90,9 @@ import AntIcon from '../components/AntIcon.astro';
         transition: opacity 0.2s;
     }
 
-    .link-home:hover { opacity: 0.85; }
+    .link-home:hover {
+        opacity: 0.85;
+    }
 
     .link-sec {
         font-size: 0.88rem;
@@ -98,9 +100,13 @@ import AntIcon from '../components/AntIcon.astro';
         transition: color 0.2s;
     }
 
-    .link-sec:hover { color: var(--color-accent); }
+    .link-sec:hover {
+        color: var(--color-accent);
+    }
 
     @media (max-width: 640px) {
-        .page { padding: 4rem 1.5rem; }
+        .page {
+            padding: 4rem 1.5rem;
+        }
     }
 </style>
