@@ -1,0 +1,60 @@
+# Vérifications à chaque push et à chaque pull request.
+#
+# Rien ne part en ligne si l'une de ces étapes échoue :
+#   1. les tests des algorithmes du Labo
+#   2. les images de partage (présentes et à jour)
+#   3. le build complet — qui échoue aussi sur un lien cassé entre contenus
+#      (relatedPosts, <VoirAussi>, FEATURED)
+#
+# Le déploiement viendra s'ajouter ici en dernière étape, une fois
+# l'hébergeur choisi.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Un nouveau push annule la vérification encore en cours sur la même branche
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: Tests, images et build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v6
+
+      - name: Installer Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Tests des algorithmes du Labo
+        run: npm test
+
+      - name: Images de partage à jour
+        run: npm run check:og
+
+      - name: Build du site
+        run: npm run build
+
+      - name: Conserver le site construit
+        uses: actions/upload-artifact@v6
+        with:
+          name: site
+          path: dist/
+          retention-days: 7

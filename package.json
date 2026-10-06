@@ -7,7 +7,13 @@
     "build": "astro build && npx pagefind --site dist",
     "preview": "astro preview",
     "og": "node scripts/generate-og.mjs",
+    "check:og": "node scripts/check-og.mjs",
+    "test": "node --experimental-strip-types --test tests/tris.test.ts",
+    "verifier": "npm test && npm run check:og && npm run build",
     "astro": "astro"
+  },
+  "engines": {
+    "node": ">=22.6"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",

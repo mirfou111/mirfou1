@@ -1,0 +1,14 @@
+# Fins de ligne : LF dans le dépôt, quel que soit le système.
+# Évite que des fichiers apparaissent entièrement modifiés selon qu'ils
+# ont été enregistrés sous Windows (CRLF) ou ailleurs (LF).
+* text=auto eol=lf
+
+# Fichiers binaires : jamais convertis
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico  binary
+*.woff binary
+*.woff2 binary

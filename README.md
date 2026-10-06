@@ -16,6 +16,20 @@ Site statique construit avec [Astro](https://astro.build) et MDX.
 | `npm run build`   | Construit le site dans `dist/` et l'index de recherche       |
 | `npm run preview` | Sert localement le résultat du build                         |
 | `npm run og`      | Génère les images de partage dans `public/og/`               |
+| `npm test`        | Tests des algorithmes du Labo                                |
+| `npm run check:og`| Vérifie que les images de partage sont présentes et à jour   |
+| `npm run verifier`| Tout ce que fait la CI : tests, images, build                |
+
+## Intégration continue
+
+`.github/workflows/ci.yml` s'exécute à chaque push et à chaque pull request :
+tests du Labo, contrôle des images de partage, puis build complet. Le build
+échoue aussi sur une référence cassée entre contenus (`relatedPosts`,
+`<VoirAussi>`, `FEATURED`). Lancer `npm run verifier` avant de pousser
+évite les mauvaises surprises.
+
+Node 22 ou plus récent est requis (les tests s'exécutent en TypeScript
+sans étape de compilation).
 
 ## Où vit quoi
 
