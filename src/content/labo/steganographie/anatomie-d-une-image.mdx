@@ -1,0 +1,41 @@
+---
+title: "Anatomie d'une image"
+description: "Démonter une image en huit plans de bits, lire la valeur de chaque pixel, et voir où l'on peut cacher un message."
+famille: steganographie
+ordre: 1
+pubDate: 2026-11-19
+draft: true
+origin: assiste
+status: graine
+tags: ["Stéganographie", "Images"]
+---
+import AnatomieImage from '../../../components/labo/AnatomieImage.astro';
+
+<AnatomieImage />
+
+{/*
+  Ton texte ici. Une proposition de plan, à réécrire à ta façon :
+
+  1. Une image n'est qu'un tableau de nombres : chaque pixel vaut de 0 à 255.
+  2. Chaque nombre s'écrit avec 8 bits, et chaque bit n'a pas le même poids.
+     Le plan 7 pèse 128, le plan 0 pèse 1.
+  3. Ce qu'on voit en parcourant les plans : les formes tiennent dans les plans
+     lourds, les plans légers ressemblent à du bruit.
+  4. Pourquoi c'est là qu'on cache : changer le plan 0 ne modifie un pixel que
+     d'une unité, invisible à l'œil.
+  5. Le contre-exemple du dégradé lisse : même le plan 0 y garde un dessin
+     régulier. Un message caché y briserait cette régularité.
+     <AnatomieImage exemple="degrade" plan={0} />
+  6. L'histogramme : il résume l'image en comptant ses valeurs. On s'en
+     servira pour détecter un message.
+
+  Image d'exemple : « 2016 04 19 Airport Security-1 », AMISOM Public
+  Information, aéroport Aden Adde de Mogadiscio. Licence CC0, Wikimedia Commons.
+  À citer sous la démonstration.
+
+  Origine « assisté » : le code de la démonstration a été écrit avec une IA.
+  Si tu écris le texte entièrement toi-même, garde « assisté » pour le code
+  ou précise-le dans le texte.
+
+  Quand le texte est prêt : draft: false, puis status pousse ou mature.
+*/}

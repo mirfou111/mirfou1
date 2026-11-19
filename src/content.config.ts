@@ -48,7 +48,7 @@ export const collections = {
     labo: defineCollection({
         loader: glob({ base: './src/content/labo', pattern: '**/*.{md,mdx}' }),
         schema: ({ image }) => baseSchema({ image }).extend({
-            famille: z.enum(['tris', 'graphes', 'combinatoire']),
+            famille: z.enum(['tris', 'graphes', 'combinatoire', 'steganographie']),
             /** Ordre d'affichage dans la famille (du plus simple au plus avancé) */
             ordre: z.number().default(100),
         }),

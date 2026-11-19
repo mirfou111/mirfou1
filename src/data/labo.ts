@@ -6,7 +6,7 @@
  * Les textes se retouchent librement ici.
  */
 
-export type Famille = 'tris' | 'graphes' | 'combinatoire';
+export type Famille = 'tris' | 'graphes' | 'combinatoire' | 'steganographie';
 
 export const FAMILLES: Record<Famille, { nom: string; intro: string; prevus: string[] }> = {
     tris: {
@@ -46,6 +46,16 @@ export const FAMILLES: Record<Famille, { nom: string; intro: string; prevus: str
             'N reines',
         ],
     },
+    steganographie: {
+        nom: 'Stéganographie',
+        intro: 'Cacher un message dans une image, puis tenter de le débusquer.',
+        prevus: [
+            "Anatomie d'une image",
+            'Cacher un message',
+            'Révéler un message',
+            'Détecter un message',
+        ],
+    },
 };
 
-export const ORDRE_FAMILLES: Famille[] = ['tris', 'graphes', 'combinatoire'];
+export const ORDRE_FAMILLES: Famille[] = ['tris', 'graphes', 'combinatoire', 'steganographie'];
