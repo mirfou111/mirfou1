@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Bientot from '../../components/Bientot.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
-import { Beaker, ArrowDownWideNarrow, Waypoints, Binary, ArrowRight } from 'lucide-astro';
+import { Beaker, ArrowDownWideNarrow, Waypoints, Binary, ScanEye, ArrowRight } from 'lucide-astro';
 import { FAMILLES, ORDRE_FAMILLES, type Famille } from '../../data/labo';
 
 // En développement, les brouillons restent visibles (et signalés) pour
@@ -18,6 +18,7 @@ const icones: Record<Famille, any> = {
     tris: ArrowDownWideNarrow,
     graphes: Waypoints,
     combinatoire: Binary,
+    steganographie: ScanEye,
 };
 
 const familles = ORDRE_FAMILLES.map((cle) => {
@@ -34,7 +35,7 @@ const familles = ORDRE_FAMILLES.map((cle) => {
 
 <BaseLayout
     title="Labo — mirfou"
-    description="Des démonstrations interactives pour voir les algorithmes travailler pas à pas : tris, graphes, combinatoire."
+    description="Des démonstrations interactives pour voir les algorithmes travailler pas à pas : tris, graphes, combinatoire, stéganographie."
 >
     <div class="page">
         <header class="page-header">

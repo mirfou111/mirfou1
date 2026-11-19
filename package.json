@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "og": "node scripts/generate-og.mjs",
     "check:og": "node scripts/check-og.mjs",
-    "test": "node --experimental-strip-types --test tests/tris.test.ts",
+    "test": "node --experimental-strip-types --test tests/tris.test.ts tests/stegano.test.ts",
     "verifier": "npm test && npm run check:og && npm run build",
     "astro": "astro"
   },

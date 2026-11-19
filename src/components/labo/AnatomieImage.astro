@@ -1,0 +1,581 @@
+---
+/**
+ * Anatomie d'une image : plans de bits, valeurs des pixels, histogramme.
+ *
+ * Usage dans un fichier MDX :
+ *   <AnatomieImage />
+ *   <AnatomieImage exemple="degrade" plan={0} />
+ *
+ * Tout se calcule dans le navigateur : l'image choisie par le visiteur
+ * n'est envoyée nulle part.
+ * Clavier (image sélectionnée) : flèches = déplacer la loupe d'un pixel,
+ * Maj + flèches = de dix pixels.
+ */
+import { Lock, Upload } from 'lucide-astro';
+import { CANAUX } from '../../labo/stegano';
+
+interface Props {
+    exemple?: 'chien' | 'degrade';
+    /** Plan affiché au départ : 0 à 7, ou -1 pour l'image elle-même */
+    plan?: number;
+}
+
+const { exemple = 'chien', plan = -1 } = Astro.props;
+const uid = `anat-${Math.random().toString(36).slice(2, 7)}`;
+const PLANS = [7, 6, 5, 4, 3, 2, 1, 0];
+---
+
+<figure
+    class="visu"
+    data-anatomie
+    data-exemple={exemple}
+    data-plan={plan}
+    aria-labelledby={`${uid}-titre`}
+>
+    <figcaption class="visu-tete">
+        <span class="visu-titre" id={`${uid}-titre`}>Anatomie d'une image</span>
+        <span class="prive"><Lock size={13} /> Votre image reste dans votre navigateur.</span>
+    </figcaption>
+
+    {/* Choix de l'image */}
+    <div class="sources">
+        <button type="button" data-exemple-btn="chien">Le chien renifleur</button>
+        <button type="button" data-exemple-btn="degrade">Un dégradé lisse</button>
+        <label class="televerser">
+            <Upload size={14} />
+            <span>Votre image…</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" data-fichier class="sr-only" />
+        </label>
+        <span class="info" data-info aria-live="polite"></span>
+    </div>
+
+    {/* Réglages */}
+    <div class="reglages">
+        <label class="reglage">
+            <span>Canal</span>
+            <select data-canal>
+                {Object.entries(CANAUX).map(([v, l]) => <option value={v}>{l}</option>)}
+            </select>
+        </label>
+
+        <div class="plans" role="radiogroup" aria-label="Ce que l'on regarde">
+            <button type="button" role="radio" data-plan-btn="-1" aria-checked={plan === -1 ? 'true' : 'false'}>Image</button>
+            {PLANS.map((b) => (
+                <button
+                    type="button"
+                    role="radio"
+                    data-plan-btn={b}
+                    aria-checked={plan === b ? 'true' : 'false'}
+                    aria-label={`Plan de bits ${b}`}
+                >{b}</button>
+            ))}
+        </div>
+    </div>
+
+    {/* Image et loupe */}
+    <div class="corps">
+        <div class="cadre" data-cadre>
+            <canvas
+                data-toile
+                tabindex="0"
+                aria-label="L'image ou le plan de bits choisi. Survolez ou cliquez pour placer la loupe, flèches pour la déplacer."
+            ></canvas>
+            <span class="viseur" data-viseur aria-hidden="true"></span>
+            <p class="deposer" data-deposer>Déposez une image ici</p>
+        </div>
+
+        <div class="panneau">
+            <div class="loupe" data-loupe aria-hidden="true"></div>
+            <p class="pixel" data-pixel aria-live="polite"></p>
+            <dl class="stats">
+                <div><dt>Taille</dt><dd data-taille>–</dd></div>
+                <div><dt>Moyenne</dt><dd data-moyenne>–</dd></div>
+                <div><dt>Min – max</dt><dd data-minmax>–</dd></div>
+                <div><dt>Entropie</dt><dd data-entropie>–</dd></div>
+                <div><dt>Bits à 1</dt><dd data-uns>–</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <p class="commentaire" data-commentaire aria-live="polite"></p>
+
+    {/* Histogramme */}
+    <div class="histo">
+        <div class="histo-tete">
+            <span>Histogramme</span>
+            <span class="histo-aide">combien de pixels prennent chaque valeur, de 0 (noir) à 255 (blanc)</span>
+        </div>
+        <canvas data-histo height="120" aria-label="Histogramme des valeurs des pixels"></canvas>
+        <div class="histo-axe" aria-hidden="true"><span>0</span><span>128</span><span>255</span></div>
+    </div>
+</figure>
+
+<script>
+    import {
+        extraireCanal, planDeBits, histogramme, statistiques, partDeUns,
+        enBinaire, voisinage, degrade, commentairePlan, type Canal, type ImageCanal,
+    } from '../../labo/stegano';
+
+    const COTE_MAX = 1024;   // au-delà, l'image est réduite pour rester fluide
+    const LOUPE = 7;         // la loupe montre 7 × 7 pixels
+    const fmt = (x: number, d = 1) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+    document.querySelectorAll<HTMLElement>('[data-anatomie]').forEach((racine) => {
+        const $ = <T extends Element>(s: string) => racine.querySelector<T>(s)!;
+        const toile = $<HTMLCanvasElement>('[data-toile]');
+        const cadre = $<HTMLDivElement>('[data-cadre]');
+        const viseur = $<HTMLSpanElement>('[data-viseur]');
+        const histo = $<HTMLCanvasElement>('[data-histo]');
+        const canalSel = $<HTMLSelectElement>('[data-canal]');
+        const loupe = $<HTMLDivElement>('[data-loupe]');
+        const info = $<HTMLSpanElement>('[data-info]');
+        const btnPlans = [...racine.querySelectorAll<HTMLButtonElement>('[data-plan-btn]')];
+        const btnExemples = [...racine.querySelectorAll<HTMLButtonElement>('[data-exemple-btn]')];
+        const ctx = toile.getContext('2d', { willReadFrequently: true })!;
+
+        let rgba: Uint8ClampedArray | null = null;
+        let largeur = 0, hauteur = 0;
+        let image: ImageCanal | null = null;
+        let plan = Number(racine.dataset.plan ?? -1);
+        let curseur = { x: 0, y: 0 };
+
+        // Cases de la loupe, créées une fois
+        const cases = Array.from({ length: LOUPE * LOUPE }, (_, k) => {
+            const c = document.createElement('span');
+            if (k === Math.floor((LOUPE * LOUPE) / 2)) c.classList.add('centre');
+            loupe.appendChild(c);
+            return c;
+        });
+
+        // ── Chargement ───────────────────────────────
+        function charger(source: CanvasImageSource, l: number, h: number, nom: string) {
+            const echelle = Math.min(1, COTE_MAX / Math.max(l, h));
+            largeur = Math.max(1, Math.round(l * echelle));
+            hauteur = Math.max(1, Math.round(h * echelle));
+            const tampon = document.createElement('canvas');
+            tampon.width = largeur;
+            tampon.height = hauteur;
+            const c = tampon.getContext('2d', { willReadFrequently: true })!;
+            c.drawImage(source, 0, 0, largeur, hauteur);
+            rgba = c.getImageData(0, 0, largeur, hauteur).data;
+            info.textContent = echelle < 1
+                ? `${nom}, réduite à ${largeur} × ${hauteur} pixels pour rester fluide.`
+                : nom;
+            curseur = { x: Math.floor(largeur / 2), y: Math.floor(hauteur / 2) };
+            toile.width = largeur;
+            toile.height = hauteur;
+            calculer();
+        }
+
+        function chargerExemple(nom: string) {
+            btnExemples.forEach((b) => b.classList.toggle('actif', b.dataset.exempleBtn === nom));
+            if (nom === 'degrade') {
+                const l = 512, h = 256;
+                const d = new ImageData(degrade(l, h) as Uint8ClampedArray<ArrayBuffer>, l, h);
+                const t = document.createElement('canvas');
+                t.width = l; t.height = h;
+                t.getContext('2d')!.putImageData(d, 0, 0);
+                charger(t, l, h, 'Un dégradé de 0 à 255');
+                return;
+            }
+            const im = new Image();
+            im.onload = () => charger(im, im.naturalWidth, im.naturalHeight, 'Chien renifleur, aéroport de Mogadiscio (CC0)');
+            im.onerror = () => { info.textContent = "L'image d'exemple n'a pas pu être chargée."; };
+            im.src = '/labo/steganographie/chien.png';
+        }
+
+        function chargerFichier(fichier: File) {
+            if (!fichier.type.startsWith('image/')) {
+                info.textContent = "Ce fichier n'est pas une image.";
+                return;
+            }
+            const url = URL.createObjectURL(fichier);
+            const im = new Image();
+            im.onload = () => {
+                btnExemples.forEach((b) => b.classList.remove('actif'));
+                charger(im, im.naturalWidth, im.naturalHeight, fichier.name);
+                URL.revokeObjectURL(url);
+            };
+            im.onerror = () => { info.textContent = "Cette image n'a pas pu être lue."; URL.revokeObjectURL(url); };
+            im.src = url;
+        }
+
+        // ── Calcul et rendu ──────────────────────────
+        function calculer() {
+            if (!rgba) return;
+            image = extraireCanal(rgba, largeur, hauteur, canalSel.value as Canal);
+            dessinerToile();
+            dessinerHisto();
+            const s = statistiques(image.pixels);
+            $('[data-taille]').textContent = `${largeur} × ${hauteur}`;
+            $('[data-moyenne]').textContent = fmt(s.moyenne);
+            $('[data-minmax]').textContent = `${s.min} – ${s.max}`;
+            $('[data-entropie]').textContent = `${fmt(s.entropie, 2)} bits`;
+            majPlan();
+        }
+
+        function dessinerToile() {
+            if (!image || !rgba) return;
+            const sortie = ctx.createImageData(largeur, hauteur);
+            const d = sortie.data;
+            if (plan < 0) {
+                const gris = canalSel.value === 'gris';
+                for (let p = 0, q = 0; p < image.pixels.length; p++, q += 4) {
+                    if (gris) {
+                        d[q] = d[q + 1] = d[q + 2] = image.pixels[p];
+                    } else {
+                        d[q] = rgba[q]; d[q + 1] = rgba[q + 1]; d[q + 2] = rgba[q + 2];
+                    }
+                    d[q + 3] = 255;
+                }
+                // Un canal seul s'affiche en niveaux de gris, pour voir ce qu'il contient
+                if (!gris) for (let p = 0, q = 0; p < image.pixels.length; p++, q += 4) d[q] = d[q + 1] = d[q + 2] = image.pixels[p];
+            } else {
+                const bits = planDeBits(image.pixels, plan);
+                for (let p = 0, q = 0; p < bits.length; p++, q += 4) {
+                    d[q] = d[q + 1] = d[q + 2] = bits[p] ? 255 : 0;
+                    d[q + 3] = 255;
+                }
+            }
+            ctx.putImageData(sortie, 0, 0);
+            majLoupe();
+        }
+
+        function dessinerHisto() {
+            if (!image) return;
+            const h = histogramme(image.pixels);
+            const dpr = window.devicePixelRatio || 1;
+            const lpx = histo.clientWidth || 512;
+            histo.width = Math.round(lpx * dpr);
+            histo.height = Math.round(120 * dpr);
+            const c = histo.getContext('2d')!;
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            c.clearRect(0, 0, lpx, 120);
+            const max = Math.max(...h);
+            const style = getComputedStyle(racine);
+            const couleur = style.getPropertyValue('--color-muted').trim() || '#5f574d';
+            const accent = style.getPropertyValue('--section-labo').trim() || '#984467';
+            const pas = lpx / 256;
+            const valeur = image.pixels[curseur.y * largeur + curseur.x];
+            for (let v = 0; v < 256; v++) {
+                const hauteurBarre = max ? (h[v] / max) * 116 : 0;
+                c.fillStyle = v === valeur ? accent : couleur;
+                c.globalAlpha = v === valeur ? 1 : 0.55;
+                c.fillRect(v * pas, 120 - hauteurBarre, Math.max(1, pas - 0.2), hauteurBarre);
+            }
+            c.globalAlpha = 1;
+        }
+
+        function majPlan() {
+            btnPlans.forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.planBtn) === plan)));
+            $('[data-commentaire]').textContent = plan < 0
+                ? "L'image telle qu'on la voit. Choisissez un plan de bits, de 7 (le plus lourd) à 0 (le plus léger), pour la démonter."
+                : commentairePlan(plan);
+            $('[data-uns]').textContent = image
+                ? `${fmt(100 * partDeUns(image.pixels, Math.max(plan, 0)), 1)} % (plan ${Math.max(plan, 0)})`
+                : '–';
+        }
+
+        function majLoupe() {
+            if (!image) return;
+            const v = voisinage(image, curseur.x, curseur.y, LOUPE);
+            const bitVu = Math.max(plan, 0);
+            v.flat().forEach((val, k) => {
+                const c = cases[k];
+                if (val === null) {
+                    c.textContent = '';
+                    c.style.background = 'transparent';
+                    c.style.color = '';
+                    return;
+                }
+                const affiche = plan < 0 ? val : ((val >> bitVu) & 1) * 255;
+                c.textContent = plan < 0 ? String(val) : String((val >> bitVu) & 1);
+                c.style.background = `rgb(${affiche},${affiche},${affiche})`;
+                c.style.color = affiche > 140 ? '#111' : '#f4f4f4';
+            });
+            const val = image.pixels[curseur.y * largeur + curseur.x];
+            const bin = enBinaire(val)
+                .split('')
+                .map((ch, i) => (7 - i === bitVu && plan >= 0 ? `<mark>${ch}</mark>` : ch))
+                .join('');
+            $('[data-pixel]').innerHTML =
+                `Pixel (${curseur.x}, ${curseur.y}) : <strong>${val}</strong> = <code>${bin}</code>`;
+            // Viseur sur l'image
+            const r = toile.getBoundingClientRect();
+            const ex = r.width / largeur, ey = r.height / hauteur;
+            viseur.style.left = `${toile.offsetLeft + (curseur.x + 0.5) * ex}px`;
+            viseur.style.top = `${toile.offsetTop + (curseur.y + 0.5) * ey}px`;
+            dessinerHisto();
+        }
+
+        // ── Interactions ─────────────────────────────
+        function placer(e: PointerEvent) {
+            const r = toile.getBoundingClientRect();
+            curseur = {
+                x: Math.min(largeur - 1, Math.max(0, Math.floor(((e.clientX - r.left) / r.width) * largeur))),
+                y: Math.min(hauteur - 1, Math.max(0, Math.floor(((e.clientY - r.top) / r.height) * hauteur))),
+            };
+            majLoupe();
+        }
+        toile.addEventListener('pointermove', placer);
+        toile.addEventListener('pointerdown', placer);
+        toile.addEventListener('keydown', (e) => {
+            const pas = e.shiftKey ? 10 : 1;
+            const d: Record<string, [number, number]> = {
+                ArrowLeft: [-pas, 0], ArrowRight: [pas, 0], ArrowUp: [0, -pas], ArrowDown: [0, pas],
+            };
+            if (!d[e.key] || !image) return;
+            e.preventDefault();
+            curseur = {
+                x: Math.min(largeur - 1, Math.max(0, curseur.x + d[e.key][0])),
+                y: Math.min(hauteur - 1, Math.max(0, curseur.y + d[e.key][1])),
+            };
+            majLoupe();
+        });
+
+        btnPlans.forEach((b) => b.addEventListener('click', () => {
+            plan = Number(b.dataset.planBtn);
+            dessinerToile();
+            majPlan();
+        }));
+        canalSel.addEventListener('change', calculer);
+        btnExemples.forEach((b) => b.addEventListener('click', () => chargerExemple(b.dataset.exempleBtn!)));
+        $<HTMLInputElement>('[data-fichier]').addEventListener('change', (e) => {
+            const f = (e.target as HTMLInputElement).files?.[0];
+            if (f) chargerFichier(f);
+        });
+
+        // Glisser-déposer
+        ['dragenter', 'dragover'].forEach((t) => cadre.addEventListener(t, (e) => {
+            e.preventDefault();
+            cadre.classList.add('survol');
+        }));
+        ['dragleave', 'drop'].forEach((t) => cadre.addEventListener(t, () => cadre.classList.remove('survol')));
+        cadre.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const f = (e as DragEvent).dataTransfer?.files?.[0];
+            if (f) chargerFichier(f);
+        });
+
+        new ResizeObserver(() => { if (image) { dessinerHisto(); majLoupe(); } }).observe(racine);
+
+        chargerExemple(racine.dataset.exemple || 'chien');
+    });
+</script>
+
+<style>
+    .visu {
+        container-type: inline-size;
+        margin: 2rem 0;
+        padding: 1.25rem;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: var(--color-surface);
+    }
+
+    /* ── En-tête ────────────────────────────────── */
+    .visu-tete {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+        margin-bottom: 1rem;
+    }
+    .visu-titre { font-weight: 700; font-size: 1rem; color: var(--color-text); }
+    .prive {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        color: var(--tone-positif);
+    }
+
+    /* ── Boutons communs ────────────────────────── */
+    .visu button, .televerser {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        min-height: 32px;
+        padding: 0 0.7rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s;
+    }
+    .visu button:hover, .televerser:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .visu button.actif { border-color: var(--color-accent); color: var(--color-accent); }
+    .televerser:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+    .sources {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.9rem;
+    }
+    .info { font-size: 0.74rem; color: var(--color-muted); }
+
+    /* ── Réglages ───────────────────────────────── */
+    .reglages {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem 1.25rem;
+        margin-bottom: 1rem;
+    }
+    .reglage { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--color-muted); }
+    .reglage select {
+        height: 30px;
+        padding: 0 0.4rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: inherit;
+    }
+    .plans { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+    .plans button { min-width: 32px; padding: 0 0.45rem; font-family: var(--font-mono); }
+    .plans button[aria-checked='true'] {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-bg);
+    }
+
+    /* ── Image et panneau ───────────────────────── */
+    .corps {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 200px;
+        gap: 1rem;
+        align-items: start;
+    }
+    @container (max-width: 480px) {
+        .corps { grid-template-columns: 1fr; }
+        .loupe { max-width: 240px; }
+    }
+    .cadre {
+        position: relative;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg);
+        overflow: hidden;
+        line-height: 0;
+    }
+    .cadre.survol { outline: 2px dashed var(--color-accent); outline-offset: -4px; }
+    .cadre canvas {
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        cursor: crosshair;
+    }
+    .cadre canvas:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+    .viseur {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        margin: -9px 0 0 -9px;
+        border: 2px solid var(--section-labo);
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+        pointer-events: none;
+    }
+    .deposer {
+        position: absolute;
+        inset: auto 0 0.4rem 0;
+        margin: 0;
+        line-height: 1.2;
+        text-align: center;
+        font-size: 0.7rem;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        transition: opacity 0.15s;
+        pointer-events: none;
+    }
+    .cadre.survol .deposer { opacity: 1; }
+
+    .loupe {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        padding: 1px;
+        border-radius: 6px;
+        background: var(--color-border);
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+    }
+    .loupe :global(span) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+    }
+    .loupe :global(span.centre) { outline: 2px solid var(--section-labo); outline-offset: -2px; font-weight: 700; }
+    .pixel { margin: 0.6rem 0; font-size: 0.78rem; color: var(--color-text); line-height: 1.5; }
+    .pixel :global(code) { font-family: var(--font-mono); letter-spacing: 0.08em; }
+    .pixel :global(mark) { background: var(--section-labo); color: #fff; border-radius: 2px; padding: 0 1px; }
+    .stats { display: grid; gap: 0.3rem; margin: 0; }
+    .stats div {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.15rem 0.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+    }
+    .stats dt { color: var(--color-muted); }
+    .stats dd { margin: 0; color: var(--color-text); }
+
+    .commentaire {
+        min-height: 2.6em;
+        margin: 0.9rem 0;
+        font-size: 0.85rem;
+        line-height: 1.55;
+        color: var(--color-text);
+    }
+
+    /* ── Histogramme ────────────────────────────── */
+    .histo-tete {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.3rem 0.75rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--color-text);
+    }
+    .histo-aide { font-weight: 400; font-size: 0.72rem; color: var(--color-muted); }
+    .histo canvas {
+        display: block;
+        width: 100%;
+        height: 120px;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .histo-axe {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--color-muted);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+</style>
